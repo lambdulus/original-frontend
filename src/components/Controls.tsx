@@ -12,6 +12,17 @@ export interface ControlProps {
   canGoBack : boolean,
 }
 
+const buttonStyle = {
+  fontSize: '1.5em',
+  background: 'none',
+  borderStyle: 'none',
+	borderBottom: '2px solid navy',
+  marginLeft: '5px',
+  marginRight: '5px',  
+  cursor: 'pointer',
+  outline: 'none',
+}
+
 export default function Controlls (props : ControlProps) : JSX.Element {
   const {
     run,
@@ -26,10 +37,10 @@ export default function Controlls (props : ControlProps) : JSX.Element {
   
   return (
     <div>
-      <button onClick={ run } disabled={ ! canRun } >RUN</button>
-      <button onClick={ stepOver } disabled={ ! canStepOver }>STEP OVER</button>
-      <button onClick={ stepIn } disabled={ ! canStepIn}>STEP IN</button>
-      <button onClick={ stepBack } disabled={ !canGoBack }>GO BACK</button>
+      <button style={ buttonStyle } onClick={ run } disabled={ ! canRun } >RUN</button>
+      <button style={ buttonStyle } onClick={ stepOver } disabled={ ! canStepOver }>STEP OVER</button>
+      <button style={ buttonStyle } onClick={ stepIn } disabled={ ! canStepIn}>STEP IN</button>
+      <button style={ buttonStyle } onClick={ stepBack } disabled={ !canGoBack }>GO BACK</button>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AST, Lexer, Parser, Token } from 'lambdulus-core'
+import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None } from 'lambdulus-core'
 
 
 import InputField, { } from './components/InputField'
@@ -9,12 +9,35 @@ import Result from './components/Result'
 // import logo from './logo.svg';
 // import './App.css';
 
-class App extends Component<any, { ast : AST | null }> {
+interface state {
+  ast : AST | null,
+  steps : number,
+  previousReduction : ASTReduction | null,
+
+}
+
+const inputStyle = {
+  margin: 'auto',
+  marginTop: '5vh',
+  width: '80%',
+  borderBottom: '2px solid gray',
+  padding: '10px',
+}
+
+const resultStyle = {
+  margin: 'auto',
+  width: '80%',
+  marginTop: '2vh'
+}
+
+class App extends Component<any, state> {
   constructor (props : object) {
     super(props)
 
     this.state = {
-      ast : null
+      ast : null,
+      steps : 0,
+      previousReduction : null
     }
 
     this.run = this.run.bind(this)
@@ -36,24 +59,46 @@ class App extends Component<any, { ast : AST | null }> {
       canGoBack : true,
     }
 
+    const { ast, steps } = this.state
 
     return (
       <div className="App">
+        <div style={ inputStyle }>
         <InputField onEntry={ this.onEntry } />
         <br />
         <Controls { ...controlProps } />
-        <Result result={ this.state.ast ? this.state.ast.print() : '' } />
+        <br />
+        Steps: { steps }
+        <br />
+        <br />
+        </div>
+        <div style={ resultStyle }>
+          <Result tree={ ast } />
+        </div>
       </div>
     );
   }
 
   run () {
     // (Y (λ f n . (<= n 1) 1 (* n (f (- n 1))) ) 3)
-    // console.log('RUN UNTIL BREAKPOINT OR NORMAL FORM')
-    if (this.state.ast) {
-      const { tree } = this.state.ast.reduceNormal()
-      this.setState({ ast : tree })
+    let { ast, steps } = this.state
+    if (ast === null) {
+      return
     }
+
+    while (true) {
+      const normal : NormalEvaluator = new NormalEvaluator(ast)
+    
+      if (normal.nextReduction instanceof None) {
+        break
+      }
+    
+      ast = normal.perform() // perform next reduction
+      steps++
+    }
+
+
+    this.setState({ ast, steps })
   }
 
   stepOver () {
@@ -69,11 +114,10 @@ class App extends Component<any, { ast : AST | null }> {
   }
 
   onEntry (expression : string) {
-    const tokens : Array<Token> = Lexer.tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars : false })
-    const ast : AST = Parser.parse(tokens)
+    const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ', '~'], singleLetterVars : false })
+    const ast : AST = parse(tokens)
 
-    this.setState({ ast })
-
+    this.setState({ ast, steps : 0, previousReduction : null })
   }
 }
 

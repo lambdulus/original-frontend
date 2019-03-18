@@ -1,9 +1,24 @@
 import React, { Component } from 'react'
+import { AST, BasicPrinter } from 'lambdulus-core';
 
-export default function Result (props : { result : string }) : JSX.Element {
+
+const style = {
+  fontSize: '2em',
+
+}
+
+export default function Result (props : { tree : AST | null }) : JSX.Element | null {
+  const { tree } = props
+
+  if (tree === null) {
+    return null
+  }
+
+  const printer : BasicPrinter = new BasicPrinter(tree)
+
   return (
-    <div>
-      { props.result }
-    </div>
+    <span style={ style } >
+      { printer.print() }
+    </span>
   )
 }
