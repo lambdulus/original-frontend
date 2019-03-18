@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None } from 'lambdulus-core'
 
-
 import InputField, { } from './components/InputField'
 import Controls, { ControlProps } from './components/Controls'
 import Result from './components/Result'
 
-// import logo from './logo.svg';
-// import './App.css';
 
 interface state {
   ast : AST | null,
@@ -80,15 +77,15 @@ class App extends Component<any, state> {
   }
 
   run () {
-    // (Y (λ f n . (<= n 1) 1 (* n (f (- n 1))) ) 3)
-    let { ast, steps } = this.state
-    if (ast === null) {
+    let { ast, steps, previousReduction } = this.state
+    if (ast === null || previousReduction instanceof None) {
       return
     }
 
     while (true) {
       const normal : NormalEvaluator = new NormalEvaluator(ast)
     
+      previousReduction = normal.nextReduction
       if (normal.nextReduction instanceof None) {
         break
       }
@@ -98,11 +95,27 @@ class App extends Component<any, state> {
     }
 
 
-    this.setState({ ast, steps })
+    this.setState({ ast, steps, previousReduction })
   }
 
   stepOver () {
+    let { ast, steps, previousReduction } = this.state
+    if (ast === null || previousReduction instanceof None) {
+      return
+    }
 
+    const normal : NormalEvaluator = new NormalEvaluator(ast)
+
+    previousReduction = normal.nextReduction  
+    if (normal.nextReduction instanceof None) {
+      return
+    }
+  
+    ast = normal.perform() // perform next reduction
+    steps++
+
+
+    this.setState({ ast, steps, previousReduction })
   }
 
   stepIn () {
@@ -114,10 +127,21 @@ class App extends Component<any, state> {
   }
 
   onEntry (expression : string) {
-    const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ', '~'], singleLetterVars : false })
-    const ast : AST = parse(tokens)
+    const encoded : string = encodeURI(expression)
+    window.location.hash = encoded
 
-    this.setState({ ast, steps : 0, previousReduction : null })
+    try {
+      const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ', '~'], singleLetterVars : false })
+      const ast : AST = parse(tokens)
+
+
+      this.setState({ ast, steps : 0, previousReduction : null })
+    }
+    catch (exception) {
+      this.setState({ ast : null, steps : 0, previousReduction : null })
+      console.log('Something went wrong')
+      console.log(exception)
+    }
   }
 }
 

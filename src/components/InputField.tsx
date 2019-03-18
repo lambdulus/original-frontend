@@ -20,33 +20,37 @@ const style = {
   borderStyle: 'none',
 }
 
-const fact : string = `
-(λ n .
-  (Y (λ f n a .
-    IF (<= n 1)
-       a
-       (f (- n 1) (* n a))
-  )) (- n 1) (n)
-) 5
-`.trim()
-
 export default class InputField extends Component<InputProps, State> {
   constructor (props : InputProps) {
     super(props)
+    
+    this.updateFromURL = this.updateFromURL.bind(this)
+    this.onChange = this.onChange.bind(this)
+    this.getExpressionFromURL = this.getExpressionFromURL.bind(this)
+
+    const content : string = this.getExpressionFromURL()
+    const lines : number = content.split('\n').length
+
+    window.addEventListener('hashchange', this.updateFromURL)
 
     const initState : State = {
-      content : fact, // ''
-      lines: 7, // 1
+      content,
+      lines,
     }
 
     this.state = initState
+  }
 
-    this.onChange = this.onChange.bind(this)
+  updateFromURL () : void {
+    const content : string = this.getExpressionFromURL()
+    const lines : number = content.split('\n').length
+
+    this.setState({ content, lines })
   }
 
   getExpressionFromURL () : string {
-    // TODO: implement
-    return ''
+    const expression : string = decodeURI(window.location.hash.substring(1))
+    return expression
   }
 
   render () {
@@ -67,8 +71,6 @@ export default class InputField extends Component<InputProps, State> {
   onChange (event : ChangeEvent<HTMLTextAreaElement>) {
     const { target : { value : content } } : { target : { value : string } } = event
     const lines : number = content.split('\n').length
-
-    console.log("lines ", lines)
 
     this.setState({ content, lines })
   }
