@@ -24,8 +24,8 @@ const fact : string = `
 (λ n .
   (Y (λ f n a .
     IF (<= n 1)
-      a
-      (f (- n 1) (* n a))
+       a
+       (f (- n 1) (* n a))
   )) (- n 1) (n)
 ) 5
 `.trim()
