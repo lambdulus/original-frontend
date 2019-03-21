@@ -185,8 +185,8 @@ export default class App extends Component<any, state> {
     // TODO: if current and expression differs only at last char
     // and this char is `(` then append `)` and put carret before `)`
     if (autoCloseParenthesis
-        &&
-        expression.length === current.length + 1 // TODO: maybe not?
+        // &&
+        // expression.length === current.length + 1 // TODO: maybe not?
         &&
         expression.charAt(caretPosition - 1) === '('
     ) {
