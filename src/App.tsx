@@ -10,6 +10,7 @@ import { debounce } from './helpers';
 interface state {
   expression : string,
   lines : number,
+  caretPosition : number,
   ast : AST | null,
   steps : number,
   previousReduction : ASTReduction | null,
@@ -29,7 +30,7 @@ const resultStyle = {
   marginTop: '2vh'
 }
 
-class App extends Component<any, state> {
+export default class App extends Component<any, state> {
   constructor (props : object) {
     super(props)
     
@@ -52,11 +53,11 @@ class App extends Component<any, state> {
     this.state = {
       expression,
       lines,
+      caretPosition : 0,
       ast,
       steps : 0,
       previousReduction : null
     }
-
   }
 
   render() {
@@ -71,12 +72,13 @@ class App extends Component<any, state> {
       canGoBack : true,
     }
 
-    const { ast, steps, expression, lines } = this.state
+    const { ast, steps, expression, lines, caretPosition } = this.state
 
     return (
       <div className="App">
         <div style={ inputStyle }>
-        <InputField content={ expression } lines={ lines } onChange={ this.onExpressionChange } />
+        <InputField content={ expression } lines={ lines } caretPosition={ caretPosition }
+          onChange={ this.onExpressionChange }  />
         <br />
         <Controls { ...controlProps } />
         <br />
@@ -144,11 +146,14 @@ class App extends Component<any, state> {
   onExpressionChange (event : ChangeEvent<HTMLTextAreaElement>) : void  {
     let { target : { value : expression } } : { target : { value : string } } = event
     const lines : number = expression.split('\n').length
+    const caretPosition : number = event.target.selectionEnd
+
     expression = expression.replace(/\\/g, 'λ')
+
     const ast : AST | null = this.parseExpression(expression)
 
     this.autoSave(expression)
-    this.setState({ expression, lines, ast, steps : 0 , previousReduction : null })
+    this.setState({ expression, lines, ast, steps : 0 , previousReduction : null, caretPosition })
   }
 
   autoSave (expression : string) : void {
@@ -194,5 +199,3 @@ class App extends Component<any, state> {
     this.setState({ expression, lines, ast, steps : 0, previousReduction : null })
   }
 }
-
-export default App;
