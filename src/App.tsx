@@ -14,20 +14,35 @@ interface state {
   ast : AST | null,
   steps : number,
   previousReduction : ASTReduction | null,
+  autoCloseParenthesis : boolean,
+  replaceBackSlash : boolean,
 }
 
 const inputStyle = {
   margin: 'auto',
   marginTop: '5vh',
-  width: '80%',
+  width: '60%',
   borderBottom: '2px solid gray',
   padding: '10px',
 }
 
 const resultStyle = {
   margin: 'auto',
-  width: '80%',
+  width: '60%',
   marginTop: '2vh'
+}
+
+const sidebarStyle = {
+  position: 'absolute' as any,
+  right: '0',
+  top: '0',
+  width: '18%',
+  height: '100%',
+  boxShadow: '-5px 0px 10px gray',
+}
+
+const configWrapper = {
+  margin: '10px'
 }
 
 export default class App extends Component<any, state> {
@@ -56,7 +71,9 @@ export default class App extends Component<any, state> {
       caretPosition : 0,
       ast,
       steps : 0,
-      previousReduction : null
+      previousReduction : null,
+      autoCloseParenthesis : true,
+      replaceBackSlash : true,
     }
   }
 
@@ -85,6 +102,18 @@ export default class App extends Component<any, state> {
         Steps: { steps }
         <br />
         <br />
+        </div>
+        <div style={ sidebarStyle }>
+          <div style={ configWrapper }>
+            <span>Replace \ with λ</span>
+            <input type='checkbox' checked={ this.state.replaceBackSlash }
+            onChange={ _ => this.setState({ ...this.state, replaceBackSlash : !this.state.replaceBackSlash }) } />
+            <br />
+            <span>Autocomplete parethesis</span>
+            <input type='checkbox' checked={ this.state.autoCloseParenthesis }
+            onChange={ _ => this.setState({ ...this.state, autoCloseParenthesis : !this.state.autoCloseParenthesis}) } />
+            <br />
+          </div>
         </div>
         <div style={ resultStyle }>
           <Result tree={ ast } />
@@ -144,11 +173,25 @@ export default class App extends Component<any, state> {
   }
 
   onExpressionChange (event : ChangeEvent<HTMLTextAreaElement>) : void  {
+    const { expression : current, autoCloseParenthesis, replaceBackSlash } : state = this.state
     let { target : { value : expression } } : { target : { value : string } } = event
     const lines : number = expression.split('\n').length
     const caretPosition : number = event.target.selectionEnd
 
-    expression = expression.replace(/\\/g, 'λ')
+    if (replaceBackSlash) {
+      expression = expression.replace(/\\/g, 'λ')
+    }
+    
+    // TODO: if current and expression differs only at last char
+    // and this char is `(` then append `)` and put carret before `)`
+    if (autoCloseParenthesis
+        &&
+        expression.length === current.length + 1
+        &&
+        expression.charAt(caretPosition - 1) === '('
+    ) {
+      expression += ')'
+    }
 
     const ast : AST | null = this.parseExpression(expression)
 
