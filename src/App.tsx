@@ -186,11 +186,11 @@ export default class App extends Component<any, state> {
     // and this char is `(` then append `)` and put carret before `)`
     if (autoCloseParenthesis
         &&
-        expression.length === current.length + 1
+        expression.length === current.length + 1 // TODO: maybe not?
         &&
         expression.charAt(caretPosition - 1) === '('
     ) {
-      expression += ')'
+      expression = expression.slice(0, caretPosition) + ')' + expression.slice(caretPosition)
     }
 
     const ast : AST | null = this.parseExpression(expression)
