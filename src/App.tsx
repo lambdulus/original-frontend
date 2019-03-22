@@ -15,7 +15,6 @@ interface state {
   steps : number,
   previousReduction : ASTReduction | null,
   autoCloseParenthesis : boolean,
-  replaceBackSlash : boolean,
 }
 
 const inputStyle = {
@@ -38,7 +37,7 @@ const sidebarStyle = {
   top: '0',
   width: '18%',
   height: '100%',
-  boxShadow: '-5px 0px 10px gray',
+  borderLeft: '2px solid gray',
 }
 
 const configWrapper = {
@@ -72,8 +71,7 @@ export default class App extends Component<any, state> {
       ast,
       steps : 0,
       previousReduction : null,
-      autoCloseParenthesis : true,
-      replaceBackSlash : true,
+      autoCloseParenthesis : false,
     }
   }
 
@@ -105,10 +103,6 @@ export default class App extends Component<any, state> {
         </div>
         <div style={ sidebarStyle }>
           <div style={ configWrapper }>
-            <span>Replace \ with λ</span>
-            <input type='checkbox' checked={ this.state.replaceBackSlash }
-            onChange={ _ => this.setState({ ...this.state, replaceBackSlash : !this.state.replaceBackSlash }) } />
-            <br />
             <span>Autocomplete parethesis</span>
             <input type='checkbox' checked={ this.state.autoCloseParenthesis }
             onChange={ _ => this.setState({ ...this.state, autoCloseParenthesis : !this.state.autoCloseParenthesis}) } />
@@ -173,20 +167,16 @@ export default class App extends Component<any, state> {
   }
 
   onExpressionChange (event : ChangeEvent<HTMLTextAreaElement>) : void  {
-    const { expression : current, autoCloseParenthesis, replaceBackSlash } : state = this.state
+    const { autoCloseParenthesis,  } : state = this.state
     let { target : { value : expression } } : { target : { value : string } } = event
     const lines : number = expression.split('\n').length
     const caretPosition : number = event.target.selectionEnd
 
-    if (replaceBackSlash) {
-      expression = expression.replace(/\\/g, 'λ')
-    }
+    expression = expression.replace(/\\/g, 'λ')
     
     // TODO: if current and expression differs only at last char
     // and this char is `(` then append `)` and put carret before `)`
     if (autoCloseParenthesis
-        // &&
-        // expression.length === current.length + 1 // TODO: maybe not?
         &&
         expression.charAt(caretPosition - 1) === '('
     ) {
