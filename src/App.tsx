@@ -80,7 +80,7 @@ export default class App extends Component<any, state> {
     this.state = {
       expression,
       lines,
-      caretPosition : 0,
+      caretPosition : expression.length,
       ast : null,
       steps : 0,
       previousReduction : null,
@@ -175,8 +175,10 @@ export default class App extends Component<any, state> {
   }
 
   stepOver () {
-    let { expression, steps, previousReduction } = this.state
-    let ast = this.parseExpression(expression)
+    let { ast, expression, steps, previousReduction } = this.state
+    if (steps === 0) {
+      ast = this.parseExpression(expression)
+    }
 
     if (ast === null || previousReduction instanceof None) {
       return
