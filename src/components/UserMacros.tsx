@@ -3,6 +3,7 @@ import { trimStr } from '../helpers'
 import { UserMacroTable, builtinMacros } from 'lambdulus-core/dist/parser'
 
 interface Props {
+  disabled : boolean,
   macros : UserMacroTable,
   addMacro (name : string, definition : string) : void,
   removeMacro (name : string) : void,
@@ -72,8 +73,8 @@ export default class UserMacros extends Component<Props, State> {
         <br />
         { this.listMacros() }
         <br />
-        <input value={ this.state.value } onChange={ this.onChange } />
-        <button onClick={ this.onAdd } >ADD</button>
+        <input disabled={this.props.disabled} value={ this.state.value } onChange={ this.onChange } />
+        <button disabled={this.props.disabled} onClick={ this.onAdd } >ADD</button>
       </div>
     )
   }

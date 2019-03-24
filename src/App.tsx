@@ -19,6 +19,7 @@ interface state {
   autoCloseParenthesis : boolean,
   macroTable : UserMacroTable,
   menuOpen: boolean,
+  steping : boolean,
 }
 
 const inputStyle = {
@@ -87,6 +88,7 @@ export default class App extends Component<any, state> {
       autoCloseParenthesis : false,
       macroTable : this.getMacrosFromLocalStorage(),
       menuOpen: false,
+      steping: false,
     }
   }
 
@@ -123,7 +125,7 @@ export default class App extends Component<any, state> {
               onChange={ _ => this.setState({ ...this.state, autoCloseParenthesis : !this.state.autoCloseParenthesis}) } />
               <br />
               <br />
-              <UserMacros macros={ this.state.macroTable } addMacro={ this.addMacro } removeMacro={ this.removeMacro } />
+              <UserMacros disabled={this.state.steping} macros={ this.state.macroTable } addMacro={ this.addMacro } removeMacro={ this.removeMacro } />
             </div>
           </div>
 
@@ -151,9 +153,11 @@ export default class App extends Component<any, state> {
   }
 
   run () {
-    let { expression, steps, previousReduction } = this.state
-    let ast = this.parseExpression(expression)
-
+    let { ast, expression, steps, previousReduction } = this.state
+    if (steps === 0) {
+      ast = this.parseExpression(expression)
+    }
+    
     if (ast === null || previousReduction instanceof None) {
       return
     }
@@ -171,7 +175,7 @@ export default class App extends Component<any, state> {
     }
 
 
-    this.setState({ ast, steps, previousReduction })
+    this.setState({ ...this.state, ast, steps, previousReduction, steping : false })
   }
 
   stepOver () {
@@ -188,6 +192,7 @@ export default class App extends Component<any, state> {
 
     previousReduction = normal.nextReduction  
     if (normal.nextReduction instanceof None) {
+      this.setState({ ...this.state, steping : false })
       return
     }
   
@@ -195,7 +200,7 @@ export default class App extends Component<any, state> {
     steps++
 
 
-    this.setState({ ast, steps, previousReduction })
+    this.setState({ ...this.state, ast, steps, previousReduction, steping : true })
   }
 
   stepIn () {
