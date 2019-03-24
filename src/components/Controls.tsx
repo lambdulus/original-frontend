@@ -39,6 +39,7 @@ export default function Controlls (props : ControlProps) : JSX.Element {
     <div>
       <button style={ buttonStyle } onClick={ run } disabled={ ! canRun } >RUN</button>
       <button style={ buttonStyle } onClick={ stepOver } disabled={ ! canStepOver }>STEP</button>
+      <button style={ buttonStyle } disabled={ true }>CLEAR</button>
       {/* <button style={ buttonStyle } onClick={ stepIn } disabled={ true }>STEP IN</button> */}
       {/* <button style={ buttonStyle } onClick={ stepBack } disabled={ true }>GO BACK</button> */}
     </div>

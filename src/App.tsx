@@ -6,7 +6,7 @@ import Controls, { ControlProps } from './components/Controls'
 import Result from './components/Result'
 import UserMacros from './components/UserMacros';
 import { debounce } from './helpers';
-import { UserMacroTable } from 'lambdulus-core/dist/parser';
+import { MacroMap } from 'lambdulus-core/';
 
 
 interface state {
@@ -17,7 +17,7 @@ interface state {
   steps : number,
   previousReduction : ASTReduction | null,
   autoCloseParenthesis : boolean,
-  macroTable : UserMacroTable,
+  macroTable : MacroMap,
   menuOpen: boolean,
   steping : boolean,
 }
@@ -261,7 +261,7 @@ export default class App extends Component<any, state> {
     return expression
   }
 
-  getMacrosFromLocalStorage () : UserMacroTable {
+  getMacrosFromLocalStorage () : MacroMap {
     return JSON.parse(window.localStorage.getItem('macrotable') || '{}')
   }
 
