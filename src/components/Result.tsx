@@ -116,6 +116,8 @@ class ReactPrinter extends ASTVisitor {
 
 const style = {
   fontSize: '2em',
+  wordWrap: 'anywhere' as any,
+  // textWrap: 'unrestricted',
 
 }
 

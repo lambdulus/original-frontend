@@ -4,7 +4,9 @@ import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None } from
 import InputField from './components/InputField'
 import Controls, { ControlProps } from './components/Controls'
 import Result from './components/Result'
+import UserMacros from './components/UserMacros';
 import { debounce } from './helpers';
+import { UserMacroTable } from 'lambdulus-core/dist/parser';
 
 
 interface state {
@@ -15,33 +17,42 @@ interface state {
   steps : number,
   previousReduction : ASTReduction | null,
   autoCloseParenthesis : boolean,
+  macroTable : UserMacroTable,
+  menuOpen: boolean,
 }
 
 const inputStyle = {
   margin: 'auto',
   marginTop: '5vh',
-  width: '60%',
+  width: '80%',
   borderBottom: '2px solid gray',
   padding: '10px',
 }
 
 const resultStyle = {
   margin: 'auto',
-  width: '60%',
+  width: '80%',
   marginTop: '2vh'
 }
 
 const sidebarStyle = {
-  position: 'absolute' as any,
-  right: '0',
+  position: 'fixed' as any,
   top: '0',
-  width: '18%',
-  height: '100%',
-  borderLeft: '2px solid gray',
+  width: '100%',
+  height: '80%',
+  borderBottom: '2px solid gray',
+  backgroundColor: 'white',
 }
 
 const configWrapper = {
   margin: '10px'
+}
+
+const menuBtnStyle = {
+  border: 'none',
+  background: 'transparent',
+  fontSize: '1.5em',
+  cursor: 'pointer',
 }
 
 export default class App extends Component<any, state> {
@@ -57,22 +68,30 @@ export default class App extends Component<any, state> {
     this.autoSave = debounce(this.autoSave.bind(this), 500)
     this.getExpressionFromURL = this.getExpressionFromURL.bind(this)
     this.updateFromURL = this.updateFromURL.bind(this)
-
-    const expression : string = this.getExpressionFromURL()
-    const lines : number = expression.split('\n').length
-    const ast : AST | null = this.parseExpression(expression)
+    this.addMacro = this.addMacro.bind(this)
+    this.removeMacro = this.removeMacro.bind(this)
+    this.getMacrosFromLocalStorage = this.getMacrosFromLocalStorage.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
+    const expression : string = this.getExpressionFromURL()
+    const lines : number = expression.split('\n').length
+    
     this.state = {
       expression,
       lines,
       caretPosition : 0,
-      ast,
+      ast : null,
       steps : 0,
       previousReduction : null,
       autoCloseParenthesis : false,
+      macroTable : this.getMacrosFromLocalStorage(),
+      menuOpen: false,
     }
+  }
+
+  componentDidMount () {
+    this.setState({ ...this.state, ast : this.parseExpression(this.state.expression) })
   }
 
   render() {
@@ -91,6 +110,29 @@ export default class App extends Component<any, state> {
 
     return (
       <div className="App">
+        {
+          this.state.menuOpen ?
+
+          <div style={ sidebarStyle }>
+            <button title='Close Menu' style={ menuBtnStyle } onClick={() => {
+              this.setState({ ...this.state, menuOpen : false })
+            }} >)(</button>
+            <div style={ configWrapper }>
+              <span style={ { fontSize: '1.3em' } } >Autocomplete parethesis</span>
+              <input type='checkbox' checked={ this.state.autoCloseParenthesis }
+              onChange={ _ => this.setState({ ...this.state, autoCloseParenthesis : !this.state.autoCloseParenthesis}) } />
+              <br />
+              <br />
+              <UserMacros macros={ this.state.macroTable } addMacro={ this.addMacro } removeMacro={ this.removeMacro } />
+            </div>
+          </div>
+
+          :
+
+          <button title='Open Menu' style={ menuBtnStyle } onClick={() => {
+            this.setState({ ...this.state, menuOpen : true })
+          }} >()</button>
+        }
         <div style={ inputStyle }>
         <InputField content={ expression } lines={ lines } caretPosition={ caretPosition }
           onChange={ this.onExpressionChange }  />
@@ -101,14 +143,6 @@ export default class App extends Component<any, state> {
         <br />
         <br />
         </div>
-        <div style={ sidebarStyle }>
-          <div style={ configWrapper }>
-            <span>Autocomplete parethesis</span>
-            <input type='checkbox' checked={ this.state.autoCloseParenthesis }
-            onChange={ _ => this.setState({ ...this.state, autoCloseParenthesis : !this.state.autoCloseParenthesis}) } />
-            <br />
-          </div>
-        </div>
         <div style={ resultStyle }>
           <Result tree={ ast } />
         </div>
@@ -117,7 +151,9 @@ export default class App extends Component<any, state> {
   }
 
   run () {
-    let { ast, steps, previousReduction } = this.state
+    let { expression, steps, previousReduction } = this.state
+    let ast = this.parseExpression(expression)
+
     if (ast === null || previousReduction instanceof None) {
       return
     }
@@ -139,7 +175,9 @@ export default class App extends Component<any, state> {
   }
 
   stepOver () {
-    let { ast, steps, previousReduction } = this.state
+    let { expression, steps, previousReduction } = this.state
+    let ast = this.parseExpression(expression)
+
     if (ast === null || previousReduction instanceof None) {
       return
     }
@@ -198,7 +236,7 @@ export default class App extends Component<any, state> {
   parseExpression (expression : string) : AST | null {
     try {
       const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ', '~'], singleLetterVars : false })
-      const ast : AST = parse(tokens)
+      const ast : AST = parse(tokens, this.state.macroTable)
 
       console.log('successfuly parsed')
 
@@ -216,6 +254,10 @@ export default class App extends Component<any, state> {
     return expression
   }
 
+  getMacrosFromLocalStorage () : UserMacroTable {
+    return JSON.parse(window.localStorage.getItem('macrotable') || '{}')
+  }
+
   updateFromURL () : void {
     const { expression : currentExpr } : state = this.state
     const expression : string = this.getExpressionFromURL()
@@ -230,5 +272,21 @@ export default class App extends Component<any, state> {
     const ast : AST | null = this.parseExpression(expression)
 
     this.setState({ expression, lines, ast, steps : 0, previousReduction : null })
+  }
+
+  addMacro (name : string, definition : string) : void {
+    // TODO: fix
+    const macroTable = { ...this.state.macroTable, [name] : definition }
+
+    this.setState({ ...this.state, macroTable })
+    window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
+  }
+
+  removeMacro (name : string) : void {
+    const macroTable = { ...this.state.macroTable }
+    delete macroTable[name]
+
+    this.setState({ ...this.state, macroTable })
+    window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
   }
 }

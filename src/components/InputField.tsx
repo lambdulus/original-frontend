@@ -16,9 +16,12 @@ const style = {
   outline: 'none',
   resize: 'none' as any,
   borderStyle: 'none',
+  // wordBreak: 'break-all' as any,
+  // wordWrap: 'anywhere' as any,
+  // textWrap: 'unrestricted',
 }
 
-export default function InputField (props : InputProps) {
+export default function InputField (props : InputProps) : JSX.Element {
   const { content, lines, onChange, caretPosition } : InputProps = props
 
     return (
@@ -27,6 +30,7 @@ export default function InputField (props : InputProps) {
         onChange={ onChange }
         value={ content }
         placeholder='(λ f . (λ x . f (x x)) (λ x . f (x x)))'
+        wrap='hard'
         autoFocus
         autoComplete="off"
         autoCorrect="off"

@@ -11,3 +11,7 @@ export function debounce (fn : Function, treshold : number) {
 }
 
 // intentionaly not handling `this` - I don't want debounced callback to (ab)use `this`
+
+export function trimStr (str : string) {
+  return str.trim()
+}
