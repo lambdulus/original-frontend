@@ -20,6 +20,7 @@ interface state {
   macroTable : MacroMap,
   menuOpen: boolean,
   steping : boolean,
+  briefHistory: Array<AST>,
 }
 
 const inputStyle = {
@@ -56,12 +57,21 @@ const menuBtnStyle = {
   cursor: 'pointer',
 }
 
+const listStyle = {
+  padding: '0',
+}
+
+const itemStyle = {
+  listStyle: 'none',
+  marginBottom: '20px',
+}
+
 export default class App extends Component<any, state> {
   constructor (props : object) {
     super(props)
     
     this.run = this.run.bind(this)
-    this.stepOver = this.stepOver.bind(this)
+    this.step = this.step.bind(this)
     this.stepIn = this.stepIn.bind(this)
     this.stepBack = this.stepBack.bind(this)
     this.parseExpression = this.parseExpression.bind(this)
@@ -72,6 +82,7 @@ export default class App extends Component<any, state> {
     this.addMacro = this.addMacro.bind(this)
     this.removeMacro = this.removeMacro.bind(this)
     this.getMacrosFromLocalStorage = this.getMacrosFromLocalStorage.bind(this)
+    this.clear = this.clear.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -89,6 +100,7 @@ export default class App extends Component<any, state> {
       macroTable : this.getMacrosFromLocalStorage(),
       menuOpen: false,
       steping: false,
+      briefHistory: []
     }
   }
 
@@ -99,7 +111,8 @@ export default class App extends Component<any, state> {
   render() {
     const controlProps : ControlProps = {
       run : this.run,
-      stepOver : this.stepOver,
+      step : this.step,
+      clear : this.clear,
       stepIn : this.stepIn,
       stepBack : this.stepBack,
       canRun : true,
@@ -146,14 +159,21 @@ export default class App extends Component<any, state> {
         <br />
         </div>
         <div style={ resultStyle }>
-          <Result tree={ ast } />
+          {/* <Result tree={ ast } /> */}
+          <ul style={ listStyle }>
+            {
+              this.state.briefHistory.map((ast, i) => {
+                return <li key={i} style={ i !== 0 ? { ...itemStyle, color: 'gray' } : itemStyle }><Result tree={ ast } /></li>
+              })
+            }
+          </ul>
         </div>
       </div>
     );
   }
 
   run () {
-    let { ast, expression, steps, previousReduction } = this.state
+    let { ast, expression, steps, previousReduction, briefHistory } = this.state
     if (steps === 0) {
       ast = this.parseExpression(expression)
     }
@@ -174,12 +194,13 @@ export default class App extends Component<any, state> {
       steps++
     }
 
+    briefHistory = [ast.clone()]
 
-    this.setState({ ...this.state, ast, steps, previousReduction, steping : false })
+    this.setState({ ...this.state, ast, steps, previousReduction, steping : false, briefHistory })
   }
 
-  stepOver () {
-    let { ast, expression, steps, previousReduction } = this.state
+  step () {
+    let { ast, expression, steps, previousReduction, briefHistory } = this.state
     if (steps === 0) {
       ast = this.parseExpression(expression)
     }
@@ -199,8 +220,19 @@ export default class App extends Component<any, state> {
     ast = normal.perform() // perform next reduction
     steps++
 
+    briefHistory.unshift(ast.clone())
+    briefHistory.length = Math.min(briefHistory.length, 5)
 
-    this.setState({ ...this.state, ast, steps, previousReduction, steping : true })
+    this.setState({ ...this.state, ast, steps, previousReduction, steping : true, briefHistory })
+  }
+
+  clear () : void {
+    this.setState({
+      steps : 0,
+      previousReduction : null,
+      briefHistory: [],
+      steping: false,
+    })
   }
 
   stepIn () {

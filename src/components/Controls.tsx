@@ -3,7 +3,8 @@ import React, { FunctionComponent, } from 'react'
 
 export interface ControlProps {
   run () : void,
-  stepOver () : void,
+  step () : void,
+  clear () : void,
   stepIn () : void,
   stepBack () : void,
   canRun : boolean,
@@ -26,7 +27,8 @@ const buttonStyle = {
 export default function Controlls (props : ControlProps) : JSX.Element {
   const {
     run,
-    stepOver,
+    step,
+    clear,
     stepIn,
     stepBack,
     canRun,
@@ -38,8 +40,8 @@ export default function Controlls (props : ControlProps) : JSX.Element {
   return (
     <div>
       <button style={ buttonStyle } onClick={ run } disabled={ ! canRun } >RUN</button>
-      <button style={ buttonStyle } onClick={ stepOver } disabled={ ! canStepOver }>STEP</button>
-      <button style={ buttonStyle } disabled={ true }>CLEAR</button>
+      <button style={ buttonStyle } onClick={ step } disabled={ ! canStepOver }>STEP</button>
+      <button style={ buttonStyle } onClick={ clear } disabled={ false }>CLEAR</button>
       {/* <button style={ buttonStyle } onClick={ stepIn } disabled={ true }>STEP IN</button> */}
       {/* <button style={ buttonStyle } onClick={ stepBack } disabled={ true }>GO BACK</button> */}
     </div>
