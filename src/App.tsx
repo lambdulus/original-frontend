@@ -7,6 +7,7 @@ import Result from './components/Result'
 import UserMacros from './components/UserMacros';
 import { debounce } from './helpers';
 import { MacroMap } from 'lambdulus-core/';
+import UserStep from './components/UserStep';
 
 
 interface state {
@@ -20,7 +21,8 @@ interface state {
   macroTable : MacroMap,
   menuOpen: boolean,
   steping : boolean,
-  briefHistory: Array<AST>,
+  briefHistory : Array<AST>,
+  isValidating : boolean,
 }
 
 const inputStyle = {
@@ -83,6 +85,8 @@ export default class App extends Component<any, state> {
     this.removeMacro = this.removeMacro.bind(this)
     this.getMacrosFromLocalStorage = this.getMacrosFromLocalStorage.bind(this)
     this.clear = this.clear.bind(this)
+    this.validate = this.validate.bind(this)
+    this.onComparison = this.onComparison.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -98,9 +102,10 @@ export default class App extends Component<any, state> {
       previousReduction : null,
       autoCloseParenthesis : false,
       macroTable : this.getMacrosFromLocalStorage(),
-      menuOpen: false,
-      steping: false,
-      briefHistory: []
+      menuOpen : false,
+      steping : false,
+      briefHistory : [],
+      isValidating : false,
     }
   }
 
@@ -113,6 +118,7 @@ export default class App extends Component<any, state> {
       run : this.run,
       step : this.step,
       clear : this.clear,
+      validate : this.validate,
       stepIn : this.stepIn,
       stepBack : this.stepBack,
       canRun : true,
@@ -160,6 +166,13 @@ export default class App extends Component<any, state> {
         </div>
         <div style={ resultStyle }>
           {/* <Result tree={ ast } /> */}
+          {
+            this.state.isValidating
+              ?
+            <UserStep onComparison={ this.onComparison }/>
+              :
+            null
+          }
           <ul style={ listStyle }>
             {
               this.state.briefHistory.map((ast, i) => {
@@ -196,7 +209,15 @@ export default class App extends Component<any, state> {
 
     briefHistory = [ast.clone()]
 
-    this.setState({ ...this.state, ast, steps, previousReduction, steping : false, briefHistory })
+    this.setState({
+      ...this.state,
+      ast,
+      steps,
+      previousReduction,
+      steping : false,
+      briefHistory,
+      isValidating : false,
+    })
   }
 
   step () {
@@ -205,6 +226,60 @@ export default class App extends Component<any, state> {
       ast = this.parseExpression(expression)
     }
 
+    if (ast === null || previousReduction instanceof None) {
+      return
+    }
+
+    const normal : NormalEvaluator = new NormalEvaluator(ast)
+
+    previousReduction = normal.nextReduction
+    if (normal.nextReduction instanceof None) {
+      this.setState({ ...this.state, steping : false, previousReduction, })
+      return
+    }
+  
+    ast = normal.perform() // perform next reduction
+    steps++
+
+    briefHistory.unshift(ast.clone())
+    briefHistory.length = Math.min(briefHistory.length, 5)
+
+    this.setState({
+      ...this.state,
+      ast,
+      steps,
+      previousReduction,
+      steping : true,
+      briefHistory,
+      isValidating : false,
+    })
+  }
+
+  clear () : void {
+    this.setState({
+      steps : 0,
+      previousReduction : null,
+      briefHistory: [],
+      steping: false,
+      isValidating : true,
+    })
+  }
+
+  validate () : void {
+    if (this.state.previousReduction instanceof None) {
+      return
+    }
+
+    this.setState({ ...this.state, isValidating : true })
+  }
+
+  onComparison (userExpression : string) : void {
+    let { ast, expression, steps, previousReduction, briefHistory } = this.state
+    if (steps === 0) {
+      ast = this.parseExpression(expression)
+    }
+
+    // TODO: tohle se asi nestane - prozkoumat
     if (ast === null || previousReduction instanceof None) {
       return
     }
@@ -220,18 +295,24 @@ export default class App extends Component<any, state> {
     ast = normal.perform() // perform next reduction
     steps++
 
+
+    // TODO: provest porovnani uzivatelskeho kroku a meho
+    // to znamena porovnani stromu vcetne vyznamu
+    // pokud nesedi, bude treba provest analyzu chyby
+    // zobrazit chybu
+    // pokracovat ve svem vyhodnocovani
+
     briefHistory.unshift(ast.clone())
     briefHistory.length = Math.min(briefHistory.length, 5)
 
-    this.setState({ ...this.state, ast, steps, previousReduction, steping : true, briefHistory })
-  }
-
-  clear () : void {
     this.setState({
-      steps : 0,
-      previousReduction : null,
-      briefHistory: [],
-      steping: false,
+      ...this.state,
+      ast,
+      steps,
+      previousReduction,
+      steping : true,
+      briefHistory,
+      isValidating : false,
     })
   }
 
