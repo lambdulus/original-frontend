@@ -40,10 +40,10 @@ const resultStyle = {
 }
 
 const sidebarStyle = {
-  position: 'fixed' as any,
+  position: 'absolute' as any,
   top: '0',
   width: '100%',
-  height: '80%',
+  // height: '80%',
   borderBottom: '2px solid gray',
   backgroundColor: 'white',
 }

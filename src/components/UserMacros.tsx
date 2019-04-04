@@ -12,6 +12,7 @@ interface Props {
 interface State {
   value : string,
   invalidMacro : boolean,
+  builtinsExpanded : boolean,
 }
 
 const listStyle = {
@@ -74,20 +75,33 @@ export default class UserMacros extends Component<Props, State> {
     this.state = {
       value : '',
       invalidMacro : false,
+      builtinsExpanded : true,
     }
   }
 
   render () {
     return (
       <div>
-        <span style={ { fontSize: '1.3em',  } } >Built-in Macros:</span>
+        <span title='Click for toggle display'
+              style={ { fontSize: '1.3em', cursor: 'pointer', } }
+              onClick={_ => this.setState({
+                ...this.state,
+                builtinsExpanded : !this.state.builtinsExpanded,
+              })
+        } >
+          Built-in Macros:</span>
           { <ul style={ listStyle }>
-          { Object.entries(builtinMacros).map(([macroName, definition ]) => {
+          { this.state.builtinsExpanded
+              ?            
+            Object.entries(builtinMacros).map(([macroName, definition ]) => {
               return <li title='Built-in Macro' style={ macroStyle } key={ macroName }>
                 { macroName }
-                {/* := { definition } */}
+                { ' ' }
+                := { definition }
               </li>
             })
+              :
+              null
           }
           </ul> }
         <span style={ { fontSize: '1.3em',  } } >User defined Macros:</span>
