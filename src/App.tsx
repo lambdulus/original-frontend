@@ -1,5 +1,5 @@
 import React, { Component, ChangeEvent } from 'react';
-import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None } from 'lambdulus-core'
+import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None, builtinMacros, MacroTable } from 'lambdulus-core'
 
 import InputField from './components/InputField'
 import Controls, { ControlProps } from './components/Controls'
@@ -23,6 +23,8 @@ interface state {
   steping : boolean,
   briefHistory : Array<AST>,
   isValidating : boolean,
+  running : boolean,
+  singleLetterVars : boolean,
 }
 
 const inputStyle = {
@@ -87,6 +89,8 @@ export default class App extends Component<any, state> {
     this.clear = this.clear.bind(this)
     this.validate = this.validate.bind(this)
     this.onComparison = this.onComparison.bind(this)
+    this.__run = this.__run.bind(this)
+    this.stop = this.stop.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -106,6 +110,8 @@ export default class App extends Component<any, state> {
       steping : false,
       briefHistory : [],
       isValidating : false,
+      running : false,
+      singleLetterVars : false, // TODO this.getConfigFromStorage()
     }
   }
 
@@ -116,6 +122,7 @@ export default class App extends Component<any, state> {
   render() {
     const controlProps : ControlProps = {
       run : this.run,
+      stop : this.stop,
       step : this.step,
       clear : this.clear,
       validate : this.validate,
@@ -125,6 +132,7 @@ export default class App extends Component<any, state> {
       canStepOver : true,
       canStepIn : true,
       canGoBack : true,
+      running : this.state.running,
     }
 
     const { ast, steps, expression, lines, caretPosition } = this.state
@@ -142,6 +150,11 @@ export default class App extends Component<any, state> {
               <span style={ { fontSize: '1.3em' } } >Autocomplete parethesis</span>
               <input type='checkbox' checked={ this.state.autoCloseParenthesis }
               onChange={ _ => this.setState({ ...this.state, autoCloseParenthesis : !this.state.autoCloseParenthesis}) } />
+              <br />
+              <br />
+              <span style={ { fontSize: '1.3em' } } title='Write identifiers without spaces' >Single letter Identifiers</span>
+              <input type='checkbox' checked={ this.state.singleLetterVars }
+              onChange={ _ => this.setState({ ...this.state, singleLetterVars : !this.state.singleLetterVars}) } />
               <br />
               <br />
               <UserMacros disabled={this.state.steping} macros={ this.state.macroTable } addMacro={ this.addMacro } removeMacro={ this.removeMacro } />
@@ -185,8 +198,12 @@ export default class App extends Component<any, state> {
     );
   }
 
-  run () {
-    let { ast, expression, steps, previousReduction, briefHistory } = this.state
+  __run () {
+    let { ast, expression, steps, previousReduction, briefHistory, running } = this.state
+    if ( ! running) {
+      return
+    }
+    
     if (steps === 0) {
       ast = this.parseExpression(expression)
     }
@@ -195,19 +212,29 @@ export default class App extends Component<any, state> {
       return
     }
 
-    while (true) {
-      const normal : NormalEvaluator = new NormalEvaluator(ast)
-    
-      previousReduction = normal.nextReduction
-      if (normal.nextReduction instanceof None) {
-        break
-      }
-    
-      ast = normal.perform() // perform next reduction
-      steps++
-    }
+    const normal : NormalEvaluator = new NormalEvaluator(ast)
+  
+    previousReduction = normal.nextReduction
+    if (normal.nextReduction instanceof None) {
+      // NOT CALL SETTIMEOUT AGAIN
+      briefHistory = [ast.clone()]
 
-    briefHistory = [ast.clone()]
+      this.setState({
+        ...this.state,
+        ast,
+        steps,
+        previousReduction,
+        steping : false,
+        briefHistory,
+        isValidating : false,
+        running : false,
+      })
+
+      return
+    }
+  
+    ast = normal.perform() // perform next reduction
+    steps++
 
     this.setState({
       ...this.state,
@@ -215,10 +242,59 @@ export default class App extends Component<any, state> {
       steps,
       previousReduction,
       steping : false,
-      briefHistory,
+      briefHistory : [ ast ],
       isValidating : false,
     })
+
+    window.setTimeout(this.__run, 10)    
   }
+
+  run () {
+    if (this.state.previousReduction instanceof None) {
+      return
+    }
+    this.setState({ ...this.state, running : true },
+      () => window.setTimeout(this.__run, 10))
+  }
+
+  stop () {
+    this.setState({ ...this.state, running : false })
+  }
+
+  // run () {
+  //   let { ast, expression, steps, previousReduction, briefHistory } = this.state
+  //   if (steps === 0) {
+  //     ast = this.parseExpression(expression)
+  //   }
+    
+  //   if (ast === null || previousReduction instanceof None) {
+  //     return
+  //   }
+
+  //   while (true) {
+  //     const normal : NormalEvaluator = new NormalEvaluator(ast)
+    
+  //     previousReduction = normal.nextReduction
+  //     if (normal.nextReduction instanceof None) {
+  //       break
+  //     }
+    
+  //     ast = normal.perform() // perform next reduction
+  //     steps++
+  //   }
+
+  //   briefHistory = [ast.clone()]
+
+  //   this.setState({
+  //     ...this.state,
+  //     ast,
+  //     steps,
+  //     previousReduction,
+  //     steping : false,
+  //     briefHistory,
+  //     isValidating : false,
+  //   })
+  // }
 
   step () {
     let { ast, expression, steps, previousReduction, briefHistory } = this.state
@@ -261,7 +337,7 @@ export default class App extends Component<any, state> {
       previousReduction : null,
       briefHistory: [],
       steping: false,
-      isValidating : true,
+      isValidating : false,
     })
   }
 
@@ -344,7 +420,7 @@ export default class App extends Component<any, state> {
     const ast : AST | null = this.parseExpression(expression)
 
     this.autoSave(expression)
-    this.setState({ expression, lines, ast, steps : 0 , previousReduction : null, caretPosition })
+    this.setState({ expression, lines, ast, briefHistory: [], steps : 0 , previousReduction : null, caretPosition, isValidating : false, })
   }
 
   autoSave (expression : string) : void {
@@ -354,8 +430,9 @@ export default class App extends Component<any, state> {
   }
 
   parseExpression (expression : string) : AST | null {
+    const { singleLetterVars } = this.state
     try {
-      const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ', '~'], singleLetterVars : false })
+      const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ', '~'], singleLetterVars })
       const ast : AST = parse(tokens, this.state.macroTable)
 
       console.log('successfuly parsed')
@@ -364,7 +441,7 @@ export default class App extends Component<any, state> {
     }
     catch (exception) {
       console.log('Something went wrong')
-      console.log(exception)
+      console.error(exception)
       return null
     }
   }
@@ -375,7 +452,15 @@ export default class App extends Component<any, state> {
   }
 
   getMacrosFromLocalStorage () : MacroMap {
-    return JSON.parse(window.localStorage.getItem('macrotable') || '{}')
+    const usefulMacros : MacroMap = {
+      fact : '(Y (λ f n . (<= n 1) 1 (* n (f (- n 1)))))',
+      facct : '(λ n . (Y (λ f n a . IF (= n 1) a (f (- n 1) (* n a)))) (- n 1) (n))',
+      fib : '(Y (λ f n . (= n 0) 0 ((= n 1) 1 ( + (f (- n 1)) (f (- n 2))))))',
+    }
+
+    const userMacros : MacroMap = JSON.parse(window.localStorage.getItem('macrotable') || '{}')
+
+    return { ...usefulMacros, ...userMacros }
   }
 
   updateFromURL () : void {

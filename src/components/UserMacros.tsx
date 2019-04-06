@@ -13,6 +13,7 @@ interface State {
   value : string,
   invalidMacro : boolean,
   builtinsExpanded : boolean,
+  macroError : null | string,
 }
 
 const listStyle = {
@@ -76,6 +77,7 @@ export default class UserMacros extends Component<Props, State> {
       value : '',
       invalidMacro : false,
       builtinsExpanded : true,
+      macroError : null,
     }
   }
 
@@ -130,8 +132,16 @@ export default class UserMacros extends Component<Props, State> {
 
     if (!definition
         ||
-        ! this.isValidExpression(definition)) {
-      this.setState({ ...this.state, invalidMacro : true })
+      ! this.isValidExpression(definition)
+        ||
+      name in builtinMacros) {
+      const macroError : string = (!definition) ? 'Empty definition.'
+        :
+        name in builtinMacros ? 'You can not redefine built-in macros.'
+          : 'Invalid macro.'
+
+      this.setState({ ...this.state, invalidMacro : true, macroError })
+      console.error(macroError)
       return
     }
     

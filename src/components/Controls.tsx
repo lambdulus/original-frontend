@@ -3,6 +3,7 @@ import React, { FunctionComponent, } from 'react'
 
 export interface ControlProps {
   run () : void,
+  stop () : void,
   step () : void,
   clear () : void,
   validate () : void,
@@ -12,6 +13,7 @@ export interface ControlProps {
   canStepOver : boolean,
   canStepIn : boolean,
   canGoBack : boolean,
+  running : boolean,
 }
 
 const buttonStyle = {
@@ -28,6 +30,7 @@ const buttonStyle = {
 export default function Controlls (props : ControlProps) : JSX.Element {
   const {
     run,
+    stop,
     step,
     clear,
     validate,
@@ -37,11 +40,14 @@ export default function Controlls (props : ControlProps) : JSX.Element {
     canStepOver,
     canStepIn,
     canGoBack,
+    running,
   } : ControlProps = props
   
   return (
     <div>
-      <button style={ buttonStyle } onClick={ run } disabled={ ! canRun } >RUN</button>
+      <button style={ buttonStyle } onClick={ () => (running ? stop : run)() } disabled={ ! canRun } >
+        { running ?  'STOP' : 'RUN' }
+      </button>
       <button style={ buttonStyle } onClick={ step } disabled={ ! canStepOver }>STEP</button>
       <button style={ buttonStyle } onClick={ clear } disabled={ false }>CLEAR</button>
       <button style={ buttonStyle } onClick={ validate } disabled={ false }>VALIDATE</button>
