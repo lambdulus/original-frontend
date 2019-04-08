@@ -5,7 +5,7 @@ import InputField from './components/InputField'
 import Controls, { ControlProps } from './components/Controls'
 import Result from './components/Result'
 import UserMacros from './components/UserMacros';
-import { debounce } from './helpers';
+import { debounce, TreeComparator } from './helpers';
 import { MacroMap } from 'lambdulus-core/';
 import UserStep from './components/UserStep';
 
@@ -356,7 +356,15 @@ export default class App extends Component<any, state> {
     }
 
     // TODO: tohle se asi nestane - prozkoumat
+    // stane pokud nekdo chce kliknout na validaci kdyz neni nic napsany v inputu
+    // pripadne pokud nekdo chce kliknout na validaci kdyz uz neni co validovat myslim
     if (ast === null || previousReduction instanceof None) {
+      this.setState({
+        ...this.state,
+        ast,
+        // steping : true,
+        isValidating : false,
+      })
       return
     }
 
@@ -364,7 +372,7 @@ export default class App extends Component<any, state> {
 
     previousReduction = normal.nextReduction  
     if (normal.nextReduction instanceof None) {
-      this.setState({ ...this.state, steping : false })
+      this.setState({ ...this.state, steping : false, isValidating : false })
       return
     }
   
@@ -378,18 +386,55 @@ export default class App extends Component<any, state> {
     // zobrazit chybu
     // pokracovat ve svem vyhodnocovani
 
-    briefHistory.unshift(ast.clone())
-    briefHistory.length = Math.min(briefHistory.length, 5)
+    const userAst : AST | null = this.parseExpression(userExpression)
 
-    this.setState({
-      ...this.state,
-      ast,
-      steps,
-      previousReduction,
-      steping : true,
-      briefHistory,
-      isValidating : false,
-    })
+    if (userAst === null) {
+      console.error('User Input is INVALID λ expression.')
+      // TODO: put it in state
+      this.setState({
+        ...this.state,
+        ast,
+        // steping : true,
+        isValidating : false,
+      })
+      return
+    }
+
+    const treeComparator : TreeComparator = new TreeComparator([ ast, userAst ])
+    if ( ! treeComparator.equals) {
+      console.error('User Input is INCCORECT.')
+      
+      briefHistory.unshift(ast.clone())
+      briefHistory.length = Math.min(briefHistory.length, 5)
+      
+      this.setState({
+        ...this.state,
+        ast,
+        steps,
+        previousReduction,
+        // steping : true, // proc bych to tady daval true to neni duvod
+        briefHistory,
+        isValidating : false,
+      })
+    }
+    else {
+      console.log('User Input is CORRECT.')
+      
+      briefHistory.unshift(userAst.clone())
+      briefHistory.length = Math.min(briefHistory.length, 5)
+
+      this.setState({
+        ...this.state,
+        ast : userAst,
+        steps,
+        previousReduction,
+        // steping : true, // proc bych to tady daval true to neni duvod
+        briefHistory,
+        isValidating : false,
+      })
+    }
+
+    
   }
 
   stepIn () {

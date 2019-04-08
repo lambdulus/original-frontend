@@ -156,7 +156,10 @@ export default class UserMacros extends Component<Props, State> {
       <ul style={ listStyle }>
         { Object.entries(macros).map(([ name, definition ]) => {
           return (
-            <li key={ name } title='Click to delete Macro' style={ userMacroStyle } onClick={ () => this.props.removeMacro(name) } >
+            <li key={ name }
+                title={ this.props.disabled ? 'You cannot remove Macro while evaluating' : 'Click to delete Macro' }
+                style={ userMacroStyle }
+                onClick={ () => ( ! this.props.disabled) && this.props.removeMacro(name) } >
               { name } := { definition }
             </li>
           )
