@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import { AST, BasicPrinter, ASTVisitor, Macro, ChurchNumber, Variable, Lambda, Application } from 'lambdulus-core';
+import { AST, BasicPrinter, ASTVisitor, Macro, ChurchNumber, Variable, Lambda, Application, Beta } from 'lambdulus-core';
+import { Breakpoint } from '../App';
 
 
 class ReactPrinter extends ASTVisitor {
@@ -22,7 +23,7 @@ class ReactPrinter extends ASTVisitor {
   private printLambdaArguments (lambda : Lambda, accumulator : JSX.Element) : void {
     if (lambda.body instanceof Lambda) {
       const args : JSX.Element = 
-      <span>
+      <span className='arguments' >
         { accumulator } { lambda.body.argument.name() }
       </span>
       
@@ -35,6 +36,7 @@ class ReactPrinter extends ASTVisitor {
 
   constructor (
     public readonly tree : AST,
+    private readonly onClick : (breakpoint : Breakpoint) => void,
   ) {
     super()
     this.tree.visit(this)
@@ -54,7 +56,7 @@ class ReactPrinter extends ASTVisitor {
       const right : JSX.Element | null = this.rendered
 
       this.rendered =
-      <span>
+      <span className='application' >
         { left } ( { right } )
       </span>
     }
@@ -66,7 +68,7 @@ class ReactPrinter extends ASTVisitor {
       const right : JSX.Element | null = this.rendered
 
       this.rendered =
-      <span>
+      <span className='application' >
         { left } { right }
       </span>
     }
@@ -75,15 +77,20 @@ class ReactPrinter extends ASTVisitor {
   // TODO: this is ugly as hell
   onLambda(lambda: Lambda): void {
     if (lambda.body instanceof Lambda) {
-      this.printLambdaArguments(lambda, <span>{ lambda.argument.name() }</span>)
+      this.printLambdaArguments(lambda, <span className='arguments' >{ lambda.argument.name() }</span>)
       const args : JSX.Element | null = this.rendered
 
       this.printLambdaBody(lambda)
       const body : JSX.Element | null = this.rendered
 
       this.rendered =
-      <span>
-        (λ { args } . { body } )
+      <span className='lambda' >
+        ( <span style={ { cursor: 'pointer' } } onClick={() => {
+          console.log(lambda)
+          this.onClick({ type: Beta, context: lambda })}
+         } >
+          λ
+        </span> { args } . { body } )
       </span>
     }
     else {
@@ -94,22 +101,28 @@ class ReactPrinter extends ASTVisitor {
       const body : JSX.Element | null = this.rendered
 
       this.rendered =
-      <span>
-        (λ { args } . { body } )
+      <span className='lambda' >
+        (<span style={ { cursor: 'pointer' } } onClick={() => {
+          console.log(lambda)
+
+          this.onClick({ type: Beta, context: lambda })}
+         } >
+          λ
+        </span> { args } . { body } )
       </span>
     }
   }
   
   onChurchNumber(churchNumber: ChurchNumber): void {
-    this.rendered = <span>{ churchNumber.name() }</span>
+    this.rendered = <span className='churchnumeral' >{ churchNumber.name() }</span>
   }
   
   onMacro(macro: Macro): void {
-    this.rendered = <span>{ macro.name() }</span>
+    this.rendered = <span className='macro' >{ macro.name() }</span>
   }
   
   onVariable(variable: Variable): void {
-    this.rendered = <span>{ variable.name() }</span>
+    this.rendered = <span className='variable' >{ variable.name() }</span>
   }
 }
 
@@ -121,14 +134,19 @@ const style = {
 
 }
 
-export default function Result (props : { tree : AST | null }) : JSX.Element | null {
-  const { tree } = props
+export default function Result (props : { tree : AST | null, addBreakpoint?(breakpoint : Breakpoint) : void }) : JSX.Element | null {
+  const { tree, addBreakpoint } = props
 
   if (tree === null) {
     return null
   }
 
-  const printer : ReactPrinter = new ReactPrinter(tree)
+  const printer : ReactPrinter = new ReactPrinter(tree, (breakpoint : Breakpoint) => {
+    if (addBreakpoint !== undefined) {
+      console.log('CLICKED')
+      addBreakpoint(breakpoint)
+    }
+  })
 
   return (
     <span style={ style } >

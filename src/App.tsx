@@ -1,5 +1,5 @@
 import React, { Component, ChangeEvent } from 'react';
-import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None, builtinMacros, MacroTable } from 'lambdulus-core'
+import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None, builtinMacros, MacroTable, Application, Beta, Lambda } from 'lambdulus-core'
 
 import InputField from './components/InputField'
 import Controls, { ControlProps } from './components/Controls'
@@ -9,6 +9,11 @@ import { debounce, TreeComparator } from './helpers';
 import { MacroMap } from 'lambdulus-core/';
 import UserStep from './components/UserStep';
 
+
+export type Breakpoint = {
+  type : ASTReduction,
+  context : AST,
+}
 
 interface state {
   expression : string,
@@ -25,6 +30,7 @@ interface state {
   isValidating : boolean,
   running : boolean,
   singleLetterVars : boolean,
+  breakpoints : Array<Breakpoint>,
 }
 
 const inputStyle = {
@@ -91,6 +97,8 @@ export default class App extends Component<any, state> {
     this.onComparison = this.onComparison.bind(this)
     this.__run = this.__run.bind(this)
     this.stop = this.stop.bind(this)
+    this.addBreakpoint = this.addBreakpoint.bind(this)
+    this.shouldBreak = this.shouldBreak.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -111,7 +119,8 @@ export default class App extends Component<any, state> {
       briefHistory : [],
       isValidating : false,
       running : false,
-      singleLetterVars : false, // TODO this.getConfigFromStorage()
+      singleLetterVars : false, // TODO this.getConfigFromStorage(),
+      breakpoints : [],
     }
   }
 
@@ -189,7 +198,12 @@ export default class App extends Component<any, state> {
           <ul style={ listStyle }>
             {
               this.state.briefHistory.map((ast, i) => {
-                return <li key={i} style={ i !== 0 ? { ...itemStyle, color: 'gray' } : itemStyle }><Result tree={ ast } /></li>
+                return <li key={i} style={ i !== 0 ? { ...itemStyle, color: 'gray' } : itemStyle }>
+                {
+                  i === 0 ? <Result addBreakpoint={ this.addBreakpoint } tree={ ast } />
+                  : <Result tree={ ast } />
+                }
+                </li>
               })
             }
           </ul>
@@ -198,8 +212,18 @@ export default class App extends Component<any, state> {
     );
   }
 
+  shouldBreak (breakpoint : Breakpoint, reduction : ASTReduction) : boolean {
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Beta && breakpoint.context instanceof Lambda
+        && reduction.target.identifier === breakpoint.context.body.identifier
+      ) {
+        return true
+    }
+    return false
+  }
+
   __run () {
-    let { ast, expression, steps, previousReduction, briefHistory, running } = this.state
+    let { ast, expression, steps, previousReduction, briefHistory, running, breakpoints } = this.state
     if ( ! running) {
       return
     }
@@ -232,6 +256,25 @@ export default class App extends Component<any, state> {
 
       return
     }
+
+    let index : number = 0
+    const breakpoint : Breakpoint | undefined = breakpoints.find(
+      (breakpoint : Breakpoint, id) =>
+        (index = id,
+        this.shouldBreak(breakpoint, normal.nextReduction))
+    )
+
+    if (breakpoint !== undefined) {
+      breakpoints.splice(index, 1)
+
+      this.setState({
+        ...this.state,
+        running : false,
+        steping : false,
+        breakpoints,
+      })
+      return
+    }
   
     ast = normal.perform() // perform next reduction
     steps++
@@ -241,7 +284,6 @@ export default class App extends Component<any, state> {
       ast,
       steps,
       previousReduction,
-      steping : false,
       briefHistory : [ ast ],
       isValidating : false,
     })
@@ -253,48 +295,13 @@ export default class App extends Component<any, state> {
     if (this.state.previousReduction instanceof None) {
       return
     }
-    this.setState({ ...this.state, running : true },
+    this.setState({ ...this.state, running : true, steping : true },
       () => window.setTimeout(this.__run, 10))
   }
 
   stop () {
     this.setState({ ...this.state, running : false })
   }
-
-  // run () {
-  //   let { ast, expression, steps, previousReduction, briefHistory } = this.state
-  //   if (steps === 0) {
-  //     ast = this.parseExpression(expression)
-  //   }
-    
-  //   if (ast === null || previousReduction instanceof None) {
-  //     return
-  //   }
-
-  //   while (true) {
-  //     const normal : NormalEvaluator = new NormalEvaluator(ast)
-    
-  //     previousReduction = normal.nextReduction
-  //     if (normal.nextReduction instanceof None) {
-  //       break
-  //     }
-    
-  //     ast = normal.perform() // perform next reduction
-  //     steps++
-  //   }
-
-  //   briefHistory = [ast.clone()]
-
-  //   this.setState({
-  //     ...this.state,
-  //     ast,
-  //     steps,
-  //     previousReduction,
-  //     steping : false,
-  //     briefHistory,
-  //     isValidating : false,
-  //   })
-  // }
 
   step () {
     let { ast, expression, steps, previousReduction, briefHistory } = this.state
@@ -338,6 +345,7 @@ export default class App extends Component<any, state> {
       briefHistory: [],
       steping: false,
       isValidating : false,
+      breakpoints : [],
     })
   }
 
@@ -465,7 +473,17 @@ export default class App extends Component<any, state> {
     const ast : AST | null = this.parseExpression(expression)
 
     this.autoSave(expression)
-    this.setState({ expression, lines, ast, briefHistory: [], steps : 0 , previousReduction : null, caretPosition, isValidating : false, })
+    this.setState({
+      expression,
+      lines,
+      ast,
+      briefHistory: [],
+      steps : 0,
+      previousReduction : null,
+      caretPosition,
+      isValidating : false,
+      breakpoints : [],
+    })
   }
 
   autoSave (expression : string) : void {
@@ -538,5 +556,12 @@ export default class App extends Component<any, state> {
 
     this.setState({ ...this.state, macroTable })
     window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
+  }
+
+  addBreakpoint (breakpoint : Breakpoint) : void {
+    this.setState({
+      ...this.state,
+      breakpoints : [ ...this.state.breakpoints, breakpoint ],
+    })
   }
 }
