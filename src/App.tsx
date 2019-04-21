@@ -519,6 +519,7 @@ export default class App extends Component<any, state> {
       fact : '(Y (λ f n . (<= n 1) 1 (* n (f (- n 1)))))',
       facct : '(λ n . (Y (λ f n a . IF (= n 1) a (f (- n 1) (* n a)))) (- n 1) (n))',
       fib : '(Y (λ f n . (= n 0) 0 ((= n 1) 1 ( + (f (- n 1)) (f (- n 2))))))',
+      inflist : '(λ n . (Y (λ x . (λ f s g . g f s) n x)))',
     }
 
     const userMacros : MacroMap = JSON.parse(window.localStorage.getItem('macrotable') || '{}')

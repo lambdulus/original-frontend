@@ -66,7 +66,6 @@ export class TreeComparator {
     }
     else if (left instanceof Variable && right instanceof Variable) {
       this.equals = this.translator.get(left.name()) === right.name()
-      console.log('Variables wwhat? ' + this.equals)
     }
     else {
       this.equals = false
