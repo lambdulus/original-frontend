@@ -1,4 +1,5 @@
 import { ASTVisitor, AST, Application, Lambda, ChurchNumber, Macro, Variable } from "lambdulus-core"
+import { Answer, expert } from "./expert";
 
 
 export function debounce (fn : Function, treshold : number) {
@@ -21,28 +22,66 @@ export function trimStr (str : string) {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-type Pair<T, E> = [T, E]
+type Pair<T> = [T, T]
+type Triple<T> = [T, T, T]
+
 
 // TODO: fix the public equals interface, maybe public get and private set?
 // maybe implement public get method and bool itself leave private?
+//
+// first I need more trees, I need the previous AST
 export class TreeComparator {
   private translator : Map<string, string> = new Map
   public equals : boolean = true
-  private context : Pair<AST, AST>
+  private context : Pair<AST>
+  public answers : Array<Answer> = []
 
-  constructor (readonly roots : Pair<AST, AST> ) {
-    this.context = roots
+  constructor (readonly roots : Triple<AST> ) {
+    let _
+    [ _, ...this.context ] = roots
+    // TODO: I need to compare roots themself
     this.compare()
+
+    if ( ! this.equals) {
+      // console.log('________________________________________________')
+      // console.log('________________________________________________')
+      // console.log('________________________________________________')
+
+      // console.log(_)
+      // console.log('________________________________________________')
+      // console.log('________________________________________________')
+      // console.log('________________________________________________')
+
+      this.answers = expert(...roots)
+    }
   }
 
   compare () : void {
-    const [ left, right ] : Pair<AST, AST> = this.context
+    /**
+    TODO: compare need to compare both children if got
+    if one of them is incorrect
+    then solve that problem
+    if both of them is incorrect
+    then solve both problems and then decide how both come together
+
+    then I have an instance of knowledge system
+    I can fire up that system in this context (this node with invalid children)
+    system will need to get instance of something to call methods on
+    because system needs to ask questions - like, is this possible,
+    is this error applicable?
+    so instead of human, code will look up the AST and answer the questions
+    so it will be some kind of class which is able to observe all 3 ASTs at the same time
+    it will also have implemented query methods,
+    probably wont be many of them, just few
+    **/
+    
+    const [ left, right ] : Pair<AST> = this.context
 
     if (left instanceof Lambda && right instanceof Lambda) {
       const backup : Map<string, string> = new Map(this.translator.entries())
 
       this.translator.set(left.argument.name(), right.argument.name())
-      this.context = [ left.right, right.right]
+      this.context = [ left.right, right.right ]
       this.compare()
 
       this.translator = backup
@@ -71,18 +110,4 @@ export class TreeComparator {
       this.equals = false
     }
   }
-
-  // sameType (left : AST, right : AST) : boolean {
-  //   return (
-  //     left instanceof Lambda && right instanceof Lambda
-  //     ||
-  //     left instanceof Application && right instanceof Application
-  //     ||
-  //     left instanceof Macro && right instanceof Macro
-  //     ||
-  //     left instanceof ChurchNumber && right instanceof ChurchNumber
-  //     ||
-  //     left instanceof Variable && right instanceof Variable
-  //   )
-  // }
 }

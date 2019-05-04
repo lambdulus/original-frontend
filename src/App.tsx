@@ -376,6 +376,8 @@ export default class App extends Component<any, state> {
       return
     }
 
+    const oldAst : AST | null = ast.clone()
+
     const normal : NormalEvaluator = new NormalEvaluator(ast)
 
     previousReduction = normal.nextReduction  
@@ -408,9 +410,25 @@ export default class App extends Component<any, state> {
       return
     }
 
-    const treeComparator : TreeComparator = new TreeComparator([ ast, userAst ])
+    // console.log('-------------------------------------------------------------')
+    // console.log('-------------------------------------------------------------')
+    // console.log('-------------------------------------------------------------')
+    // console.log('-------------------------------------------------------------')
+
+    // console.log(oldAst.clone())
+
+    // console.log('-------------------------------------------------------------')
+    // console.log('-------------------------------------------------------------')
+    // console.log('-------------------------------------------------------------')
+    // console.log('-------------------------------------------------------------')
+
+
+    const treeComparator : TreeComparator = new TreeComparator([ oldAst.clone(), ast.clone(), userAst.clone() ])
     if ( ! treeComparator.equals) {
       console.error('User Input is INCCORECT.')
+      console.log('----------------------------------------------------')      
+      console.log(treeComparator.answers)
+      console.log('----------------------------------------------------')
       
       briefHistory.unshift(ast.clone())
       briefHistory.length = Math.min(briefHistory.length, 5)
