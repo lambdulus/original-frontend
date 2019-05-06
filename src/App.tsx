@@ -1,5 +1,5 @@
 import React, { Component, ChangeEvent } from 'react';
-import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None, builtinMacros, MacroTable, Application, Beta, Lambda } from 'lambdulus-core'
+import { AST, tokenize, parse, ASTReduction, Token, NormalEvaluator, None, builtinMacros, MacroTable, Application, Beta, Lambda, Variable, ChurchNumber, Expansion, Macro } from 'lambdulus-core'
 
 import InputField from './components/InputField'
 import Controls, { ControlProps } from './components/Controls'
@@ -31,6 +31,8 @@ interface state {
   running : boolean,
   singleLetterVars : boolean,
   breakpoints : Array<Breakpoint>,
+  comparison : Array<string>,
+  userExpression : string,
 }
 
 const inputStyle = {
@@ -121,6 +123,8 @@ export default class App extends Component<any, state> {
       running : false,
       singleLetterVars : false, // TODO this.getConfigFromStorage(),
       breakpoints : [],
+      comparison : [],
+      userExpression : ''
     }
   }
 
@@ -189,6 +193,16 @@ export default class App extends Component<any, state> {
         <div style={ resultStyle }>
           {/* <Result tree={ ast } /> */}
           {
+            this.state.comparison.length ? 
+            <span style={{ color: 'red'}}>
+              Your expression: <span style={{color:'gray'}}>{this.state.userExpression}</span> is not valid.
+              <ul style={ listStyle }>
+                { this.state.comparison.map((error, i) => <li style={itemStyle} key={i}>{error}</li>) }
+              </ul>
+            </span>
+            : null
+          }
+          {
             this.state.isValidating
               ?
             <UserStep onComparison={ this.onComparison }/>
@@ -213,12 +227,33 @@ export default class App extends Component<any, state> {
   }
 
   shouldBreak (breakpoint : Breakpoint, reduction : ASTReduction) : boolean {
+
     if (reduction instanceof (breakpoint.type as any)
         && reduction instanceof Beta && breakpoint.context instanceof Lambda
         && reduction.target.identifier === breakpoint.context.body.identifier
       ) {
         return true
     }
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Beta && breakpoint.context instanceof Variable
+        && reduction.redex.left instanceof Lambda
+        && reduction.redex.left.argument.identifier === breakpoint.context.identifier
+    ) {
+      return true
+    }
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Expansion && breakpoint.context instanceof ChurchNumber
+        && reduction.target.identifier === breakpoint.context.identifier
+    ) {
+      return true
+    }
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Expansion && breakpoint.context instanceof Macro
+        && reduction.target.identifier === breakpoint.context.identifier
+    ) {
+      return true
+    }
+
     return false
   }
 
@@ -284,7 +319,7 @@ export default class App extends Component<any, state> {
       ast,
       steps,
       previousReduction,
-      briefHistory : [ ast ],
+      briefHistory : [ ast.clone() ],
       isValidating : false,
     })
 
@@ -295,8 +330,9 @@ export default class App extends Component<any, state> {
     if (this.state.previousReduction instanceof None) {
       return
     }
-    this.setState({ ...this.state, running : true, steping : true },
-      () => window.setTimeout(this.__run, 10))
+    this.setState({ ...this.state, running : true, steping : true, comparison : [],
+      userExpression : '', },
+      () => window.setTimeout(this.__run, 5))
   }
 
   stop () {
@@ -317,7 +353,8 @@ export default class App extends Component<any, state> {
 
     previousReduction = normal.nextReduction
     if (normal.nextReduction instanceof None) {
-      this.setState({ ...this.state, steping : false, previousReduction, })
+      this.setState({ ...this.state, steping : false, previousReduction, comparison : [],
+        userExpression : '', })
       return
     }
   
@@ -335,6 +372,8 @@ export default class App extends Component<any, state> {
       steping : true,
       briefHistory,
       isValidating : false,
+      comparison : [],
+      userExpression : '',
     })
   }
 
@@ -354,7 +393,7 @@ export default class App extends Component<any, state> {
       return
     }
 
-    this.setState({ ...this.state, isValidating : true })
+    this.setState({ ...this.state, isValidating : true, comparison : [], userExpression : '' })
   }
 
   onComparison (userExpression : string) : void {
@@ -425,14 +464,18 @@ export default class App extends Component<any, state> {
 
     const treeComparator : TreeComparator = new TreeComparator([ oldAst.clone(), ast.clone(), userAst.clone() ])
     if ( ! treeComparator.equals) {
-      console.error('User Input is INCCORECT.')
-      console.log('----------------------------------------------------')      
-      console.log(treeComparator.answers)
-      console.log('----------------------------------------------------')
+      // console.error('User Input is INCCORECT.')
+      // console.log('----------------------------------------------------')      
+      // console.log(treeComparator.answers)
+      // console.log('----------------------------------------------------')
       
       briefHistory.unshift(ast.clone())
       briefHistory.length = Math.min(briefHistory.length, 5)
-      
+      const comparison : Array<string> = Object.keys(treeComparator.answers)
+      if (comparison.length === 0) {
+        comparison.push(`I don't know what went wrong.`)
+      }
+
       this.setState({
         ...this.state,
         ast,
@@ -441,10 +484,12 @@ export default class App extends Component<any, state> {
         // steping : true, // proc bych to tady daval true to neni duvod
         briefHistory,
         isValidating : false,
+        comparison,
+        userExpression,
       })
     }
     else {
-      console.log('User Input is CORRECT.')
+      // console.log('User Input is CORRECT.')
       
       briefHistory.unshift(userAst.clone())
       briefHistory.length = Math.min(briefHistory.length, 5)
@@ -457,6 +502,8 @@ export default class App extends Component<any, state> {
         // steping : true, // proc bych to tady daval true to neni duvod
         briefHistory,
         isValidating : false,
+        comparison : [],
+        userExpression,
       })
     }
 

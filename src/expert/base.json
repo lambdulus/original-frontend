@@ -14,6 +14,7 @@
     "type" : "con",
     "predicates" : [
       "should-do-beta",
+      "not-same-as-old",
       "argument-substituted-but-unremoved"
     ]
   },
@@ -22,7 +23,7 @@
     "type" : "con",
     "predicates" : [
       "should-do-beta",
-      "same-or-equivalent-from-beta-redex"
+      "old-same-or-equivalent-to-user"
     ]
   },
   {

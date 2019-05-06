@@ -146,6 +146,13 @@ function verify (predicate : string, old : AST, correct : AST, user : AST) : Ans
 
       return { valid : false, errors : [ `Next reduction should not be Beta.`]}
     }
+    case 'old-same-or-equivalent-to-user' : {
+      if (compareWhole(old, user)) {
+        return { valid : true }
+      }
+
+      return { valid : false, errors : [ `User's and old trees are not equivalent.` ]}
+    }
     case 'same-or-equivalent-until-beta-redex' : { // TODO: zatim jenom SAME
       const redex : AST | null = betaRedex(old)
       if (redex === null) {
@@ -181,6 +188,12 @@ function verify (predicate : string, old : AST, correct : AST, user : AST) : Ans
 
       return { valid : true }
     }
+    case 'not-same-as-old' : {
+      if (compareWhole(old, user)) {
+        return { valid : false, errors : [ `Old and user trees are same.` ]}
+      }
+      return { valid : true }
+    }
     case 'beta-redex-right-side-beta-reduced' : {
       let redex : Binary | null = betaRedex(old) as Binary
       if (redex === null) {
@@ -209,6 +222,7 @@ function verify (predicate : string, old : AST, correct : AST, user : AST) : Ans
     case 'argument-substituted-but-unremoved' : {
       const norm : NormalEvaluator = new NormalEvaluator(old)
       if (!(norm.nextReduction instanceof Beta)) {
+
         return { valid : false, errors : [ `I cannot find beta redex because next reduction is not beta` ] }
       }
       
@@ -218,23 +232,25 @@ function verify (predicate : string, old : AST, correct : AST, user : AST) : Ans
       }
 
       const userLeft : AST = userNorm.perform()
+      const left : AST = norm.perform()
 
       if (norm.nextReduction.parent === null
         || norm.nextReduction.treeSide === null) {
         if (norm.nextReduction.argName === userNorm.nextReduction.argName
           &&
-            compareWhole(norm.perform(), userLeft)
+            compareWhole(left, userLeft)
           ) {
             return { valid : true }
           }
+          console.log('FUCK')
         return { valid : false, errors : [ `I cannot find beta redex because next reduction is not beta` ] }
       }
 
-      const next : AST = norm.perform()
+      // const next : AST = norm.perform()
 
       if (norm.nextReduction.argName === userNorm.nextReduction.argName
             &&
-          compareWhole(next, userLeft)
+          compareWhole(left, userLeft)
         ) {
           return { valid : true }
         }
@@ -242,6 +258,7 @@ function verify (predicate : string, old : AST, correct : AST, user : AST) : Ans
 
 
       if ( ! compareWhole(norm.nextReduction.parent[norm.nextReduction.treeSide], userLeft)) {
+        console.log('FUUUUUUCK')
         return { valid : false, errors : [ `Does not appear to be case of unremoved but substituted arg.` ] }
       }
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { AST, BasicPrinter, ASTVisitor, Macro, ChurchNumber, Variable, Lambda, Application, Beta } from 'lambdulus-core';
+import { AST, BasicPrinter, ASTVisitor, Macro, ChurchNumber, Variable, Lambda, Application, Beta, Expansion } from 'lambdulus-core';
 import { Breakpoint } from '../App';
 
 
@@ -24,7 +24,12 @@ class ReactPrinter extends ASTVisitor {
     if (lambda.body instanceof Lambda) {
       const args : JSX.Element = 
       <span className='arguments' >
-        { accumulator } { lambda.body.argument.name() }
+        { accumulator }
+        {' '}
+        <span style={ { cursor: 'pointer' } }
+          onClick={() => this.onClick({type:Beta, context: (lambda.body as Lambda).argument})} >
+          {lambda.body.argument.name()}
+        </span>
       </span>
       
       this.printLambdaArguments(lambda.body, args)
@@ -77,7 +82,12 @@ class ReactPrinter extends ASTVisitor {
   // TODO: this is ugly as hell
   onLambda(lambda: Lambda): void {
     if (lambda.body instanceof Lambda) {
-      this.printLambdaArguments(lambda, <span className='arguments' >{ lambda.argument.name() }</span>)
+      const acc : JSX.Element = <span style={ { cursor: 'pointer' } }
+        onClick={() => this.onClick({type:Beta, context: (lambda.body as Lambda).argument})} >
+        {lambda.argument.name()}
+      </span>
+
+      this.printLambdaArguments(lambda, acc)
       const args : JSX.Element | null = this.rendered
 
       this.printLambdaBody(lambda)
@@ -86,7 +96,7 @@ class ReactPrinter extends ASTVisitor {
       this.rendered =
       <span className='lambda' >
         ( <span style={ { cursor: 'pointer' } } onClick={() => {
-          console.log(lambda)
+          // console.log(lambda)
           this.onClick({ type: Beta, context: lambda })}
          } >
           λ
@@ -103,7 +113,7 @@ class ReactPrinter extends ASTVisitor {
       this.rendered =
       <span className='lambda' >
         (<span style={ { cursor: 'pointer' } } onClick={() => {
-          console.log(lambda)
+          // console.log(lambda)
 
           this.onClick({ type: Beta, context: lambda })}
          } >
@@ -114,11 +124,17 @@ class ReactPrinter extends ASTVisitor {
   }
   
   onChurchNumber(churchNumber: ChurchNumber): void {
-    this.rendered = <span className='churchnumeral' >{ churchNumber.name() }</span>
+    this.rendered = <span className='churchnumeral' style={{cursor:'pointer'}}
+      onClick={() => this.onClick({ type: Expansion, context : churchNumber })} >
+      { churchNumber.name() }
+    </span>
   }
   
   onMacro(macro: Macro): void {
-    this.rendered = <span className='macro' >{ macro.name() }</span>
+    this.rendered = <span className='macro' style={{cursor:'pointer'}}
+      onClick={() => this.onClick({ type: Expansion, context : macro })} >
+      { macro.name() }
+    </span>
   }
   
   onVariable(variable: Variable): void {
