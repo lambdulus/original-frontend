@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { AST, BasicPrinter, ASTVisitor, Macro, ChurchNumber, Variable, Lambda, Application, Beta, Expansion } from 'lambdulus-core';
+import { AST, BasicPrinter, ASTVisitor, Macro, ChurchNumber, Variable, Lambda, Application, Beta, Expansion, NormalEvaluator, None } from 'lambdulus-core';
 import { Breakpoint } from '../App';
 
 
@@ -42,6 +42,7 @@ class ReactPrinter extends ASTVisitor {
   constructor (
     public readonly tree : AST,
     private readonly onClick : (breakpoint : Breakpoint) => void,
+    private readonly redex : AST | null,
   ) {
     super()
     this.tree.visit(this)
@@ -53,24 +54,43 @@ class ReactPrinter extends ASTVisitor {
 
   // TODO: this is ugly as hell
   onApplication(application: Application): void {
+    let leftStyle : React.CSSProperties = {}
+    let rightStyle : React.CSSProperties = {}
+
+    if (this.redex !== null && this.redex.identifier === application.identifier && this.redex === application) {
+      leftStyle = {
+        backgroundColor: '#69f0ae',
+        borderRadius: '5px'
+      }
+
+      rightStyle = {
+        backgroundColor: '#ff80ab',
+        borderRadius: '5px'
+      }
+    }
+
     if (application.right instanceof Application) {
       application.left.visit(this)
-      const left : JSX.Element | null = this.rendered
+      const left : JSX.Element | null = <span style={leftStyle}>{this.rendered}</span>
 
       application.right.visit(this)
-      const right : JSX.Element | null = this.rendered
+      const right : JSX.Element | null = <span style={rightStyle}>( { this.rendered } )</span>
 
       this.rendered =
       <span className='application' >
-        { left } ( { right } )
+        { left } { right }
       </span>
     }
     else {
       application.left.visit(this)
-      const left : JSX.Element | null = this.rendered
+      // const left : JSX.Element | null = this.rendered
+      const left : JSX.Element | null = <span style={leftStyle}>{this.rendered}</span>
+
 
       application.right.visit(this)
-      const right : JSX.Element | null = this.rendered
+      // const right : JSX.Element | null = this.rendered
+      const right : JSX.Element | null = <span style={rightStyle}>{ this.rendered }</span>
+
 
       this.rendered =
       <span className='application' >
@@ -124,14 +144,31 @@ class ReactPrinter extends ASTVisitor {
   }
   
   onChurchNumber(churchNumber: ChurchNumber): void {
-    this.rendered = <span className='churchnumeral' style={{cursor:'pointer'}}
+    let style : React.CSSProperties = {}
+
+    if (this.redex !== null && this.redex.identifier === churchNumber.identifier && this.redex === churchNumber) {
+      style = {
+        backgroundColor: '#82b1ff',
+        borderRadius: '5px'
+      }
+    }
+    this.rendered = <span className='churchnumeral' style={{cursor:'pointer', ...style}}
       onClick={() => this.onClick({ type: Expansion, context : churchNumber })} >
       { churchNumber.name() }
     </span>
   }
   
   onMacro(macro: Macro): void {
-    this.rendered = <span className='macro' style={{cursor:'pointer'}}
+    let style : React.CSSProperties = {}
+
+    if (this.redex !== null && this.redex.identifier === macro.identifier && this.redex === macro) {
+      style = {
+        backgroundColor: '#80d8ff',
+        borderRadius: '5px'
+      }
+    }
+
+    this.rendered = <span className='macro' style={{cursor:'pointer', ...style}}
       onClick={() => this.onClick({ type: Expansion, context : macro })} >
       { macro.name() }
     </span>
@@ -157,12 +194,21 @@ export default function Result (props : { tree : AST | null, addBreakpoint?(brea
     return null
   }
 
+  let redex : AST | null  = null
+  const normal : NormalEvaluator = new NormalEvaluator(tree)
+  if (normal.nextReduction instanceof Beta) {
+    redex = normal.nextReduction.redex
+  }
+  if (normal.nextReduction instanceof Expansion) {
+    redex = normal.nextReduction.target
+  }
+
   const printer : ReactPrinter = new ReactPrinter(tree, (breakpoint : Breakpoint) => {
     if (addBreakpoint !== undefined) {
       console.log('CLICKED')
       addBreakpoint(breakpoint)
     }
-  })
+  }, redex)
 
   return (
     <span style={ style } >
