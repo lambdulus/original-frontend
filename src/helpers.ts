@@ -52,7 +52,11 @@ export class TreeComparator {
       // console.log('________________________________________________')
       // console.log('________________________________________________')
 
+      console.log("EXPEEEEERT")
+
       this.answers = expert(...roots)
+      console.log("EXPEEEEERT")
+
     }
   }
 

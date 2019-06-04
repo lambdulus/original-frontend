@@ -7,6 +7,12 @@ export interface Answer {
   errors ? : Array<string>,
 }
 
+// hotfix
+
+const rules__g = rules
+
+// hotfix
+
 function compareWhole (next : AST, user : AST) : boolean {
   if (next instanceof Lambda && user instanceof Lambda
       ||
@@ -242,7 +248,7 @@ function verify (predicate : string, old : AST, correct : AST, user : AST) : Ans
           ) {
             return { valid : true }
           }
-          console.log('FUCK')
+          console.log('BAD')
         return { valid : false, errors : [ `I cannot find beta redex because next reduction is not beta` ] }
       }
 
@@ -258,7 +264,7 @@ function verify (predicate : string, old : AST, correct : AST, user : AST) : Ans
 
 
       if ( ! compareWhole(norm.nextReduction.parent[norm.nextReduction.treeSide], userLeft)) {
-        console.log('FUUUUUUCK')
+        console.log('BAAAAAAAD')
         return { valid : false, errors : [ `Does not appear to be case of unremoved but substituted arg.` ] }
       }
 
@@ -379,13 +385,18 @@ const contradicts = (answer : any, rule : any) =>
   (answer.valid === false && rule.type === 'con')
 
 export function expert (old : AST, current : AST, user : AST) {
+  // console.log(Object.values(rules), '---------------')
   let rules_list = (Object as any).fromEntries([ ...rules ].map(({ name }) => [ name, [] ]))
+  const rules_list__g = (Object as any).fromEntries([ ...rules ].map(({ name }) => [ name, [] ]))
 
   const infer = (rules : Array<any>) => {
     rules:
     for (const rule of rules) {
       const { name, predicates } = rule
-      // console.log('RULE :  ' + name)
+      if (! (name in rules_list)) {
+        continue rules
+      }
+
 
       predicates:
       for (const predicate of predicates) {
@@ -400,13 +411,22 @@ export function expert (old : AST, current : AST, user : AST) {
         }
 
         if (predicate in rules_list) {
-          infer([rules.find(({name}) => name === predicate )])
+          infer([rules__g.find(({name}) => name === predicate )])
 
           if (predicate in rules_list) {
             // TODO if it is STILL in rules_list and was not removed
+            console.log([ rules_list[name], rules_list[predicate] ], '0')
             rules_list[name] = [ ...rules_list[name],  ...rules_list[predicate] ]
             continue
           }
+          if (contradicts({valid:false}, rule)) {
+            delete rules_list[name]
+            continue rules
+          }
+          continue
+        } else if (predicate in rules_list__g) {
+          console.log('PREDICATE which was disproven found', predicate,
+          'cheching if it contradicts and sorting things out')
           if (contradicts({valid:false}, rule)) {
             delete rules_list[name]
             continue rules
@@ -416,12 +436,6 @@ export function expert (old : AST, current : AST, user : AST) {
 
 
         const answer = verify(predicate, old.clone(), current.clone(), user.clone())
-
-        if (name === "argument-unremoved") {
-          // console.log('================================')
-          // console.log(answer)
-          // console.log('================================')
-        }
   
         if (contradicts(answer, rule)) {
           delete rules_list[name]
@@ -431,6 +445,9 @@ export function expert (old : AST, current : AST, user : AST) {
         if ( ! answer.valid) {
           continue
         }
+
+        console.log([ rules_list[name] ], '1')
+        console.log(name)
   
         rules_list[name] = [ answer , ...rules_list[name] ]
       }
