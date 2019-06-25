@@ -581,10 +581,9 @@ export default class App extends Component<any, state> {
 
   getMacrosFromLocalStorage () : MacroMap {
     const usefulMacros : MacroMap = {
-      fact : '(Y (λ f n . (<= n 1) 1 (* n (f (- n 1)))))',
-      facct : '(λ n . (Y (λ f n a . IF (= n 1) a (f (- n 1) (* n a)))) (- n 1) (n))',
-      fib : '(Y (λ f n . (= n 0) 0 ((= n 1) 1 ( + (f (- n 1)) (f (- n 2))))))',
-      inflist : '(λ n . (Y (λ x . (λ f s g . g f s) n x)))',
+      FACT : '(Y (λ f n . (<= n 1) 1 (* n (f (- n 1)))))',
+      FACCT : '(λ n . (Y (λ f n a . IF (= n 1) a (f (- n 1) (* n a)))) (- n 1) (n))',
+      FIB : '(Y (λ f n . (= n 0) 0 ((= n 1) 1 ( + (f (- n 1)) (f (- n 2))))))',
       SHORTLIST : 'CON 3 (CONS 5 (CONS 1 NIL))',
       LONGLIST :  '(CONS 3 (CONS 5 (CONS 1 (CONS 10 (CONS 7 (CONS 2 (CONS 4 (CONS 9 (CONS 4 (CONS 6 (CONS 8 NIL)))))))))))',
       LISTGREQ : 'Y (λ fn piv list . IF (NULL list) (NIL) ( IF (>= (FIRST list) piv) (CONS (FIRST list) (fn piv (SECOND list))) (fn piv (SECOND list)) ) )',
@@ -592,7 +591,7 @@ export default class App extends Component<any, state> {
       LISTGR : 'Y (λ fn piv list . IF (NULL list) (NIL) ( IF (> (FIRST list) piv) (CONS (FIRST list) (fn piv (SECOND list))) (fn piv (SECOND list)) ) )',
       LISTEQ : 'Y (λ fn piv list . IF (NULL list) (NIL) ( IF (= (FIRST list) piv) (CONS (FIRST list) (fn piv (SECOND list))) (fn piv (SECOND list)) ) )',
       APPEND : 'Y (λ fn listA listB . IF (NULL listA) (listB) (CONS (FIRST listA) (fn (SECOND listA) listB)))',
-      QUICKSORT : 'Y (λ fn list . IF (NULL list) (NIL) ( IF (NULL (SECOND list)) (list) ( CONNECT (fn (LISTLESS (FIRST list) list)) ( CONNECT (LISTEQ (FIRST list) list) (fn (LISTGR (FIRST list) list)) ) ) ) )',
+      QUICKSORT : 'Y (λ fn list . IF (NULL list) (NIL) ( IF (NULL (SECOND list)) (list) ( APPEND (fn (LISTLESS (FIRST list) list)) ( APPEND (LISTEQ (FIRST list) list) (fn (LISTGR (FIRST list) list)) ) ) ) )',
       INFLIST : '(λ n . (Y (λ x . (λ f s g . g f s) n x)))',
       DELNTH : 'Y (λ fn list n . IF (= n 0) (SECOND list) (IF (NULL list) NIL (CONS (FIRST list) (fn (SECOND list) (- n 1) ) ) ) )',
       NTH : 'Y (λ fn list n . IF (= n 0) (FIRST list) (IF (NULL (list)) NIL (fn (SECOND list) (- n 1)) ) )',
