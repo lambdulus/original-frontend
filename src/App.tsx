@@ -23,7 +23,7 @@ import {
 import './App.css'
 import Editor from './components/Editor'
 import { debounce } from './misc';
-import Evaluator from './components/Evaluator';
+import Evaluator, { Breakpoint, EvaluationState } from './components/Evaluator';
 
 
 const HANDY_MACROS : MacroMap = {
@@ -62,7 +62,7 @@ interface State {
   singleLetterVars : boolean
   macroTable : MacroMap
 
-  submittedExpressions : Array<AST>
+  submittedExpressions : Array<EvaluationState>
 }
 
 export default class App extends Component<any, State> {
@@ -111,16 +111,17 @@ export default class App extends Component<any, State> {
       <div className='app'>
 
         <ul className='evaluatorSpace' >
-          { submittedExpressions.map((ast : AST, i : number) =>
-            <li key={ i }>
+          { submittedExpressions.map((state : EvaluationState, i : number) =>
+            <li key={ state.key }>
               <button
                 className='controlButton'
                 onClick={ () => this.onRemoveExpression(i) }
               >
-                DELETE
+                DEL
               </button>
               <Evaluator
-                ast={ ast }
+                { ...state }
+                updateState={ (state : EvaluationState) => this.onUpdateEvaluationState(state, i) }
               />
             </li>
             ) }
@@ -152,6 +153,17 @@ export default class App extends Component<any, State> {
     this.updateURL(expression)
   }
 
+  onUpdateEvaluationState (state : EvaluationState, index : number) : void {
+    const { submittedExpressions } : State = this.state
+
+    submittedExpressions[index] = state
+
+    this.setState({
+      ...this.state,
+      submittedExpressions,
+    })
+  }
+
   onRemoveExpression (index : number) {
     const { submittedExpressions } : State = this.state
 
@@ -169,12 +181,24 @@ export default class App extends Component<any, State> {
     const { editorState : { expression, caretPosition, }, submittedExpressions } : State = this.state
     
     // window.location.hash = encodeURI(expression)
-    history.pushState({}, "page 2", "#" + encodeURI(expression))
+    history.pushState({}, "", "#" + encodeURI(expression))
 
     try {
       const ast : AST = this.parseExpression(expression)
       // window.location.hash = encodeURI('')
-      history.pushState({}, "page 2", "#" + encodeURI(''))
+      history.pushState({}, "", "#" + encodeURI(''))
+
+      const evaluationState : EvaluationState = {
+        key : Date.now().toString(),
+        ast,
+        history : [ ast ],
+        steps : 0,
+        isStepping : false,
+        isRunning : false,
+        lastReduction : null,
+        breakpoints : [],
+        timeout : undefined
+      }
 
       this.setState({
         ...this.state,
@@ -183,7 +207,7 @@ export default class App extends Component<any, State> {
           caretPosition : 0,
           syntaxError : null,
         },
-        submittedExpressions : [ ...submittedExpressions, ast ]
+        submittedExpressions : [ ...submittedExpressions, evaluationState ]
       })
   
     } catch (exception) {
