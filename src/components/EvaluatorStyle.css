@@ -1,0 +1,7 @@
+.evaluator {
+  border: 1px solid black;
+}
+
+.inactiveStep {
+  color: gray;
+}

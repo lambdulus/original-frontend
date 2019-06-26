@@ -1,0 +1,29 @@
+.step {
+  font-size: 2em;
+  word-wrap: anywhere;
+}
+
+.left.redex {
+  background-color: #69f0ae;
+  border-radius: 5px;
+}
+
+.right.redex {
+  background-color: #ff80ab;
+  border-radius: 5px;
+}
+
+.activeStep .macro, .activeStep .lambda, .activeStep .argument, .activeStep .churchnumeral {
+  cursor: pointer;
+}
+
+
+.macro.redex {
+  background-color: #80d8ff;
+  border-radius: 5px;
+}
+
+.churchnumeral.redex {
+  background-color: #82b1ff;
+  border-radius: 5px;
+}

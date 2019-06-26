@@ -1,0 +1,14 @@
+#controls {
+  margin-bottom: 10px;
+}
+
+.controlButton {
+  font-size: 1.5em;
+  background: none;
+  border-style: none;
+	border-bottom: 2px solid navy;
+  margin-left: 5px;
+  margin-right: 5px;  
+  cursor: pointer;
+  outline: none;
+}

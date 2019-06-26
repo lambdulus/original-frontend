@@ -1,59 +1,36 @@
-import React, { FunctionComponent, } from 'react'
+import React from 'react'
+
+import './ControlsStyle.css'
 
 
-export interface ControlProps {
-  run () : void,
-  stop () : void,
-  step () : void,
-  clear () : void,
-  validate () : void,
-  stepIn () : void,
-  stepBack () : void,
-  canRun : boolean,
-  canStepOver : boolean,
-  canStepIn : boolean,
-  canGoBack : boolean,
-  running : boolean,
+export interface ControlsProps {
+  onRun () : void,
+  onStop () : void,
+  onStep () : void,
+  onClear () : void,
+  isRunning : boolean,
 }
 
-const buttonStyle = {
-  fontSize: '1.5em',
-  background: 'none',
-  borderStyle: 'none',
-	borderBottom: '2px solid navy',
-  marginLeft: '5px',
-  marginRight: '5px',  
-  cursor: 'pointer',
-  outline: 'none',
-}
-
-export default function Controlls (props : ControlProps) : JSX.Element {
+export default function Controls (props : ControlsProps) : JSX.Element {
   const {
-    run,
-    stop,
-    step,
-    clear,
-    validate,
-    stepIn,
-    stepBack,
-    canRun,
-    canStepOver,
-    canStepIn,
-    canGoBack,
-    running,
-  } : ControlProps = props
+    onRun,
+    onStop,
+    onStep,
+    onClear,
+    isRunning,
+  } : ControlsProps = props
   
   return (
-    <div>
-      <button style={ buttonStyle } onClick={ () => (running ? stop : run)() } disabled={ ! canRun } >
-        { running ?  'STOP' : 'RUN' }
+    <div id="controls">
+      <button
+        className='controlButton'
+        onClick={ () => isRunning ? onStop() : onRun() }
+        disabled={ false }
+      >
+        { isRunning ? 'STOP' : 'RUN' }
       </button>
-      <button style={ buttonStyle } onClick={ step } disabled={ (! canStepOver) || running }>STEP</button>
-      <button style={ buttonStyle } onClick={ clear } disabled={ running }>CLEAR</button>
-      <button style={ buttonStyle } onClick={ validate } disabled={ false }>VALIDATE</button>
-
-      {/* <button style={ buttonStyle } onClick={ stepIn } disabled={ true }>STEP IN</button> */}
-      {/* <button style={ buttonStyle } onClick={ stepBack } disabled={ true }>GO BACK</button> */}
+      <button className='controlButton' onClick={ onStep } disabled={ isRunning }>STEP</button>
+      <button className='controlButton' onClick={ onClear } disabled={ isRunning }>CLEAR</button>
     </div>
   )
 }

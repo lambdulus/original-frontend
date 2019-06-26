@@ -1,0 +1,20 @@
+.prompt {
+  width: 100%;
+  font-size: 3em;
+  border: none;
+  overflow: auto;
+  outline: none;
+  resize: none;
+  border-style: none;
+}
+
+.editor {
+  /* position: relative; */
+  /* bottom: 0; */
+  margin-left: 5vw;
+  width: 90vw;
+  /* margin-top : 5vh; */
+  border-bottom: 2px solid gray;
+  padding: 10px;
+  border: 1px solid black;
+}
