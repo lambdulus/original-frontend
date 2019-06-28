@@ -13,7 +13,7 @@ interface EditorProperties {
 
 export default function Editor (props : EditorProperties) : JSX.Element {
   const { expression, caretPosition, onExpression, onSubmit, syntaxError } : EditorProperties = props
-  const lines : number = expression.split('\n').length
+  const lines : number = Math.min(expression.split('\n').length, expression.length)
 
   const onChange = (event : ChangeEvent<HTMLTextAreaElement>) => {
     let { target : { value : expression } } : { target : { value : string } } = event
@@ -34,6 +34,10 @@ export default function Editor (props : EditorProperties) : JSX.Element {
   return (
     <div className="editor">
       { syntaxError ? `${syntaxError}` : '' }
+      <i id='editorEnter' className="far fa-play-circle fa-3x" onClick={ onSubmit } />
+      {/* <button id='editorEnter' onClick={ onSubmit } >
+        Δ
+      </button> */}
       <InputField
         expression={ expression }
         lines={ lines }
@@ -69,7 +73,7 @@ function InputField (props : InputProps) : JSX.Element {
       autoCorrect="off"
       autoCapitalize="off"
       spellCheck={ false }
-      rows={ Math.max(lines, 2) } 
+      rows={ Math.max(lines, 1) } 
       ref={ (element : HTMLTextAreaElement) => {
         if (element !== null) {
           element.selectionStart = caretPosition

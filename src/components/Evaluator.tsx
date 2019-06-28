@@ -7,6 +7,9 @@ import Controls from './Controls';
 import Step from './Step';
 import { mapRightFromTo } from '../misc'
 
+// import Slider, { Range } from 'rc-slider'
+// import 'rc-slider/assets/index.css'
+
 
 export type Breakpoint = {
   type : ASTReduction,
@@ -14,27 +17,32 @@ export type Breakpoint = {
 }
 
 export interface EvaluationState {
-  key : string
+  __key : string
+  expression : string
   ast : AST
   history : Array<AST>
   steps : number
-  isStepping : boolean
+  // isStepping : boolean
   isRunning : boolean
   lastReduction : ASTReduction | null
   breakpoints : Array<Breakpoint>
-  timeout : number | undefined
+  timeoutID : number | undefined
+  timeout : number
+
 }
 
 interface EvaluationProperties {
-  key : string
+  __key : string
   ast : AST
+  expression : string
   history : Array<AST>
   steps : number
-  isStepping : boolean
+  // isStepping : boolean
   isRunning : boolean
   lastReduction : ASTReduction | null
   breakpoints : Array<Breakpoint>
-  timeout : number | undefined
+  timeoutID : number | undefined
+  timeout : number
   updateState (state : EvaluationState) : void
 }
 
@@ -43,6 +51,8 @@ function equalProps (oldProps : EvaluationProperties, newProps : EvaluationPrope
     oldProps.isRunning === newProps.isRunning
       &&
     oldProps.steps === newProps.steps
+      &&
+    oldProps.timeout === newProps.timeout
   )
 } 
 
@@ -52,11 +62,11 @@ function Evaluator (props : EvaluationProperties) : JSX.Element {
   const {
     history,
     steps,
-    isStepping,
+    // isStepping,
     isRunning,
     lastReduction,
     breakpoints,
-    timeout,
+    timeoutID,
     updateState,
   } : EvaluationProperties = props
 
@@ -89,7 +99,7 @@ function Evaluator (props : EvaluationProperties) : JSX.Element {
 } 
 
 function onRun (props : EvaluationProperties) : void {
-  const { lastReduction, updateState } : EvaluationProperties = props
+  const { lastReduction, updateState, timeout } : EvaluationProperties = props
 
   if (lastReduction instanceof None) {
     return
@@ -98,25 +108,25 @@ function onRun (props : EvaluationProperties) : void {
   updateState({
     ...props,
     isRunning : true,
-    isStepping : true,
-    timeout : window.setTimeout(() => __onRun({
+    // isStepping : true,
+    timeoutID : window.setTimeout(() => __onRun({
       ...props,
       isRunning : true,
-      isStepping : true,
-    }), 10),
+      // isStepping : true,
+    }), timeout),
   })
 }
 
 function onStop (props : EvaluationProperties) : void {
-  const { updateState, timeout } : EvaluationProperties = props
+  const { updateState, timeoutID } : EvaluationProperties = props
 
-  window.clearTimeout(timeout)
+  window.clearTimeout(timeoutID)
 
   updateState({
     ...props,
-    isStepping : false,
+    // isStepping : false,
     isRunning : false,
-    timeout : undefined
+    timeoutID : undefined
   })
 }
 
@@ -136,7 +146,7 @@ function onStep (props : EvaluationProperties) : void {
   if (normal.nextReduction instanceof None) {
     updateState({
       ...props,
-      isStepping : false,
+      // isStepping : false,
       lastReduction
     })
     
@@ -150,7 +160,7 @@ function onStep (props : EvaluationProperties) : void {
     ...props,
     history : [ ...history, ast ],
     steps,
-    isStepping : true,
+    // isStepping : true,
     lastReduction,
   })
 }
@@ -162,7 +172,7 @@ function onClear (props : EvaluationProperties) : void {
     ...props,
     history : [ props.ast ],
     steps : 0,
-    isStepping : false,
+    // isStepping : false,
     isRunning : false,
     lastReduction : null,
     breakpoints : [],
@@ -209,7 +219,7 @@ function shouldBreak (breakpoint : Breakpoint, reduction : ASTReduction) : boole
 }
 
 function __onRun (props : EvaluationProperties) {
-  let { history, steps, lastReduction, isRunning, breakpoints, updateState } = props
+  let { history, steps, lastReduction, isRunning, breakpoints, updateState, timeout } = props
   
   if ( ! isRunning) {
     return
@@ -219,7 +229,7 @@ function __onRun (props : EvaluationProperties) {
     updateState({
       ...props,
       isRunning : false,
-      timeout : undefined,
+      timeoutID : undefined,
     })
 
     return
@@ -238,9 +248,9 @@ function __onRun (props : EvaluationProperties) {
       history,
       steps,
       lastReduction,
-      isStepping : false,
+      // isStepping : false,
       isRunning : false,
-      timeout : undefined,
+      timeoutID : undefined,
     })
 
     return
@@ -260,9 +270,9 @@ function __onRun (props : EvaluationProperties) {
     updateState({
       ...props,
       isRunning : false,
-      isStepping : false,
+      // isStepping : false,
       breakpoints,
-      timeout : undefined,
+      timeoutID : undefined,
     })
 
     return
@@ -277,11 +287,11 @@ function __onRun (props : EvaluationProperties) {
     history : [ ast ],
     steps,
     lastReduction,
-    timeout : window.setTimeout(() => __onRun({
+    timeoutID : window.setTimeout(() => __onRun({
       ...props,
       history : [ ast ],
       steps,
       lastReduction,
-    }), 10),
+    }), timeout),
   })
 }

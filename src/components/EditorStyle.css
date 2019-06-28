@@ -1,5 +1,5 @@
 .prompt {
-  width: 100%;
+  width: 95%;
   font-size: 3em;
   border: none;
   overflow: auto;
@@ -9,12 +9,29 @@
 }
 
 .editor {
-  /* position: relative; */
+  position: relative;
   /* bottom: 0; */
   margin-left: 5vw;
   width: 90vw;
   /* margin-top : 5vh; */
-  border-bottom: 2px solid gray;
-  padding: 10px;
-  border: 1px solid black;
+  /* border-bottom: 2px solid gray; */
+  /* padding: 10px; */
+  border: 1px solid gray;
+  border-radius: 5px;
+}
+
+#editorEnter {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+
+  /* font-size: 1em; */
+  color: #1976d2;
+  /* border-radius: 3px; */
+  /* border-style: none; */
+	/* border-bottom: 2px solid navy; */
+  /* margin-left: 5px; */
+  /* margin-right: 5px;   */
+  cursor: pointer;
+  /* outline: none; */
 }

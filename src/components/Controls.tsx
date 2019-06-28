@@ -22,15 +22,59 @@ export default function Controls (props : ControlsProps) : JSX.Element {
   
   return (
     <div id="controls">
-      <button
+
+      {
+        isRunning ?
+        <i
+          className="enabled fas fa-pause fa-2x"
+          onClick={ onStop }
+        />
+          :
+        <i
+          className="enabled fas fa-forward fa-2x"
+          onClick={ onRun }
+        />  
+      }
+
+      {/* <button
         className='controlButton'
-        onClick={ () => isRunning ? onStop() : onRun() }
+        
         disabled={ false }
       >
         { isRunning ? 'STOP' : 'RUN' }
-      </button>
-      <button className='controlButton' onClick={ onStep } disabled={ isRunning }>STEP</button>
-      <button className='controlButton' onClick={ onClear } disabled={ isRunning }>CLEAR</button>
+      </button> */}
+      {/* <button className='controlButton' onClick={ onStep } disabled={ isRunning }>STEP</button> */}
+      {
+        isRunning ?
+        <i
+          className="disabled fas fa-play fa-2x"
+          onClick={ () => {} }
+        />
+          :
+        <i
+          className="enabled fas fa-play fa-2x"
+          onClick={ onStep }
+        />
+      }
+
+      {
+        isRunning ?
+        <i
+          className="disabled fas fa-redo-alt fa-2x"
+          onClick={ () => {} }
+        />
+          :
+        <i
+          className="enabled fas fa-redo-alt fa-2x"
+          onClick={ onClear }
+        />
+      }
+      {/* <i
+        className="fas fa-redo-alt fa-2x"
+        onClick={ onClear }
+       />
+
+      <button className='controlButton' onClick={ onClear } disabled={ isRunning }>CLEAR</button> */}
     </div>
   )
 }

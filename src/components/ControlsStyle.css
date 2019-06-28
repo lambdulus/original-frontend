@@ -2,13 +2,24 @@
   margin-bottom: 10px;
 }
 
-.controlButton {
+.enabled {
   font-size: 1.5em;
-  background: none;
-  border-style: none;
-	border-bottom: 2px solid navy;
-  margin-left: 5px;
-  margin-right: 5px;  
+  /* background: none; */
+  /* border-style: none; */
+	/* border-bottom: 2px solid navy; */
+  /* margin-left: 5px; */
+  /* margin-right: 5px;   */
   cursor: pointer;
-  outline: none;
+  /* padding-left: 5px; */
+}
+
+.disabled {
+  font-size: 1.5em;
+  cursor: auto;
+  color: grey;
+}
+
+#controls i {
+  padding-left: 5px;
+  padding-right: 5px;
 }

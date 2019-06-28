@@ -24,6 +24,7 @@ import './App.css'
 import Editor from './components/Editor'
 import { debounce } from './misc';
 import Evaluator, { Breakpoint, EvaluationState } from './components/Evaluator';
+import TopBar from './components/TopBar';
 
 
 const HANDY_MACROS : MacroMap = {
@@ -52,7 +53,7 @@ const HANDY_MACROS : MacroMap = {
   INFIX : 'APPLY (λ l op r . op l r)',
 }
 
-interface State {
+export interface AppState {
   editorState : {
     expression : string
     caretPosition : number
@@ -65,7 +66,7 @@ interface State {
   submittedExpressions : Array<EvaluationState>
 }
 
-export default class App extends Component<any, State> {
+export default class App extends Component<any, AppState> {
   constructor (props : object) {
     super(props)
 
@@ -93,7 +94,7 @@ export default class App extends Component<any, State> {
       singleLetterVars : false,
       macroTable : { ...HANDY_MACROS, ...this.getSavedMacros() },
 
-      submittedExpressions : []
+      submittedExpressions : [],
 
     }
     
@@ -105,20 +106,21 @@ export default class App extends Component<any, State> {
       singleLetterVars,
       macroTable,
       submittedExpressions
-    } : State = this.state
+    } : AppState = this.state
 
     return (
       <div className='app'>
 
+        <TopBar state={this.state} onImport={ (state : AppState) => this.setState(state) } />
+
         <ul className='evaluatorSpace' >
           { submittedExpressions.map((state : EvaluationState, i : number) =>
-            <li key={ state.key }>
-              <button
-                className='controlButton'
-                onClick={ () => this.onRemoveExpression(i) }
-              >
-                DEL
-              </button>
+            <li key={ state.__key }>
+              <div className='evaluationHeader'>
+                <i className="far fa-trash-alt fa-lg" onClick={ () => this.onRemoveExpression(i) } />
+                <i className="fas fa-pencil-alt fa-lg" />
+                <p>New Expression: { state.expression }</p>
+              </div>
               <Evaluator
                 { ...state }
                 updateState={ (state : EvaluationState) => this.onUpdateEvaluationState(state, i) }
@@ -146,7 +148,9 @@ export default class App extends Component<any, State> {
     history.pushState({}, "page title?", "#" + encodeURI(expression))
   }
 
-  cancelUpdate () : void {}
+  cancelUpdate () : void {
+    // TODO: this is placeholder for cancel-debounced-function DONT REMOVE
+  }
 
   onExpression (expression : string, caretPosition : number) : void {
     this.setState({ ...this.state, editorState : { expression, caretPosition, syntaxError : null } } )
@@ -154,7 +158,7 @@ export default class App extends Component<any, State> {
   }
 
   onUpdateEvaluationState (state : EvaluationState, index : number) : void {
-    const { submittedExpressions } : State = this.state
+    const { submittedExpressions } : AppState = this.state
 
     submittedExpressions[index] = state
 
@@ -165,7 +169,8 @@ export default class App extends Component<any, State> {
   }
 
   onRemoveExpression (index : number) {
-    const { submittedExpressions } : State = this.state
+    console.log(index)
+    const { submittedExpressions } : AppState = this.state
 
     submittedExpressions.splice(index, 1)
 
@@ -178,7 +183,7 @@ export default class App extends Component<any, State> {
   onSubmit () : void {
     this.cancelUpdate()
     
-    const { editorState : { expression, caretPosition, }, submittedExpressions } : State = this.state
+    const { editorState : { expression, caretPosition, }, submittedExpressions } : AppState = this.state
     
     // window.location.hash = encodeURI(expression)
     history.pushState({}, "", "#" + encodeURI(expression))
@@ -189,15 +194,17 @@ export default class App extends Component<any, State> {
       history.pushState({}, "", "#" + encodeURI(''))
 
       const evaluationState : EvaluationState = {
-        key : Date.now().toString(),
+        __key : Date.now().toString(),
+        expression,
         ast,
         history : [ ast ],
         steps : 0,
-        isStepping : false,
+        // isStepping : false,
         isRunning : false,
         lastReduction : null,
         breakpoints : [],
-        timeout : undefined
+        timeoutID : undefined,
+        timeout : 10
       }
 
       this.setState({
@@ -231,7 +238,7 @@ export default class App extends Component<any, State> {
   }
 
   updateFromURL () : void {
-    const { editorState : { expression : currentExpr } } : State = this.state
+    const { editorState : { expression : currentExpr } } : AppState = this.state
     const expression : string = this.getExpressionFromURL()
 
     if (currentExpr === expression) {
@@ -255,7 +262,7 @@ export default class App extends Component<any, State> {
     // this method raises exception and caller handles it
     // caller should by able to display error to user
     // caller should store exception in editorState
-    const { singleLetterVars, macroTable } : State = this.state
+    const { singleLetterVars, macroTable } : AppState = this.state
     
     const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars })
     const ast : AST = parse(tokens, macroTable)

@@ -1,6 +1,7 @@
 .step {
   font-size: 2em;
   word-wrap: anywhere;
+  padding-left: 10px;
 }
 
 .left.redex {
