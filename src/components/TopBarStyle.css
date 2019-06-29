@@ -19,19 +19,23 @@
 	opacity: 0;
 	overflow: hidden;
 	position: absolute;
-	z-index: -1;
+  z-index: -1;
+  
 }
 
 .icon {
+  min-width: 32px;
+  min-height: 32px;
   color: white;
-  margin-right: 20px;
+  /* margin-right: 10px; */
+  margin-left: 10px;
+  cursor: pointer; /* "hand" cursor */
 }
 
 #input + label {
   position: relative;
   top: -5px;
   font-size: 1.25em;
-  /* font-weight: 700; */
   color: white;
   background-color: #42a5f5;
   display: inline-block;
@@ -42,10 +46,14 @@
 #input:focus + label,
 #input + label:hover {
   background-color: #1565c0;
+  margin-left: 10px;
+
 }
 
 #input + label {
-	cursor: pointer; /* "hand" cursor */
+  cursor: pointer; /* "hand" cursor */
+  margin-left: 10px;
+  
 }
 
 #input:focus + label {

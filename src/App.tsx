@@ -1,30 +1,21 @@
-import React, { Component, ChangeEvent } from 'react';
+import React, { Component } from 'react';
 
 import {
   AST,
   tokenize,
   parse,
-  ASTReduction,
   Token,
-  NormalEvaluator,
-  None,
-  builtinMacros,
-  MacroTable,
-  Application,
-  Beta,
-  Lambda,
-  Variable,
-  ChurchNumber,
-  Expansion,
-  Macro,
   MacroMap
 } from 'lambdulus-core'
 
 import './App.css'
 import Editor from './components/Editor'
-import { debounce } from './misc';
-import Evaluator, { Breakpoint, EvaluationState } from './components/Evaluator';
+import { debounce, trimStr } from './misc';
+import { EvaluationState } from './components/Evaluator';
 import TopBar from './components/TopBar';
+import Box, { BoxState, BoxType } from './components/Box';
+import { MacroDefinitionState } from './components/MacroDefinition';
+import { NoteState } from './components/Note';
 
 
 const HANDY_MACROS : MacroMap = {
@@ -53,6 +44,13 @@ const HANDY_MACROS : MacroMap = {
   INFIX : 'APPLY (λ l op r . op l r)',
 }
 
+
+export enum Screen {
+  main,
+  macrolist,
+  notebooks,
+}
+
 export interface AppState {
   editorState : {
     expression : string
@@ -63,7 +61,9 @@ export interface AppState {
   singleLetterVars : boolean
   macroTable : MacroMap
 
-  submittedExpressions : Array<EvaluationState>
+  submittedExpressions : Array<BoxState>
+  screen : Screen
+
 }
 
 export default class App extends Component<any, AppState> {
@@ -80,6 +80,9 @@ export default class App extends Component<any, AppState> {
     this.onExpression = this.onExpression.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
     this.onRemoveExpression = this.onRemoveExpression.bind(this)
+    this.isMacroDefinition = this.isMacroDefinition.bind(this)
+    this.isNote = this.isNote.bind(this)
+    this.updateMacros = this.updateMacros.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -95,9 +98,9 @@ export default class App extends Component<any, AppState> {
       macroTable : { ...HANDY_MACROS, ...this.getSavedMacros() },
 
       submittedExpressions : [],
-
+      
+      screen : Screen.main,
     }
-    
   }
 
   render () {
@@ -105,36 +108,78 @@ export default class App extends Component<any, AppState> {
       editorState : { expression, caretPosition, syntaxError },
       singleLetterVars,
       macroTable,
-      submittedExpressions
+      submittedExpressions,
+      screen
     } : AppState = this.state
+
+    const evaluatorSpace : JSX.Element = (
+      <ul className='evaluatorSpace' >
+        { submittedExpressions.map((state : BoxState, i : number) =>
+          <li key={ state.__key }>
+            <Box
+              state={ state }
+              updateState={ (state : EvaluationState) => this.onUpdateEvaluationState(state, i) }
+              removeExpression={ () => this.onRemoveExpression(i) }
+            />
+          </li>
+          ) }
+      </ul>
+    )
+
+    const macros : JSX.Element = (
+      <ul className='macroSpace' >
+        { Object.entries(macroTable).map(([macroName, macroDef]) =>
+          <div key={ macroName }>
+            <div className='macroHeader'>
+              <i className="icon far fa-trash-alt" onClick={ () => this.onRemoveMacro(macroName) } />
+              <i className="icon fas fa-pencil-alt" />
+              { macroName }
+            </div>
+            <li>
+              <div className='box'>
+                { macroDef }
+              </div>
+            </li>
+          </div>
+        ) }
+      </ul>
+    )
+
+    const notebooks : JSX.Element = (
+      <div>
+        Notebooks are not implemented yet.
+      </div>
+    )
+
 
     return (
       <div className='app'>
 
-        <TopBar state={this.state} onImport={ (state : AppState) => this.setState(state) } />
+        <TopBar
+          state={this.state}
+          onImport={ (state : AppState) => this.setState(state) }
+          onScreenChange={ (screen : Screen) => this.setState({
+            ...this.state,
+            screen,
+          }) }
+         />
 
-        <ul className='evaluatorSpace' >
-          { submittedExpressions.map((state : EvaluationState, i : number) =>
-            <li key={ state.__key }>
-              <div className='evaluationHeader'>
-                <i className="far fa-trash-alt fa-lg" onClick={ () => this.onRemoveExpression(i) } />
-                <i className="fas fa-pencil-alt fa-lg" />
-                <p>New Expression: { state.expression }</p>
-              </div>
-              <Evaluator
-                { ...state }
-                updateState={ (state : EvaluationState) => this.onUpdateEvaluationState(state, i) }
-              />
-            </li>
-            ) }
-        </ul>
+        {
+          screen === Screen.main ?
+            evaluatorSpace
+            :
+            screen === Screen.macrolist ?
+              macros
+              :
+              notebooks
+        }
 
         <Editor
-        expression={ expression }
-        caretPosition={ caretPosition }
-        onExpression={ this.onExpression }
-        onSubmit={ this.onSubmit }
-        syntaxError={ syntaxError }
+          expression={ expression }
+          caretPosition={ caretPosition }
+          onExpression={ this.onExpression }
+          onSubmit={ this.onSubmit }
+          syntaxError={ syntaxError }
         />
 
         <div id="anchor"></div>
@@ -157,10 +202,13 @@ export default class App extends Component<any, AppState> {
     this.updateURL(expression)
   }
 
-  onUpdateEvaluationState (state : EvaluationState, index : number) : void {
+  onUpdateEvaluationState (state : BoxState, index : number) : void {
     const { submittedExpressions } : AppState = this.state
 
-    submittedExpressions[index] = state
+    submittedExpressions[index] = {
+      ...submittedExpressions[index],
+      ...state,
+    }
 
     this.setState({
       ...this.state,
@@ -169,10 +217,11 @@ export default class App extends Component<any, AppState> {
   }
 
   onRemoveExpression (index : number) {
-    console.log(index)
     const { submittedExpressions } : AppState = this.state
 
-    submittedExpressions.splice(index, 1)
+    const removed : BoxState = submittedExpressions.splice(index, 1)[0]
+
+    // TODO: if macro was removed somehow do something
 
     this.setState({
       ...this.state,
@@ -181,30 +230,38 @@ export default class App extends Component<any, AppState> {
   }
 
   onSubmit () : void {
+    // TODO: maybe cancel and clear URL only after succsessful parsing
     this.cancelUpdate()
     
-    const { editorState : { expression, caretPosition, }, submittedExpressions } : AppState = this.state
+    const { editorState : { expression, caretPosition, }, submittedExpressions, macroTable } : AppState = this.state
     
     // window.location.hash = encodeURI(expression)
     history.pushState({}, "", "#" + encodeURI(expression))
 
-    try {
-      const ast : AST = this.parseExpression(expression)
-      // window.location.hash = encodeURI('')
+    //
+    // TODO: here decide if it is macro
+    // note
+    // expression to evaluate
+    // macro contains := and name must be valid expression - later i will implement own parsing endpoint in core
+    // note starts with # and can contains anything whatever user wants
+    // expression is already implemented and working
+    //
+
+    if (this.isMacroDefinition(expression)) {
       history.pushState({}, "", "#" + encodeURI(''))
 
-      const evaluationState : EvaluationState = {
+      const [macroName, macroExpression] : Array<string> = expression.split(':=').map(trimStr)
+
+      const macroState : MacroDefinitionState = {
+        type : BoxType.macro,
         __key : Date.now().toString(),
-        expression,
-        ast,
-        history : [ ast ],
-        steps : 0,
-        // isStepping : false,
-        isRunning : false,
-        lastReduction : null,
-        breakpoints : [],
-        timeoutID : undefined,
-        timeout : 10
+        macroName,
+        macroExpression,
+      }
+
+      const newMacroTable : MacroMap = {
+        ...macroTable,
+        [macroName] : macroExpression
       }
 
       this.setState({
@@ -214,21 +271,77 @@ export default class App extends Component<any, AppState> {
           caretPosition : 0,
           syntaxError : null,
         },
-        submittedExpressions : [ ...submittedExpressions, evaluationState ]
+        submittedExpressions : [ ...submittedExpressions, macroState ],
+        macroTable : newMacroTable,
       })
-  
-    } catch (exception) {
-      this.updateURL(expression)
-      console.log(exception)
-      
+
+      this.updateMacros(newMacroTable)
+    }
+
+    else if (this.isNote(expression)) {
+      history.pushState({}, "", "#" + encodeURI(''))
+
+      const noteState : NoteState = {
+        type : BoxType.note,
+        __key : Date.now().toString(),
+        note : expression.substring(1)
+      }
+
       this.setState({
         ...this.state,
         editorState : {
-          expression,
-          caretPosition,
-          syntaxError : exception,
-        }
+          expression : '',
+          caretPosition : 0,
+          syntaxError : null,
+        },
+        submittedExpressions : [ ...submittedExpressions, noteState ]
       })
+    }
+
+    else {
+      try {
+        const ast : AST = this.parseExpression(expression)
+        // window.location.hash = encodeURI('')
+        history.pushState({}, "", "#" + encodeURI(''))
+  
+        const evaluationState : EvaluationState = {
+          type : BoxType.expression,
+          __key : Date.now().toString(),
+          expression,
+          ast,
+          history : [ ast ],
+          steps : 0,
+          // isStepping : false,
+          isRunning : false,
+          lastReduction : null,
+          breakpoints : [],
+          timeoutID : undefined,
+          timeout : 10
+        }
+  
+        this.setState({
+          ...this.state,
+          editorState : {
+            expression : '',
+            caretPosition : 0,
+            syntaxError : null,
+          },
+          submittedExpressions : [ ...submittedExpressions, evaluationState ]
+        })
+    
+      } catch (exception) {
+        this.updateURL(expression)
+        console.log(exception)
+        
+        this.setState({
+          ...this.state,
+          editorState : {
+            expression,
+            caretPosition,
+            syntaxError : exception,
+          }
+        })
+      }
     }
   }
 
@@ -257,6 +370,22 @@ export default class App extends Component<any, AppState> {
     })
   }
 
+  isNote (expression : string) : boolean {
+    return expression.indexOf('#') === 0
+  }
+
+  isMacroDefinition (expression : string) : boolean {
+    // TODO: check if first part of macro assignment is valid identifier
+    // TODO: check if second part of macro assignment is valid lambda expression
+
+    try {
+      return expression.indexOf(':=') > 0
+    }
+    catch (exception) {
+      return false
+    }
+  }
+
   parseExpression (expression : string) : AST {
     // TODO: without try and catch
     // this method raises exception and caller handles it
@@ -270,7 +399,25 @@ export default class App extends Component<any, AppState> {
     return ast
   }
 
+  onRemoveMacro (name : string) : void {
+    const { macroTable } = this.state
+    
+    const newMacroTable = { ...macroTable }
+    delete newMacroTable[name]
+
+    this.setState({
+      ...this.state,
+      macroTable : newMacroTable
+    })
+
+    this.updateMacros(newMacroTable)
+  }
+
   getSavedMacros () : MacroMap {
     return JSON.parse(window.localStorage.getItem('macrotable') || '{}')
+  }
+
+  updateMacros (macroTable : MacroMap) : void {
+    window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
   }
 }

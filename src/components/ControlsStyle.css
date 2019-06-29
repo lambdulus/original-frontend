@@ -3,7 +3,6 @@
 }
 
 .enabled {
-  font-size: 1.5em;
   /* background: none; */
   /* border-style: none; */
 	/* border-bottom: 2px solid navy; */
@@ -14,7 +13,6 @@
 }
 
 .disabled {
-  font-size: 1.5em;
   cursor: auto;
   color: grey;
 }

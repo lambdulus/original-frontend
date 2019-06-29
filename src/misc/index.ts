@@ -1,3 +1,5 @@
+import { strict } from "assert";
+
 export function debounce (fn : Function, treshold : number)
  : [ (...args : Array<any>) => void, () => void ] {
   let timer : number
@@ -29,3 +31,7 @@ export function mapRightFromTo(
 
     return result
   }
+
+export function trimStr (str : string) : string {
+  return str.trim()
+}

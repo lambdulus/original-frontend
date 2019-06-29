@@ -12,6 +12,10 @@
   height: 1px;
 }
 
+i {
+  font-style: normal;
+}
+
 ul {
   padding: 0;
 }
@@ -21,32 +25,30 @@ li {
   margin-bottom: 20px;
 }
 
-.evaluatorSpace {
+.evaluatorSpace, .macroSpace {
   margin-top: 5em;
   margin-left: 5vw;
   width: 90vw;
 }
 
-.evaluationHeader {
-  height: 1em;
+.evaluationHeader, .macroHeader, .noteHeader {
+  /* height: 1em; */
   background-color: #0091ea;
   color: white;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  padding: 1em;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+
+  font-size: 1.5em;
+
+  /* font-size: 1.5em; */
 }
 
 .evaluationHeader i {
-  margin-right: 1em;
-  cursor: pointer;
-
-  /* font-size: 1em; */
-
-  /* display: inline */
+  color: white;
 }
 
-.evaluationHeader p {
-  /* margin-left: 1px; */
-
-  display: inline
+.macroSpace .box {
+  font-size: 1.5em;
 }

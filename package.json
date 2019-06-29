@@ -2,7 +2,7 @@
   "name": "lambdulus-frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://taskkill.github.io/lambdulus-frontend/",
+  "homepage": "https://lambdulus.github.io/",
   "dependencies": {
     "@types/jest": "24.0.9",
     "@types/node": "11.9.5",

@@ -26,12 +26,12 @@ export default function Controls (props : ControlsProps) : JSX.Element {
       {
         isRunning ?
         <i
-          className="enabled fas fa-pause fa-2x"
+          className="enabled fas fa-pause"
           onClick={ onStop }
         />
           :
         <i
-          className="enabled fas fa-forward fa-2x"
+          className="enabled fas fa-forward"
           onClick={ onRun }
         />  
       }
@@ -47,12 +47,12 @@ export default function Controls (props : ControlsProps) : JSX.Element {
       {
         isRunning ?
         <i
-          className="disabled fas fa-play fa-2x"
+          className="disabled fas fa-play"
           onClick={ () => {} }
         />
           :
         <i
-          className="enabled fas fa-play fa-2x"
+          className="enabled fas fa-play"
           onClick={ onStep }
         />
       }
@@ -60,12 +60,12 @@ export default function Controls (props : ControlsProps) : JSX.Element {
       {
         isRunning ?
         <i
-          className="disabled fas fa-redo-alt fa-2x"
+          className="disabled fas fa-redo-alt"
           onClick={ () => {} }
         />
           :
         <i
-          className="enabled fas fa-redo-alt fa-2x"
+          className="enabled fas fa-redo-alt"
           onClick={ onClear }
         />
       }
