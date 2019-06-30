@@ -1,37 +1,49 @@
 .prompt {
-  width: 95%;
+  width: 96%;
   font-size: 3em;
   border: none;
   overflow: auto;
   outline: none;
   resize: none;
   border-style: none;
+  border: 1px solid gray;
+  width:100%;
 }
 
-.editor {
-  position: relative;
-  /* bottom: 0; */
-  margin-left: 5vw;
+.editorContainer {
+  /* position: relative; */
   width: 90vw;
-  /* margin-top : 5vh; */
-  /* border-bottom: 2px solid gray; */
-  /* padding: 10px; */
+  margin-left: 5vw;
   border: 1px solid gray;
   border-radius: 5px;
 }
 
-#editorEnter {
-  position: absolute;
-  right: 0;
-  bottom: 2px;
+.editor {
+  position: relative;
+  bottom: 0;
+  /* margin-left: 5vw; */
+  width: 90vw;
+  /* margin-top : 5vh; */
+  /* border-bottom: 2px solid gray; */
+  /* padding: 10px; */
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
 
-  /* font-size: 1em; */
-  color: #1976d2;
-  /* border-radius: 3px; */
-  /* border-style: none; */
-	/* border-bottom: 2px solid navy; */
-  /* margin-left: 5px; */
-  /* margin-right: 5px;   */
+#editorEnter {
+  vertical-align: baseline;
+  font-size: 2em;
+  color: grey;
   cursor: pointer;
-  /* outline: none; */
+  display: inline-block;
+  padding: 12px;
+}
+
+#editorEnter:hover {
+  color: #1976d2;
+}
+
+#editorEnter:active {
+  color: #164b80;
 }

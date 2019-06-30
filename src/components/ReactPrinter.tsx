@@ -11,12 +11,18 @@ export default class ReactPrinter extends ASTVisitor {
   private printMultiLambda (lambda : Lambda, accumulator : JSX.Element) : void {
     if (lambda.body instanceof Lambda) {
       const context : Variable = lambda.body.argument
+      let className : string = 'argument'
+
+      if (this.isBreakpoint(lambda.body.argument)) {
+        className += ' breakpoint'
+      }
+
       const args : JSX.Element = (
         <span className='arguments'>
           { accumulator } {' '}
           <span
-            className='argument'
-            onClick={ () => this.onClick({ type : Beta, context }) }
+            className={ className }
+            onClick={ () => this.onClick({ type : Beta, context, broken : new Set }) }
           >
             { lambda.body.argument.name() }
           </span>
@@ -36,7 +42,7 @@ export default class ReactPrinter extends ASTVisitor {
           <span
             className='lambda'
             onClick={ () => {
-              this.onClick({ type : Beta, context : lambda })}
+              this.onClick({ type : Beta, context : lambda, broken : new Set })}
             }>
               λ { ' ' }
           </span>
@@ -47,10 +53,20 @@ export default class ReactPrinter extends ASTVisitor {
     }
   }
 
+  isBreakpoint (node : AST) : boolean {
+    for (const breakpoint of this.breakpoints) {
+      if (breakpoint.context.identifier === node.identifier) {
+        return true
+      }
+    }
+    return false
+  }
+
   constructor (
     public readonly tree : AST,
     private readonly onClick : (breakpoint : Breakpoint) => void,
     private readonly redex : AST | null,
+    private readonly breakpoints : Array<Breakpoint>,
   ) {
     super()
     this.tree.visit(this)
@@ -104,11 +120,17 @@ export default class ReactPrinter extends ASTVisitor {
   // TODO: little bit refactored, maybe keep going
   onLambda(lambda: Lambda) : void {
     if (lambda.body instanceof Lambda) {
-      const context : Variable = lambda.body.argument
+      const context : Variable = lambda.argument
+      let className : string = 'argument'
+
+      if (this.isBreakpoint(lambda.argument)) {
+        className += ' breakpoint'
+      }
+
       const acc : JSX.Element = (
         <span
-          className='argument'
-          onClick={ () => this.onClick({ type : Beta, context }) }
+          className={ className }
+          onClick={ () => this.onClick({ type : Beta, context, broken : new Set }) }
         >
           { lambda.argument.name() }
         </span>
@@ -125,19 +147,25 @@ export default class ReactPrinter extends ASTVisitor {
       lambda.body.visit(this)
       const body : JSX.Element | null = this.rendered
 
+      let className : string = 'argument'
+
+      if (this.isBreakpoint(lambda.argument)) {
+        className += ' breakpoint'
+      }
+
       this.rendered = (
         <span className='function' >
           (
           <span
             className='lambda'
             onClick={ () => {
-              this.onClick({ type: Beta, context: lambda })}
+              this.onClick({ type: Beta, context: lambda, broken : new Set })}
             }>
               λ { ' ' }
           </span>
           <span
-            className='argument'
-            onClick={ () => this.onClick({ type : Beta, context }) }
+            className={ className }
+            onClick={ () => this.onClick({ type : Beta, context, broken : new Set }) }
           >
             { args } { ' ' }
           </span>
@@ -160,10 +188,15 @@ export default class ReactPrinter extends ASTVisitor {
       ) {
         className += ' redex'
     }
+
+    if (this.isBreakpoint(churchNumber)) {
+      className += ' breakpoint'
+    }
+
     this.rendered = (
       <span
         className={ className }
-        onClick={ () => this.onClick({ type: Expansion, context : churchNumber }) }
+        onClick={ () => this.onClick({ type: Expansion, context : churchNumber, broken : new Set }) }
       >
         { churchNumber.name() }
       </span>
@@ -178,10 +211,14 @@ export default class ReactPrinter extends ASTVisitor {
       className += ' redex'
     }
 
+    if (this.isBreakpoint(macro)) {
+      className += ' breakpoint'
+    }
+
     this.rendered = (
       <span
         className={ className }
-        onClick={ () => this.onClick({ type: Expansion, context : macro }) }
+        onClick={ () => this.onClick({ type: Expansion, context : macro, broken : new Set }) }
       >
         { macro.name() }
       </span>

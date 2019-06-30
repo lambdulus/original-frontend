@@ -16,6 +16,8 @@ import TopBar from './components/TopBar';
 import Box, { BoxState, BoxType } from './components/Box';
 import { MacroDefinitionState } from './components/MacroDefinition';
 import { NoteState } from './components/Note';
+import EvaluatorSpace from './components/EvaluatorSpace';
+import MacroSpace from './components/MacroSpace';
 
 
 const HANDY_MACROS : MacroMap = {
@@ -43,7 +45,6 @@ const HANDY_MACROS : MacroMap = {
   MOD : '(λ n m . (n (λ n . (= n (- m 1)) (0) (+ n 1)) (0)) )',
   INFIX : 'APPLY (λ l op r . op l r)',
 }
-
 
 export enum Screen {
   main,
@@ -83,6 +84,8 @@ export default class App extends Component<any, AppState> {
     this.isMacroDefinition = this.isMacroDefinition.bind(this)
     this.isNote = this.isNote.bind(this)
     this.updateMacros = this.updateMacros.bind(this)
+    this.onUpdateEvaluationState = this.onUpdateEvaluationState.bind(this)
+    this.onRemoveMacro = this.onRemoveMacro.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -112,38 +115,18 @@ export default class App extends Component<any, AppState> {
       screen
     } : AppState = this.state
 
-    const evaluatorSpace : JSX.Element = (
-      <ul className='evaluatorSpace' >
-        { submittedExpressions.map((state : BoxState, i : number) =>
-          <li key={ state.__key }>
-            <Box
-              state={ state }
-              updateState={ (state : EvaluationState) => this.onUpdateEvaluationState(state, i) }
-              removeExpression={ () => this.onRemoveExpression(i) }
-            />
-          </li>
-          ) }
-      </ul>
-    )
+    const getEvaluatorSpace = () =>
+    <EvaluatorSpace
+      removeExpression={ this.onRemoveExpression }
+      updateState={ this.onUpdateEvaluationState }
+      submittedExpressions={ submittedExpressions }
+    />
 
-    const macros : JSX.Element = (
-      <ul className='macroSpace' >
-        { Object.entries(macroTable).map(([macroName, macroDef]) =>
-          <div key={ macroName }>
-            <div className='macroHeader'>
-              <i className="icon far fa-trash-alt" onClick={ () => this.onRemoveMacro(macroName) } />
-              <i className="icon fas fa-pencil-alt" />
-              { macroName }
-            </div>
-            <li>
-              <div className='box'>
-                { macroDef }
-              </div>
-            </li>
-          </div>
-        ) }
-      </ul>
-    )
+    const getMacroSpace = () =>
+    <MacroSpace
+      macroTable={ macroTable }
+      removeMacro={ this.onRemoveMacro }
+    />
 
     const notebooks : JSX.Element = (
       <div>
@@ -166,10 +149,10 @@ export default class App extends Component<any, AppState> {
 
         {
           screen === Screen.main ?
-            evaluatorSpace
+            getEvaluatorSpace()
             :
             screen === Screen.macrolist ?
-              macros
+              getMacroSpace()
               :
               notebooks
         }
@@ -309,7 +292,7 @@ export default class App extends Component<any, AppState> {
           __key : Date.now().toString(),
           expression,
           ast,
-          history : [ ast ],
+          history : [ ast.clone() ],
           steps : 0,
           // isStepping : false,
           isRunning : false,

@@ -30,12 +30,12 @@ export default function TopBar (props : TopBarProperties) : JSX.Element {
         
         {
           screen === Screen.main ?
-            <i className="icon fas fa-bars fa-2x" onClick={ () => onScreenChange(Screen.macrolist) } />
+            <i className="icon fas fa-list-ul fa-2x" onClick={ () => onScreenChange(Screen.macrolist) } />
             :
             <i className="icon far fa-window-close fa-2x" onClick={ () => onScreenChange(Screen.main) } />
         }
 
-        <i className="save icon fas fa-save fa-2x" />
+        {/* <i className="save icon fas fa-save fa-2x" /> */}
       <a
         className='export icon'
         href={ link }

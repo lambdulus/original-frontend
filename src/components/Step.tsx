@@ -9,11 +9,12 @@ import ReactPrinter from './ReactPrinter';
 
 interface StepProperties {
   tree : AST | null
+  breakpoints : Array<Breakpoint>
   addBreakpoint (breakpoint : Breakpoint) : void
 }
 
 export default function Step (props : StepProperties) : JSX.Element | null {
-  const { tree, addBreakpoint } = props
+  const { tree, addBreakpoint, breakpoints } = props
 
   if (tree === null) {
     return null
@@ -30,7 +31,7 @@ export default function Step (props : StepProperties) : JSX.Element | null {
     redex = normal.nextReduction.target
   }
 
-  const printer : ReactPrinter = new ReactPrinter(tree, addBreakpoint, redex)
+  const printer : ReactPrinter = new ReactPrinter(tree, addBreakpoint, redex, breakpoints)
 
   return (
     <span className='step'>

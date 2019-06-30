@@ -13,7 +13,8 @@ interface EditorProperties {
 
 export default function Editor (props : EditorProperties) : JSX.Element {
   const { expression, caretPosition, onExpression, onSubmit, syntaxError } : EditorProperties = props
-  const lines : number = Math.min(expression.split('\n').length, expression.length)
+  const lines : number = expression.split('\n').length
+  
 
   const onChange = (event : ChangeEvent<HTMLTextAreaElement>) => {
     let { target : { value : expression } } : { target : { value : string } } = event
@@ -32,19 +33,23 @@ export default function Editor (props : EditorProperties) : JSX.Element {
   }
 
   return (
-    <div className="editor">
+    <div className='editorContainer'>
       { syntaxError ? `${syntaxError}` : '' }
-      <i id='editorEnter' className="far fa-play-circle fa-3x" onClick={ onSubmit } />
-      {/* <button id='editorEnter' onClick={ onSubmit } >
-        Δ
-      </button> */}
-      <InputField
-        expression={ expression }
-        lines={ lines }
-        caretPosition={ caretPosition }
-        onChange={ onChange }
-        onKeyDown={ onKeyDown }
-      />
+
+      <div className="editor">      
+        {/* <button id='editorEnter' onClick={ onSubmit } >
+          Δ
+        </button> */}
+        <InputField
+          expression={ expression }
+          lines={ lines }
+          caretPosition={ caretPosition }
+          onChange={ onChange }
+          onKeyDown={ onKeyDown }
+        />
+        <i id='editorEnter' className="fas fa-plus" onClick={ onSubmit } />
+        </div>
+
     </div>
   )
 }

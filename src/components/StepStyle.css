@@ -27,3 +27,8 @@
   background-color: #82b1ff;
   border-radius: 5px;
 }
+
+.breakpoint {
+  border-bottom: 3px solid black;
+  /* border-radius: 5px; */
+}

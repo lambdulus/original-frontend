@@ -8,9 +8,6 @@
   color: white;
   padding-top: 1em;
   padding-left: 5vw;
-  /* font-size: 2em; */
-
-  /* border: 1px solid black; */
 }
 
 #input {
@@ -25,9 +22,8 @@
 
 .icon {
   min-width: 32px;
-  min-height: 32px;
+  /* min-height: 32px; */
   color: white;
-  /* margin-right: 10px; */
   margin-left: 10px;
   cursor: pointer; /* "hand" cursor */
 }

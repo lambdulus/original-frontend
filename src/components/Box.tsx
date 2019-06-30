@@ -29,7 +29,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
         <div className='evaluationHeader'>
           <i className="icon far fa-trash-alt" onClick={ props.removeExpression } />
           <i className="icon fas fa-pencil-alt" />
-          <i>Expression added</i>
+          <i className='headerTitle'>Expression added</i>
         </div>
 
         <Evaluator
@@ -46,7 +46,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
         <div className='macroHeader'>
           <i className="icon far fa-trash-alt" onClick={ props.removeExpression } />
           <i className="icon fas fa-pencil-alt" />
-          <i>Macro defined</i>
+          <i className='headerTitle'>Macro defined</i>
         </div>
         <MacroDefinition state={ state as MacroDefinitionState } />
       </div>
@@ -59,7 +59,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
         <div className='noteHeader'>
           <i className="icon far fa-trash-alt" onClick={ props.removeExpression } />
           <i className="icon fas fa-pencil-alt" />
-          <i>Note added</i>
+          <i className='headerTitle'>Note added</i>
         </div>
         <Note state={ state as NoteState } />
       </div>
