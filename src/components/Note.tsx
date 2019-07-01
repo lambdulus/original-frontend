@@ -16,7 +16,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
   const { state : { note } } : NoteProperties = props
 
   return (
-    <div className='box'>
+    <div className='box boxNote'>
       { note }
     </div>
   )

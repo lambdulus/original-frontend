@@ -1,13 +1,31 @@
 .box {
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  /* border-bottom-left-radius: 5px; */
+  /* border-bottom-right-radius: 5px; */
 
-  border: 1px solid black;
+  /* border: 1px solid black; */
   border-top: none;
-  padding-left: 5px;
+  padding-left: 20px;
   padding-top: 5px;
   padding-bottom: 5px;
   font-size: 1.5em;
+
+  border: 1px solid #eee;
+  border-radius: .25rem;
+}
+
+.boxEval {
+  border-left: 5px solid cornflowerblue;
+}
+
+.boxMacro {
+  border-left: 5px solid darkgoldenrod;
+}
+
+.boxNote {
+  border-left: 5px solid darkgreen;
+  background-color: #ececec;
+  /* border-top-right-radius: 5px; */
+  /* border-bottom-right-radius: 5px; */
 }
 
 .inactiveStep {

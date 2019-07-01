@@ -1,3 +1,7 @@
+body {
+  height: 100%;
+}
+
 .app * {
   /* don't allow the children of the scrollable element to be selected as an anchor node */
   overflow-anchor: none;
@@ -18,6 +22,7 @@ i {
 
 ul {
   padding: 0;
+  margin: 0;
 }
 
 li {
@@ -26,9 +31,10 @@ li {
 }
 
 .evaluatorSpace, .macroSpace {
-  margin-top: 5em;
-  margin-left: 5vw;
-  width: 90vw;
+  padding-top: 10px;
+  width: 93vw;
+  margin-left: 6em;
+  margin-bottom: 5em;
 }
 
 .evaluationHeader, .macroHeader, .noteHeader {

@@ -5,7 +5,7 @@ import { AST, ASTReduction, None, NormalEvaluator, Beta, Lambda, Variable, Expan
 import './EvaluatorStyle.css'
 import Controls from './Controls';
 import Step from './Step';
-import { mapRightFromTo } from '../misc'
+import { mapRightFromTo, mapLeftFromTo } from '../misc'
 import { BoxType } from './Box';
 
 
@@ -73,25 +73,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
     } : EvaluationState = state
 
     return (
-      <div className='box'>
-        <Controls
-          onRun={ this.onRun }
-          onStop={ this.onStop }
-          onStep={ this.onStep }
-          onClear={ this.onClear }
-          isRunning={ isRunning }
-        />
-  
+      <div className='box boxEval'>
         <ul>
-          <li key={history.length - 1} className='activeStep'>
-            <Step
-              breakpoints={ breakpoints }
-              addBreakpoint={ this.addBreakpoint }
-              tree={ history[history.length - 1] }
-            />
-          </li>
           {
-            mapRightFromTo(0, history.length - 2, history, (ast, i) =>
+            mapLeftFromTo(0, history.length - 2, history, (ast, i) =>
               <li key={ i } className='inactiveStep' >
                 <Step
                   breakpoints={ breakpoints }
@@ -100,7 +85,21 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
                 />
               </li>)
           }
+          <li key={history.length - 1} className='activeStep'>
+            <Step
+              breakpoints={ breakpoints }
+              addBreakpoint={ this.addBreakpoint }
+              tree={ history[history.length - 1] }
+            />
+          </li>
         </ul>
+        <Controls
+          onRun={ this.onRun }
+          onStop={ this.onStop }
+          onStep={ this.onStep }
+          onClear={ this.onClear }
+          isRunning={ isRunning }
+        />
       </div>
     )
   }

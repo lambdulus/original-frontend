@@ -1,28 +1,32 @@
 .prompt {
-  width: 96%;
+  width: 100%;
   font-size: 3em;
   border: none;
   overflow: auto;
   outline: none;
   resize: none;
   border-style: none;
-  border: 1px solid gray;
+  /* border: 1px solid gray; */
   width:100%;
 }
 
 .editorContainer {
-  /* position: relative; */
-  width: 90vw;
-  margin-left: 5vw;
+  position: fixed;
+  bottom: 1px;
+  width: 93vw;
+  left: 6vw;
   border: 1px solid gray;
   border-radius: 5px;
+
+  border-left: 5px solid cornflowerblue;
+  border-radius: .25rem;
 }
 
 .editor {
   position: relative;
   bottom: 0;
   /* margin-left: 5vw; */
-  width: 90vw;
+  width: 100%;
   /* margin-top : 5vh; */
   /* border-bottom: 2px solid gray; */
   /* padding: 10px; */

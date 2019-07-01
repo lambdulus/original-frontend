@@ -8,14 +8,14 @@ import { AST, BasicPrinter, tokenize, parse, Token, MacroTable, MacroMap } from 
 import { BoxState, BoxType } from './Box';
 
 
-interface TopBarProperties {
+interface MenuBarProperties {
   state : AppState
   onImport (state : AppState) : void
   onScreenChange (screen : Screen) : void
 }
 
-export default function TopBar (props : TopBarProperties) : JSX.Element {
-  const { state, onImport, onScreenChange } : TopBarProperties = props
+export default function MenuBar (props : MenuBarProperties) : JSX.Element {
+  const { state, onImport, onScreenChange } : MenuBarProperties = props
   const { screen } = state
 
   const dehydrated : object = dehydrate(state)
@@ -26,26 +26,40 @@ export default function TopBar (props : TopBarProperties) : JSX.Element {
   return (
     <div id="topbar">
         {/* <i className="icon fas fa-cog fa-2x" /> */}
-        <i className="icon fas fa-book-open fa-2x"></i>
+        <div>
+          <i id='notebooks' className="icon fas fa-book-open fa-2x" />
+          <p className='iconLabel'>Notebooks</p>
+        </div>
+
+        <div>
+          {
+            screen === Screen.main ?
+              <i className="icon fas fa-list-ul fa-2x" onClick={ () => onScreenChange(Screen.macrolist) } />
+              :
+              <i className="icon far fa-window-close fa-2x" onClick={ () => onScreenChange(Screen.main) } />
+          }
+          <p className='iconLabel'>Macros</p>
+        </div>        
         
-        {
-          screen === Screen.main ?
-            <i className="icon fas fa-list-ul fa-2x" onClick={ () => onScreenChange(Screen.macrolist) } />
-            :
-            <i className="icon far fa-window-close fa-2x" onClick={ () => onScreenChange(Screen.main) } />
-        }
 
         {/* <i className="save icon fas fa-save fa-2x" /> */}
-      <a
-        className='export icon'
-        href={ link }
-        download="notebook_lambdulus.json"
-        onClick={ () => setTimeout(() => window.URL.revokeObjectURL(link), 10) }
-      >
-        <i id='download' className="fas fa-cloud-download-alt fa-2x" />
-      </a>
-      <input type="file" accept="application/json" id="input" onChange={ (e) => onFiles(e, onImport) } />
-      <label htmlFor="input">Import notebook</label>
+      <div>
+        <a
+          className='export'
+          href={ link }
+          download="notebook_lambdulus.json"
+          onClick={ () => setTimeout(() => window.URL.revokeObjectURL(link), 10) }
+        >
+          <i id='download' className="icon fas fa-cloud-download-alt fa-2x" />
+        </a>
+        <p className='iconLabel'>Export</p>
+      </div>
+      
+      <div>
+        <input type="file" accept="application/json" id="input" onChange={ (e) => onFiles(e, onImport) } />
+        <label htmlFor="input"><i className="icon fas fa-cloud-upload-alt fa-2x"></i></label>
+        <p className='iconLabel'>Import</p>
+      </div>      
     </div>
   )
 }

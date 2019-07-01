@@ -7,12 +7,12 @@ interface EditorProperties {
   expression : string
   caretPosition : number
   onExpression (newExpression : string, caretPosition : number) : void
-  onSubmit () : void
+  onEnter () : void
   syntaxError : Error | null
 }
 
 export default function Editor (props : EditorProperties) : JSX.Element {
-  const { expression, caretPosition, onExpression, onSubmit, syntaxError } : EditorProperties = props
+  const { expression, caretPosition, onExpression, onEnter, syntaxError } : EditorProperties = props
   const lines : number = expression.split('\n').length
   
 
@@ -26,18 +26,18 @@ export default function Editor (props : EditorProperties) : JSX.Element {
   }
 
   const onKeyDown = (event : KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.shiftKey && event.key === 'Enter') {
+    if (! event.shiftKey && event.key === 'Enter') {
       event.preventDefault()
-      onSubmit()
+      onEnter()
     }
   }
 
   return (
     <div className='editorContainer'>
-      { syntaxError ? `${syntaxError}` : '' }
+      { syntaxError ? `${syntaxError}` : null }
 
       <div className="editor">      
-        {/* <button id='editorEnter' onClick={ onSubmit } >
+        {/* <button id='editorEnter' onClick={ onEnter } >
           Δ
         </button> */}
         <InputField
@@ -47,7 +47,7 @@ export default function Editor (props : EditorProperties) : JSX.Element {
           onChange={ onChange }
           onKeyDown={ onKeyDown }
         />
-        <i id='editorEnter' className="fas fa-plus" onClick={ onSubmit } />
+        {/* <i id='editorEnter' className="fas fa-plus" onClick={ onEnter } /> */}
         </div>
 
     </div>
@@ -71,7 +71,7 @@ function InputField (props : InputProps) : JSX.Element {
       onKeyDown={ onKeyDown }
       onChange={ onChange }
       value={ expression }
-      placeholder='(λ f . (λ x . f (x x)) (λ x . f (x x)))'
+      placeholder='type here'
       wrap='hard'
       autoFocus
       autoComplete="off"

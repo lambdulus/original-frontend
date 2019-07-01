@@ -13,16 +13,23 @@ export default function EvaluatorSpace (props: EvaluatorProperties) : JSX.Elemen
   const { submittedExpressions, updateState, removeExpression } = props
 
   return (
-    <ul className='evaluatorSpace'>
-        { submittedExpressions.map((state : BoxState, i : number) =>
-          <li key={ state.__key }>
-            <Box
-              state={ state }
-              updateState={ (state : EvaluationState) => updateState(state, i) }
-              removeExpression={ () => removeExpression(i) }
-            />
-          </li>
-          ) }
-      </ul>
+    <div className='evaluatorSpace'>
+      {
+        submittedExpressions.length ?
+          <ul>
+            { submittedExpressions.map((state : BoxState, i : number) =>
+              <li key={ state.__key }>
+                <Box
+                  state={ state }
+                  updateState={ (state : EvaluationState) => updateState(state, i) }
+                  removeExpression={ () => removeExpression(i) }
+                />
+              </li>
+              ) }
+          </ul>
+          :
+          null
+      }
+    </div>
   )
 }

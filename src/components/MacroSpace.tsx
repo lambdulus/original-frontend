@@ -14,16 +14,14 @@ export default function MacroSpace (props : MacroProperties) : JSX.Element {
     <div className='macroSpace'>
       <p>Built-in Macros</p>
       <ul>
-        { Object.entries(builtinMacros).map(([macroName, macroDef]) =>
+        { Object.entries(builtinMacros).map(([macroName, macroExpression]) =>
           <div key={ macroName }>
-            <div className='macroHeader'>
-              {/* <i className="icon far fa-trash-alt" onClick={ () => removeMacro(macroName) } /> */}
-              {/* <i className="icon fas fa-pencil-alt" /> */}
+            {/* <div className='macroHeader'>
               <i className='headerTitle'>{ macroName }</i>
-            </div>
+            </div> */}
             <li>
-              <div className='box'>
-                { macroDef }
+              <div className='box boxMacro'>
+                { macroName } := { macroExpression }
               </div>
             </li>
           </div>
@@ -32,16 +30,16 @@ export default function MacroSpace (props : MacroProperties) : JSX.Element {
 
       <p>User-defined Macros</p>
       <ul>
-        { Object.entries(macroTable).map(([macroName, macroDef]) =>
+        { Object.entries(macroTable).map(([macroName, macroExpression]) =>
             <div key={ macroName }>
-              <div className='macroHeader'>
+              {/* <div className='macroHeader'>
                 <i className="icon far fa-trash-alt" onClick={ () => removeMacro(macroName) } />
                 <i className="icon fas fa-pencil-alt" />
                 <i className='headerTitle'>{ macroName }</i>
-              </div>
+              </div> */}
               <li>
-                <div className='box'>
-                  { macroDef }
+                <div className='box boxMacro'>
+                  { macroName } := { macroExpression }
                 </div>
               </li>
             </div>

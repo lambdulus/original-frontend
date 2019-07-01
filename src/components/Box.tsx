@@ -25,12 +25,12 @@ export default function Box (props : BoxProperties) : JSX.Element {
 
   if (type === BoxType.expression) {
     return (
-      <div>
-        <div className='evaluationHeader'>
+      <div className=''>
+        {/* <div className='evaluationHeader'>
           <i className="icon far fa-trash-alt" onClick={ props.removeExpression } />
           <i className="icon fas fa-pencil-alt" />
           <i className='headerTitle'>Expression added</i>
-        </div>
+        </div> */}
 
         <Evaluator
           state={ state as EvaluationState }
@@ -42,12 +42,12 @@ export default function Box (props : BoxProperties) : JSX.Element {
 
   if (type === BoxType.macro) {
     return (
-      <div>
-        <div className='macroHeader'>
+      <div className=''>
+        {/* <div className='macroHeader'>
           <i className="icon far fa-trash-alt" onClick={ props.removeExpression } />
           <i className="icon fas fa-pencil-alt" />
           <i className='headerTitle'>Macro defined</i>
-        </div>
+        </div> */}
         <MacroDefinition state={ state as MacroDefinitionState } />
       </div>
     )
@@ -55,12 +55,12 @@ export default function Box (props : BoxProperties) : JSX.Element {
 
   if (type === BoxType.note) {
     return (
-      <div>
-        <div className='noteHeader'>
+      <div className=''>
+        {/* <div className='noteHeader'>
           <i className="icon far fa-trash-alt" onClick={ props.removeExpression } />
           <i className="icon fas fa-pencil-alt" />
           <i className='headerTitle'>Note added</i>
-        </div>
+        </div> */}
         <Note state={ state as NoteState } />
       </div>
     )

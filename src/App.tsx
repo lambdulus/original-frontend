@@ -5,14 +5,16 @@ import {
   tokenize,
   parse,
   Token,
-  MacroMap
+  MacroMap,
+  None,
+  NormalEvaluator
 } from 'lambdulus-core'
 
 import './App.css'
 import Editor from './components/Editor'
 import { debounce, trimStr } from './misc';
 import { EvaluationState } from './components/Evaluator';
-import TopBar from './components/TopBar';
+import TopBar from './components/MenuBar';
 import Box, { BoxState, BoxType } from './components/Box';
 import { MacroDefinitionState } from './components/MacroDefinition';
 import { NoteState } from './components/Note';
@@ -86,6 +88,8 @@ export default class App extends Component<any, AppState> {
     this.updateMacros = this.updateMacros.bind(this)
     this.onUpdateEvaluationState = this.onUpdateEvaluationState.bind(this)
     this.onRemoveMacro = this.onRemoveMacro.bind(this)
+    this.onEnter = this.onEnter.bind(this)
+    this.onStep = this.onStep.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -161,7 +165,7 @@ export default class App extends Component<any, AppState> {
           expression={ expression }
           caretPosition={ caretPosition }
           onExpression={ this.onExpression }
-          onSubmit={ this.onSubmit }
+          onEnter={ this.onEnter }
           syntaxError={ syntaxError }
         />
 
@@ -209,6 +213,63 @@ export default class App extends Component<any, AppState> {
     this.setState({
       ...this.state,
       submittedExpressions
+    })
+  }
+
+  onEnter () : void {
+    const { editorState : { expression }, submittedExpressions } = this.state
+    const activeExpression : BoxState = submittedExpressions[submittedExpressions.length - 1]
+
+    if (expression.length || activeExpression === undefined || activeExpression.type !== BoxType.expression) {
+      this.onSubmit()
+    }
+    else {
+      this.onStep()
+    }
+  }
+
+  onStep () : void {
+    const { submittedExpressions } = this.state
+    const activeExpression : EvaluationState = submittedExpressions[submittedExpressions.length - 1] as EvaluationState
+    let { history, steps, lastReduction } = activeExpression
+  
+    if (lastReduction instanceof None) {
+      return
+    }
+  
+    let ast = history[history.length - 1].clone()
+    
+    const normal : NormalEvaluator = new NormalEvaluator(ast)
+  
+    lastReduction = normal.nextReduction
+  
+    if (normal.nextReduction instanceof None) {
+      submittedExpressions[submittedExpressions.length - 1] = {
+        ...activeExpression,
+        lastReduction,
+      }
+
+      this.setState({
+        ...this.state,
+        submittedExpressions,
+      })
+      
+      return
+    }
+  
+    ast = normal.perform()
+    steps++
+  
+    submittedExpressions[submittedExpressions.length - 1] = {
+      ...activeExpression,
+      history : [ ...history, ast ],
+      steps,
+      lastReduction,
+    }
+
+    this.setState({
+      ...this.state,
+      submittedExpressions,
     })
   }
 

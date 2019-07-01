@@ -17,7 +17,7 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
   const { state : { macroName, macroExpression } } : MacroDefinitionProperties = props
 
   return (
-    <div className='box'>
+    <div className='box boxMacro'>
       { macroName } := { macroExpression }
     </div>
   )
