@@ -18,7 +18,7 @@ import TopBar from './components/MenuBar';
 import Box, { BoxState, BoxType } from './components/Box';
 import { MacroDefinitionState } from './components/MacroDefinition';
 import { NoteState } from './components/Note';
-import EvaluatorSpace from './components/EvaluatorSpace';
+import EvaluatorSpace from './components/ExpressionSpace';
 import MacroSpace from './components/MacroSpace';
 
 
@@ -60,6 +60,7 @@ export default class App extends Component<any, AppState> {
     this.onRemoveMacro = this.onRemoveMacro.bind(this)
     this.onEnter = this.onEnter.bind(this)
     this.onStep = this.onStep.bind(this)
+    this.onRemoveLastStep = this.onRemoveLastStep.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -92,6 +93,14 @@ export default class App extends Component<any, AppState> {
       removeExpression={ this.onRemoveExpression }
       updateState={ this.onUpdateEvaluationState }
       submittedExpressions={ submittedExpressions }
+      editExpression={ (ast : AST) => this.setState({
+        ...this.state,
+        editorState : {
+          expression : ast.toString(),
+          caretPosition : ast.toString().length,
+          syntaxError : null
+        }
+      }) }
     />
 
     const getMacroSpace = () =>
@@ -105,6 +114,16 @@ export default class App extends Component<any, AppState> {
         Notebooks are not implemented yet.
       </div>
     )
+
+    // const onKeyDown = (event : KeyboardEvent) => {
+    //   if (! event.shiftKey && event.key === 'Enter') {
+    //     event.preventDefault()
+    //     this.onEnter()
+    //   }
+    // }
+
+    // document.onkeydown = onKeyDown
+  
 
     return (
       <div className='app'>
@@ -134,6 +153,8 @@ export default class App extends Component<any, AppState> {
           onExpression={ this.onExpression }
           onEnter={ this.onEnter }
           syntaxError={ syntaxError }
+          onDelete={ this.onRemoveExpression }
+          onStepBack={ this.onRemoveLastStep }
         />
 
         <div id="anchor"></div>
@@ -172,17 +193,43 @@ export default class App extends Component<any, AppState> {
     })
   }
 
-  onRemoveExpression (index : number) {
-    const { submittedExpressions } : AppState = this.state
+  onRemoveExpression () {
+    const { submittedExpressions, macroTable } : AppState = this.state
 
-    const removed : BoxState = submittedExpressions.splice(index, 1)[0]
+    const removed : BoxState | undefined = submittedExpressions.pop()
 
-    // TODO: solve deleting a macro revoking problem 
+    if (removed !== undefined && removed.type === BoxType.macro) {
+      const name : string = (removed as MacroDefinitionState).macroName
+      delete macroTable[name]
+      this.updateMacros(macroTable)
+    }
 
     this.setState({
       ...this.state,
+      macroTable,
       submittedExpressions
     })
+  }
+
+  onRemoveLastStep () {
+    console.log('CURRENTLY NOT IMPEMENTED')
+    // const { submittedExpressions } : AppState = this.state
+
+    // const last : BoxState | undefined = submittedExpressions[submittedExpressions.length - 1]
+    
+
+    // if (last === undefined || last.type !== BoxType.expression) {
+    //   return
+    // }
+
+    // const active : EvaluationState = submittedExpressions[submittedExpressions.length - 1] as EvaluationState
+    
+    // active.
+
+    // this.setState({
+    //   ...this.state,
+    //   submittedExpressions
+    // })
   }
 
   onEnter () : void {

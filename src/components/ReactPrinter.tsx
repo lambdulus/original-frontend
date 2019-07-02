@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumber, Expansion, Macro } from "lambdulus-core";
+import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro } from "lambdulus-core";
 
 import { Breakpoint } from "./Evaluator";
 
@@ -177,7 +177,7 @@ export default class ReactPrinter extends ASTVisitor {
   }
   
   // TODO: little bit refactored, maybe keep going
-  onChurchNumber(churchNumber: ChurchNumber) : void {
+  onChurchNumeral(churchNumber: ChurchNumeral) : void {
     let className : string = 'churchnumeral'
 
     if (this.redex !== null

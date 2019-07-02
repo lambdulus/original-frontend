@@ -4,7 +4,7 @@ import './TopBarStyle.css'
 
 import { AppState, Screen } from '../App'
 import { EvaluationState } from './Evaluator';
-import { AST, BasicPrinter, tokenize, parse, Token, MacroTable, MacroMap } from 'lambdulus-core';
+import { AST, tokenize, parse, Token, MacroMap } from 'lambdulus-core';
 import { BoxState, BoxType } from './Box';
 
 

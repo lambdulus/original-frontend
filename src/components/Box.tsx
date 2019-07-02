@@ -2,6 +2,7 @@ import React from 'react'
 import Evaluator, { EvaluationState } from './Evaluator';
 import MacroDefinition, { MacroDefinitionState } from './MacroDefinition';
 import Note, { NoteState } from './Note';
+import { AST } from 'lambdulus-core';
 
 
 export enum BoxType {
@@ -16,7 +17,8 @@ interface BoxProperties {
   state : BoxState
   // children : JSX.Element
   updateState (state : BoxState) : void
-  removeExpression() : void
+  removeExpression () : void
+  editExpression (ast : AST) : void
 }
 
 export default function Box (props : BoxProperties) : JSX.Element {
@@ -35,6 +37,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
         <Evaluator
           state={ state as EvaluationState }
           updateState={ updateState }
+          editExpression={ props.editExpression }
         />
       </div>
     )

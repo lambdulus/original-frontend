@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 
-import { AST, ASTReduction, None, NormalEvaluator, Beta, Lambda, Variable, Expansion, ChurchNumber, Macro } from "lambdulus-core";
+import { AST, ASTReduction, None, NormalEvaluator, Beta, Lambda, Variable, Expansion, ChurchNumeral, Macro } from "lambdulus-core";
 
 import './EvaluatorStyle.css'
 import Controls from './Controls';
@@ -46,6 +46,7 @@ export interface EvaluationStatePatch {
 interface EvaluationProperties {
   state : EvaluationState
   updateState (state : EvaluationStatePatch) : void
+  editExpression (ast : AST) : void
 }
 
 export default class Evaluator extends PureComponent<EvaluationProperties, EvaluationState> {
@@ -83,6 +84,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
                   addBreakpoint={ () => {} }
                   tree={ ast }
                 />
+                <i
+                  className="hiddenIcon fas fa-pencil-alt"
+                  onClick={ () => this.props.editExpression(ast) }
+                />
               </li>)
           }
           <li key={history.length - 1} className='activeStep'>
@@ -90,6 +95,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
               breakpoints={ breakpoints }
               addBreakpoint={ this.addBreakpoint }
               tree={ history[history.length - 1] }
+            />
+            <i
+              className="hiddenIcon fas fa-pencil-alt"
+              onClick={ () => this.props.editExpression(history[history.length - 1]) }
             />
           </li>
         </ul>
@@ -278,7 +287,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
       return true
     }
     if (reduction instanceof (breakpoint.type as any)
-        && reduction instanceof Expansion && breakpoint.context instanceof ChurchNumber
+        && reduction instanceof Expansion && breakpoint.context instanceof ChurchNumeral
         && reduction.target.identifier === breakpoint.context.identifier
         && ! breakpoint.broken.has(reduction.target)
     ) {
@@ -294,65 +303,4 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
   
     return false
   }
-
-
-
 }
-
-
-
-
-// function equalProps (oldProps : EvaluationProperties, newProps : EvaluationProperties) : boolean {
-//   return (
-//     oldProps.state.isRunning === newProps.state.isRunning
-//       &&
-//     oldProps.state.steps === newProps.state.steps
-//       &&
-//     oldProps.state.timeout === newProps.state.timeout
-//   )
-// }
-
-// export default React.memo(Evaluator, equalProps)
-
-// function _Evaluator (props : EvaluationProperties) : JSX.Element {
-//   const {
-//     state,
-//     updateState,
-//   } : EvaluationProperties = props
-//   const {
-//     history,
-//     steps,
-//     // isStepping,
-//     isRunning,
-//     lastReduction,
-//     breakpoints,
-//     timeoutID,
-//   } : EvaluationState = state
-
-//   return (
-//     <div className='box'>
-//       <Controls
-//         onRun={ () => onRun(props) }
-//         onStop={ () => onStop(props) }
-//         onStep={ () => onStep(props) }
-//         onClear={ () => onClear(props) }
-//         isRunning={ isRunning }
-//       />
-
-//       <ul>
-//         <li key={history.length - 1} className='activeStep'>
-//           <Step
-//             addBreakpoint={ (breakpoint : Breakpoint) => addBreakpoint(props, breakpoint) }
-//             tree={ history[history.length - 1] }
-//           />
-//         </li>
-//         {
-//           mapRightFromTo(0, history.length - 2, history, (ast, i) =>
-//             <li key={ i } className='inactiveStep' >
-//               <Step addBreakpoint={ () => {} } tree={ ast } />
-//             </li>)
-//         }
-//       </ul>
-//     </div>
-//   )
-// } 

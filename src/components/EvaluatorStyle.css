@@ -11,6 +11,7 @@
 
   border: 1px solid #eee;
   border-radius: .25rem;
+  /* display: inline-block; */
 }
 
 .boxEval {
@@ -30,4 +31,18 @@
 
 .inactiveStep {
   color: gray;
+}
+
+.hiddenIcon, .hiddenMacroIcon {
+  margin-left: 0.75em;
+  display: none;
+}
+
+li:hover > .hiddenIcon {
+  display: inline;
+}
+
+li:hover .hiddenMacroIcon {
+  color: grey;
+  display: inline;
 }

@@ -8,11 +8,21 @@ interface EditorProperties {
   caretPosition : number
   onExpression (newExpression : string, caretPosition : number) : void
   onEnter () : void
+  onDelete () : void
+  onStepBack () : void
   syntaxError : Error | null
 }
 
 export default function Editor (props : EditorProperties) : JSX.Element {
-  const { expression, caretPosition, onExpression, onEnter, syntaxError } : EditorProperties = props
+  const {
+    expression,
+    caretPosition,
+    onExpression,
+    onEnter,
+    onDelete,
+    syntaxError,
+    onStepBack,
+  } : EditorProperties = props
   const lines : number = expression.split('\n').length
   
 
@@ -30,16 +40,21 @@ export default function Editor (props : EditorProperties) : JSX.Element {
       event.preventDefault()
       onEnter()
     }
+    if (event.key === 'Delete') {
+      event.preventDefault()
+      onDelete()
+    }
+    if (event.key === 'Backspace') {
+      event.preventDefault()
+      onStepBack()
+    }
   }
 
   return (
     <div className='editorContainer'>
       { syntaxError ? `${syntaxError}` : null }
 
-      <div className="editor">      
-        {/* <button id='editorEnter' onClick={ onEnter } >
-          Δ
-        </button> */}
+      <div className="editor">
         <InputField
           expression={ expression }
           lines={ lines }
@@ -83,6 +98,7 @@ function InputField (props : InputProps) : JSX.Element {
         if (element !== null) {
           element.selectionStart = caretPosition
           element.selectionEnd = caretPosition
+          element.focus()
         }
       } }
     />
