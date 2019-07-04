@@ -6,29 +6,60 @@
 .left.redex {
   background-color: #69f0ae;
   border-radius: 5px;
+  /* padding: 1px; */
+
 }
 
 .right.redex {
   background-color: #ff80ab;
   border-radius: 5px;
+  /* padding: 1px; */
+
 }
 
 .activeStep .macro, .activeStep .lambda, .activeStep .argument, .activeStep .churchnumeral {
   cursor: pointer;
 }
 
-
 .macro.redex {
   background-color: #80d8ff;
   border-radius: 5px;
+  /* padding: 1px; */
+
 }
 
 .churchnumeral.redex {
   background-color: #82b1ff;
   border-radius: 5px;
+  /* padding: 1px; */
+
 }
 
 .breakpoint {
   border-bottom: 3px solid black;
   /* border-radius: 5px; */
+}
+
+.application, .function, .variable, .macro, .churchnumeral {
+  /* padding: 10px; */
+}
+
+.lastReduction {
+  color: gray;
+  font-size: 0.7em;
+  margin: 0;
+  margin-left: 1.5em;
+}
+
+.stepNumber {
+  /* display: none; */
+  color: gray;
+  display: inline-block;
+  margin: 0;
+  font-size: 0.5em;
+  margin-right: 1em;
+}
+
+.inlineblock {
+  display: inline-block;
 }

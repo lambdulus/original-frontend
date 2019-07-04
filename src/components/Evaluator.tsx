@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 
-import { AST, ASTReduction, None, NormalEvaluator, Beta, Lambda, Variable, Expansion, ChurchNumeral, Macro } from "lambdulus-core";
+import { AST, ASTReduction, None, NormalEvaluator, Beta, Lambda, Variable, Expansion, ChurchNumeral, Macro, } from "lambdulus-core";
 
 import './EvaluatorStyle.css'
 import Controls from './Controls';
@@ -15,18 +15,25 @@ export type Breakpoint = {
   broken : Set<AST>,
 }
 
+export interface StepRecord {
+  ast : AST
+  lastReduction : ASTReduction | null
+  step : number
+}
+
 export interface EvaluationState {
   __key : string
   type : BoxType
   expression : string
   ast : AST
-  history : Array<AST>
+  history : Array<StepRecord>
   steps : number
   isRunning : boolean
   lastReduction : ASTReduction | null
   breakpoints : Array<Breakpoint>
   timeoutID : number | undefined
   timeout : number
+  isExercise : boolean
 }
 
 export interface EvaluationStatePatch {
@@ -34,19 +41,22 @@ export interface EvaluationStatePatch {
   type? : BoxType
   expression? : string
   ast? : AST
-  history? : Array<AST>
+  history? : Array<StepRecord>
   steps? : number
   isRunning? : boolean
   lastReduction? : ASTReduction | null
   breakpoints? : Array<Breakpoint>
   timeoutID? : number | undefined
   timeout? : number
+  isExercise? : boolean
 }
 
 interface EvaluationProperties {
   state : EvaluationState
   updateState (state : EvaluationStatePatch) : void
   editExpression (ast : AST) : void
+  makeActive () : void
+  isActive : boolean
 }
 
 export default class Evaluator extends PureComponent<EvaluationProperties, EvaluationState> {
@@ -71,35 +81,38 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
       lastReduction,
       breakpoints,
       timeoutID,
+      isExercise,
     } : EvaluationState = state
 
     return (
       <div className='box boxEval'>
         <ul>
           {
-            mapLeftFromTo(0, history.length - 2, history, (ast, i) =>
+            mapLeftFromTo(0, history.length - 2, history, (stepRecord, i) =>
               <li key={ i } className='inactiveStep' >
                 <Step
                   breakpoints={ breakpoints }
                   addBreakpoint={ () => {} }
-                  tree={ ast }
-                />
-                <i
-                  className="hiddenIcon fas fa-pencil-alt"
-                  onClick={ () => this.props.editExpression(ast) }
-                />
+                  stepRecord={ stepRecord }
+                >
+                  <i
+                    className="hiddenIcon fas fa-pencil-alt"
+                    onClick={ () => this.props.editExpression(stepRecord.ast) }
+                  />
+                </Step>
               </li>)
           }
           <li key={history.length - 1} className='activeStep'>
             <Step
               breakpoints={ breakpoints }
               addBreakpoint={ this.addBreakpoint }
-              tree={ history[history.length - 1] }
-            />
-            <i
-              className="hiddenIcon fas fa-pencil-alt"
-              onClick={ () => this.props.editExpression(history[history.length - 1]) }
-            />
+              stepRecord={ history[history.length - 1] }
+            >
+              <i
+                className="hiddenIcon fas fa-pencil-alt"
+                onClick={ () => this.props.editExpression(history[history.length - 1].ast) }
+              />
+            </Step>
           </li>
         </ul>
         <Controls
@@ -108,6 +121,11 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
           onStep={ this.onStep }
           onClear={ this.onClear }
           isRunning={ isRunning }
+          isActive={ this.props.isActive }
+          makeActive={ this.props.makeActive }
+          isExercise={ isExercise }
+          makeExercise={ () => this.props.updateState({ isExercise : true }) }
+          endExercise={ () => this.props.updateState({ isExercise : false })  }
         />
       </div>
     )
@@ -145,14 +163,15 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
     }
   
     // let ast : AST = history[history.length - 1].clone()
-    let ast : AST = history[history.length - 1]
+    const { step } = history[history.length - 1] 
+    let ast : AST = history[history.length - 1].ast
 
     const normal : NormalEvaluator = new NormalEvaluator(ast)
   
     lastReduction = normal.nextReduction
     
     if (normal.nextReduction instanceof None) {
-      history = [ ast ]
+      history = [ { ast, lastReduction, step } ]
   
       updateState({
         history,
@@ -198,7 +217,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
     steps++
   
     updateState({
-      history : [ ast ],
+      history : [ { ast, lastReduction, step } ],
       steps,
       lastReduction,
       timeoutID : window.setTimeout(this.__onRun, timeout),
@@ -225,7 +244,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
       return
     }
   
-    let ast = history[history.length - 1].clone()
+    let ast = history[history.length - 1].ast.clone()
     // let ast = history[history.length - 1]
 
     
@@ -245,7 +264,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
     steps++
   
     updateState({
-      history : [ ...history, ast ],
+      history : [ ...history, { ast, lastReduction, step : steps } ],
       steps,
       lastReduction,
     })
@@ -255,7 +274,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
     let { state, updateState } : EvaluationProperties = this.props
   
     updateState({
-      history : [ state.ast.clone() ],
+      history : [ { ast : state.ast.clone(), lastReduction : None, step : 0 } ],
       steps : 0,
       isRunning : false,
       lastReduction : null,

@@ -19,10 +19,13 @@ interface BoxProperties {
   updateState (state : BoxState) : void
   removeExpression () : void
   editExpression (ast : AST) : void
+  isActive : boolean
+  makeActive () : void
+
 }
 
 export default function Box (props : BoxProperties) : JSX.Element {
-  const { state, updateState } : BoxProperties = props
+  const { state, updateState, isActive } : BoxProperties = props
   const { type } = state
 
   if (type === BoxType.expression) {
@@ -38,7 +41,17 @@ export default function Box (props : BoxProperties) : JSX.Element {
           state={ state as EvaluationState }
           updateState={ updateState }
           editExpression={ props.editExpression }
+          isActive={ isActive }
+          makeActive={ props.makeActive }
         />
+        {/* <div
+          ref={ (el) => {
+            if (el && isActive) {
+              el.scrollIntoView() // { behavior: "smooth" }
+            }
+
+           }}
+        /> */}
       </div>
     )
   }

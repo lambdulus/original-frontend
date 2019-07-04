@@ -20,6 +20,7 @@ import { MacroDefinitionState } from './components/MacroDefinition';
 import { NoteState } from './components/Note';
 import EvaluatorSpace from './components/ExpressionSpace';
 import MacroSpace from './components/MacroSpace';
+import { TreeComparator } from './components/TreeComparator';
 
 
 export enum Screen {
@@ -28,8 +29,15 @@ export enum Screen {
   notebooks,
 }
 
+export enum PromptPlaceholder {
+  INIT = 'type λ expression',
+  EVAL_MODE = 'HIT ENTER AGAIN FOR NEXT STEP',
+  VALIDATE_MODE = 'HIT ENTER TO VALIDATE YOUR SKILL',
+}
+
 export interface AppState {
   editorState : {
+    placeholder : string
     expression : string
     caretPosition : number
     syntaxError : Error | null
@@ -40,7 +48,7 @@ export interface AppState {
 
   submittedExpressions : Array<BoxState>
   screen : Screen
-
+  activeBox : number
 }
 
 export default class App extends Component<any, AppState> {
@@ -61,6 +69,7 @@ export default class App extends Component<any, AppState> {
     this.onEnter = this.onEnter.bind(this)
     this.onStep = this.onStep.bind(this)
     this.onRemoveLastStep = this.onRemoveLastStep.bind(this)
+    this.onExerciseStep = this.onExerciseStep.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -68,6 +77,7 @@ export default class App extends Component<any, AppState> {
 
     this.state = {
       editorState : {
+        placeholder : PromptPlaceholder.INIT,
         expression,
         caretPosition : expression.length,
         syntaxError : null,
@@ -76,16 +86,18 @@ export default class App extends Component<any, AppState> {
       macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
       submittedExpressions : [],
       screen : Screen.main,
+      activeBox : -1,
     }
   }
 
   render () {
     const {
-      editorState : { expression, caretPosition, syntaxError },
+      editorState : { expression, caretPosition, syntaxError, placeholder },
       singleLetterVars,
       macroTable,
       submittedExpressions,
-      screen
+      screen,
+      activeBox,
     } : AppState = this.state
 
     const getEvaluatorSpace = () =>
@@ -96,10 +108,16 @@ export default class App extends Component<any, AppState> {
       editExpression={ (ast : AST) => this.setState({
         ...this.state,
         editorState : {
+          placeholder : PromptPlaceholder.INIT,
           expression : ast.toString(),
           caretPosition : ast.toString().length,
           syntaxError : null
         }
+      }) }
+      activeBox={ activeBox }
+      makeActive={ (index : number) => this.setState({
+        ...this.state,
+        activeBox : index,
       }) }
     />
 
@@ -148,16 +166,17 @@ export default class App extends Component<any, AppState> {
         }
 
         <Editor
+          placeholder={ placeholder }
           expression={ expression }
           caretPosition={ caretPosition }
           onExpression={ this.onExpression }
           onEnter={ this.onEnter }
           syntaxError={ syntaxError }
-          onDelete={ this.onRemoveExpression }
-          onStepBack={ this.onRemoveLastStep }
+          // onDelete={ this.onRemoveExpression }
+          // onStepBack={ this.onRemoveLastStep }
         />
 
-        <div id="anchor"></div>
+        {/* <div id="anchor"></div> */}
 
       </div>
     )
@@ -174,7 +193,12 @@ export default class App extends Component<any, AppState> {
   }
 
   onExpression (expression : string, caretPosition : number) : void {
-    this.setState({ ...this.state, editorState : { expression, caretPosition, syntaxError : null } } )
+    this.setState({ ...this.state, editorState : {
+      placeholder : this.state.editorState.placeholder,
+      expression,
+      caretPosition,
+      syntaxError : null
+     } } )
     this.updateURL(expression)
   }
 
@@ -194,21 +218,22 @@ export default class App extends Component<any, AppState> {
   }
 
   onRemoveExpression () {
-    const { submittedExpressions, macroTable } : AppState = this.state
+    // TODO: implement IMPLEMENT I M P L E M E N T
+    // const { submittedExpressions, macroTable,  } : AppState = this.state
 
-    const removed : BoxState | undefined = submittedExpressions.pop()
+    // const removed : BoxState | undefined = submittedExpressions.pop()
 
-    if (removed !== undefined && removed.type === BoxType.macro) {
-      const name : string = (removed as MacroDefinitionState).macroName
-      delete macroTable[name]
-      this.updateMacros(macroTable)
-    }
+    // if (removed !== undefined && removed.type === BoxType.macro) {
+    //   const name : string = (removed as MacroDefinitionState).macroName
+    //   delete macroTable[name]
+    //   this.updateMacros(macroTable)
+    // }
 
-    this.setState({
-      ...this.state,
-      macroTable,
-      submittedExpressions
-    })
+    // this.setState({
+    //   ...this.state,
+    //   macroTable,
+    //   submittedExpressions
+    // })
   }
 
   onRemoveLastStep () {
@@ -236,7 +261,10 @@ export default class App extends Component<any, AppState> {
     const { editorState : { expression }, submittedExpressions } = this.state
     const activeExpression : BoxState = submittedExpressions[submittedExpressions.length - 1]
 
-    if (expression.length || activeExpression === undefined || activeExpression.type !== BoxType.expression) {
+    if (activeExpression !== undefined && (activeExpression as EvaluationState).isExercise) {
+      this.onExerciseStep()
+    }
+    else if (expression.length || activeExpression === undefined || activeExpression.type !== BoxType.expression) {
       this.onSubmit()
     }
     else {
@@ -244,23 +272,117 @@ export default class App extends Component<any, AppState> {
     }
   }
 
+  onExerciseStep () {
+    console.log('VALIDATE MY EXP')
+    const { editorState : { expression } } = this.state
+    try {
+      const userAst : AST = this.parseExpression(expression)
+
+      const { submittedExpressions, activeBox } = this.state
+      const activeExpression : EvaluationState = submittedExpressions[activeBox] as EvaluationState
+      let { history, steps, lastReduction } = activeExpression
+    
+      if (lastReduction instanceof None) {
+        // TODO: do something about it
+        // say user - there are no more steps and it is in normal form
+        return
+      }
+    
+      let ast = history[history.length - 1].ast.clone()
+      // TODO: take evaluation strategy from activeExpression
+      const normal : NormalEvaluator = new NormalEvaluator(ast)
+    
+      lastReduction = normal.nextReduction
+    
+      if (normal.nextReduction instanceof None) {
+        // TODO: say user it is in normal form and they are mistaken
+        submittedExpressions[activeBox] = {
+          ...activeExpression,
+          lastReduction,
+        }
+
+        this.setState({
+          ...this.state,
+          submittedExpressions,
+        })
+        
+        return
+      }
+    
+      ast = normal.perform()
+      steps++
+    
+      const comparator : TreeComparator = new TreeComparator([ userAst, ast ])
+      if (comparator.equals) {
+        ast = userAst
+      }
+      else {
+        // TODO: say user it was incorrect
+        // TODO: na to se pouzije uvnitr EvaluatorState prop messages nebo tak neco
+        console.log('Incorrect step')
+      }
+
+
+
+      submittedExpressions[activeBox] = {
+        ...activeExpression,
+        history : [ ...history, { ast, lastReduction, step : steps } ],
+        steps,
+        lastReduction,
+      }
+
+      this.setState({
+        ...this.state,
+        editorState : {
+          ...this.state.editorState,
+          expression : '',
+          caretPosition : 0,
+          placeholder : PromptPlaceholder.VALIDATE_MODE,
+          syntaxError : null,
+        },
+        submittedExpressions,
+      })
+
+    } catch (exception) {
+      // TODO: print syntax error
+      // TODO: do it localy - no missuse of onSubmit
+
+      this.onSubmit()
+    }
+
+    // TODO: compare expression ast with nextstep ast
+
+
+    // this.setState({
+    //   ...this.state,
+    //   editorState : {
+    //     ...this.state.editorState,
+    //     expression : '',
+    //   }
+    // })
+
+    // this.onStep();
+
+
+  }
+
   onStep () : void {
-    const { submittedExpressions } = this.state
-    const activeExpression : EvaluationState = submittedExpressions[submittedExpressions.length - 1] as EvaluationState
+    const { submittedExpressions, activeBox } = this.state
+    const activeExpression : EvaluationState = submittedExpressions[activeBox] as EvaluationState
     let { history, steps, lastReduction } = activeExpression
   
     if (lastReduction instanceof None) {
       return
     }
   
-    let ast = history[history.length - 1].clone()
+    let ast = history[history.length - 1].ast.clone()
     
     const normal : NormalEvaluator = new NormalEvaluator(ast)
   
     lastReduction = normal.nextReduction
   
     if (normal.nextReduction instanceof None) {
-      submittedExpressions[submittedExpressions.length - 1] = {
+      submittedExpressions[activeBox] = {
         ...activeExpression,
         lastReduction,
       }
@@ -276,9 +398,9 @@ export default class App extends Component<any, AppState> {
     ast = normal.perform()
     steps++
   
-    submittedExpressions[submittedExpressions.length - 1] = {
+    submittedExpressions[activeBox] = {
       ...activeExpression,
-      history : [ ...history, ast ],
+      history : [ ...history, { ast, lastReduction, step : steps } ],
       steps,
       lastReduction,
     }
@@ -294,7 +416,8 @@ export default class App extends Component<any, AppState> {
     // TODO: maybe cancel and clear URL only after succsessful parsing
     this.cancelUpdate()
     
-    const { editorState : { expression, caretPosition, }, submittedExpressions, macroTable } : AppState = this.state
+    const { editorState : { expression, caretPosition, },
+    submittedExpressions, macroTable, activeBox } : AppState = this.state
     
     // window.location.hash = encodeURI(expression)
     history.pushState({}, "", "#" + encodeURI(expression))
@@ -328,12 +451,14 @@ export default class App extends Component<any, AppState> {
       this.setState({
         ...this.state,
         editorState : {
+          placeholder : this.state.editorState.placeholder,
           expression : '',
           caretPosition : 0,
           syntaxError : null,
         },
         submittedExpressions : [ ...submittedExpressions, macroState ],
         macroTable : newMacroTable,
+        activeBox : activeBox + 1,
       })
 
       this.updateMacros(newMacroTable)
@@ -351,11 +476,13 @@ export default class App extends Component<any, AppState> {
       this.setState({
         ...this.state,
         editorState : {
+          placeholder : this.state.editorState.placeholder,
           expression : '',
           caretPosition : 0,
           syntaxError : null,
         },
-        submittedExpressions : [ ...submittedExpressions, noteState ]
+        submittedExpressions : [ ...submittedExpressions, noteState ],
+        activeBox : activeBox + 1,
       })
     }
 
@@ -370,24 +497,27 @@ export default class App extends Component<any, AppState> {
           __key : Date.now().toString(),
           expression,
           ast,
-          history : [ ast.clone() ],
+          history : [ { ast : ast.clone(), lastReduction : None, step : 0 } ],
           steps : 0,
           // isStepping : false,
           isRunning : false,
           lastReduction : null,
           breakpoints : [],
           timeoutID : undefined,
-          timeout : 10
+          timeout : 10,
+          isExercise : false
         }
   
         this.setState({
           ...this.state,
           editorState : {
+            placeholder : PromptPlaceholder.EVAL_MODE,
             expression : '',
             caretPosition : 0,
             syntaxError : null,
           },
-          submittedExpressions : [ ...submittedExpressions, evaluationState ]
+          submittedExpressions : [ ...submittedExpressions, evaluationState ],
+          activeBox : activeBox + 1,
         })
     
       } catch (exception) {
@@ -397,6 +527,7 @@ export default class App extends Component<any, AppState> {
         this.setState({
           ...this.state,
           editorState : {
+            placeholder : this.state.editorState.placeholder,
             expression,
             caretPosition,
             syntaxError : exception,
@@ -419,6 +550,7 @@ export default class App extends Component<any, AppState> {
     this.setState({
       ...this.state,
       editorState : {
+        placeholder : this.state.editorState.placeholder,
         expression,
         caretPosition : expression.length,
         syntaxError : null

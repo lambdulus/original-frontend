@@ -4,7 +4,7 @@ import './TopBarStyle.css'
 
 import { AppState, Screen } from '../App'
 import { EvaluationState } from './Evaluator';
-import { AST, tokenize, parse, Token, MacroMap } from 'lambdulus-core';
+import { AST, tokenize, parse, Token, MacroMap, None } from 'lambdulus-core';
 import { BoxState, BoxType } from './Box';
 
 
@@ -104,7 +104,7 @@ function hydrateBox (box : BoxState, config : Config) : BoxState {
     return {
       ...box,
       ast,
-      history : [ ast ],
+      history : [ { ast, lastReduction : None, step : 0 } ],
     }
   }
 

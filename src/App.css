@@ -1,5 +1,6 @@
 body {
   height: 100%;
+  /* background-color: darkorange; */
 }
 
 .app * {
@@ -30,11 +31,17 @@ li {
   margin-bottom: 20px;
 }
 
+.evaluatorList > li {
+  margin-bottom: 40px;
+}
+
 .evaluatorSpace, .macroSpace {
   padding-top: 10px;
   width: 93vw;
   margin-left: 6em;
   margin-bottom: 5em;
+  height: 88vh;
+  overflow-y: scroll
 }
 
 .evaluationHeader, .macroHeader, .noteHeader {

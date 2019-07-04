@@ -1,24 +1,30 @@
 import React from 'react'
 
-import { AST, Beta, Expansion, NormalEvaluator } from 'lambdulus-core';
+import { AST, Beta, Expansion, NormalEvaluator, ASTReduction } from 'lambdulus-core';
 
 import './StepStyle.css'
-import { Breakpoint } from './Evaluator'
+import { Breakpoint, StepRecord } from './Evaluator'
 import ReactPrinter from './ReactPrinter';
+import ReductionMessage from './ReductionMessage';
 
 
 interface StepProperties {
-  tree : AST | null
+  stepRecord : StepRecord
   breakpoints : Array<Breakpoint>
   addBreakpoint (breakpoint : Breakpoint) : void
+  children : JSX.Element
 }
 
 export default function Step (props : StepProperties) : JSX.Element | null {
-  const { tree, addBreakpoint, breakpoints } = props
+  const { stepRecord, addBreakpoint, breakpoints, children } = props
+  const { ast : tree, lastReduction, step } = stepRecord
 
   if (tree === null) {
     return null
   }
+
+  // TODO: tohle se musi fixnout
+  // validni regex se musi dostat ze statu a ne si ho tedka vymyslet sam
 
   let redex : AST | null  = null
   const normal : NormalEvaluator = new NormalEvaluator(tree)
@@ -35,7 +41,14 @@ export default function Step (props : StepProperties) : JSX.Element | null {
 
   return (
     <span className='step'>
-      { printer.print() }
+      <ReductionMessage lastReduction={ lastReduction } />
+      <div className='inlineblock' >
+        <p className='stepNumber' >
+          { step } :
+        </p>
+        { printer.print() }
+        { children }
+      </div>
     </span>
   )
 }

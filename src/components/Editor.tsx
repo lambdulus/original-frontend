@@ -4,24 +4,26 @@ import './EditorStyle.css'
 
 
 interface EditorProperties {
+  placeholder: string
   expression : string
   caretPosition : number
   onExpression (newExpression : string, caretPosition : number) : void
   onEnter () : void
-  onDelete () : void
-  onStepBack () : void
+  // onDelete () : void
+  // onStepBack () : void
   syntaxError : Error | null
 }
 
 export default function Editor (props : EditorProperties) : JSX.Element {
   const {
+    placeholder,
     expression,
     caretPosition,
     onExpression,
     onEnter,
-    onDelete,
+    // onDelete,
     syntaxError,
-    onStepBack,
+    // onStepBack,
   } : EditorProperties = props
   const lines : number = expression.split('\n').length
   
@@ -40,14 +42,6 @@ export default function Editor (props : EditorProperties) : JSX.Element {
       event.preventDefault()
       onEnter()
     }
-    if (event.key === 'Delete') {
-      event.preventDefault()
-      onDelete()
-    }
-    if (event.key === 'Backspace') {
-      event.preventDefault()
-      onStepBack()
-    }
   }
 
   return (
@@ -56,6 +50,7 @@ export default function Editor (props : EditorProperties) : JSX.Element {
 
       <div className="editor">
         <InputField
+          placeholder={ placeholder }
           expression={ expression }
           lines={ lines }
           caretPosition={ caretPosition }
@@ -70,15 +65,16 @@ export default function Editor (props : EditorProperties) : JSX.Element {
 }
 
 interface InputProps {
-  expression : string,
-  lines : number,
-  caretPosition : number,
-  onChange (event : ChangeEvent<HTMLTextAreaElement>) : void,
-  onKeyDown (event : KeyboardEvent<HTMLTextAreaElement>) : void,
+  placeholder : string
+  expression : string
+  lines : number
+  caretPosition : number
+  onChange (event : ChangeEvent<HTMLTextAreaElement>) : void
+  onKeyDown (event : KeyboardEvent<HTMLTextAreaElement>) : void
 }
 
 function InputField (props : InputProps) : JSX.Element {
-  const { expression, lines, onChange, onKeyDown, caretPosition } : InputProps = props
+  const { placeholder, expression, lines, onChange, onKeyDown, caretPosition } : InputProps = props
 
   return (
     <textarea
@@ -86,7 +82,7 @@ function InputField (props : InputProps) : JSX.Element {
       onKeyDown={ onKeyDown }
       onChange={ onChange }
       value={ expression }
-      placeholder='type here'
+      placeholder={ placeholder }
       wrap='hard'
       autoFocus
       autoComplete="off"

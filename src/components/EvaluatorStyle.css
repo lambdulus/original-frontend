@@ -4,8 +4,8 @@
 
   /* border: 1px solid black; */
   border-top: none;
-  padding-left: 20px;
-  padding-top: 5px;
+  padding-left: 10px;
+  padding-top: 10px;
   padding-bottom: 5px;
   font-size: 1.5em;
 
@@ -38,11 +38,32 @@
   display: none;
 }
 
-li:hover > .hiddenIcon {
+li:hover > .step > .inlineblock > .hiddenIcon {
   display: inline;
+  color: black;
 }
 
 li:hover .hiddenMacroIcon {
-  color: grey;
+  color: black;
+  /* color: grey; */
   display: inline;
+}
+
+.badge {
+  padding: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 2px solid black;
+  border-radius: 1rem;
+  display: inline-block;
+  font-size: 0.6em;
+  margin-right: 1em;
+}
+
+.makeBadge {
+  cursor: pointer;
+}
+
+.makeBadge:hover {
+  background-color: #BDBDBD;
 }
