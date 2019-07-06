@@ -16,9 +16,6 @@ export default function MacroSpace (props : MacroProperties) : JSX.Element {
       <ul>
         { Object.entries(builtinMacros).map(([macroName, macroExpression]) =>
           <div key={ macroName }>
-            {/* <div className='macroHeader'>
-              <i className='headerTitle'>{ macroName }</i>
-            </div> */}
             <li>
               <div className='box boxMacro'>
                 { macroName } := { macroExpression }
@@ -32,11 +29,6 @@ export default function MacroSpace (props : MacroProperties) : JSX.Element {
       <ul>
         { Object.entries(macroTable).map(([macroName, macroExpression]) =>
             <div key={ macroName }>
-              {/* <div className='macroHeader'>
-                <i className="icon far fa-trash-alt" onClick={ () => removeMacro(macroName) } />
-                <i className="icon fas fa-pencil-alt" />
-                <i className='headerTitle'>{ macroName }</i>
-              </div> */}
               <li>
                 <div className='box boxMacro'>
                   { macroName } := { macroExpression }

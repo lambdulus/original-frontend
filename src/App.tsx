@@ -7,15 +7,24 @@ import {
   Token,
   MacroMap,
   None,
-  NormalEvaluator
+  NormalEvaluator,
+  Expansion,
+  Macro,
+  ChurchNumeral,
+  Variable,
+  Lambda,
+  Beta,
+  ASTReduction,
+  ApplicativeEvaluator,
+  OptimizeEvaluator
 } from 'lambdulus-core'
 
 import './App.css'
 import Editor from './components/Editor'
 import { debounce, trimStr, HANDY_MACROS, getExpressionFromURL, isNote, isMacroDefinition, getSavedMacros } from './misc';
-import { EvaluationState } from './components/Evaluator';
+import { EvaluationState, Breakpoint, StepRecord } from './components/Evaluator';
 import TopBar from './components/MenuBar';
-import Box, { BoxState, BoxType } from './components/Box';
+import { BoxState, BoxType } from './components/Box';
 import { MacroDefinitionState } from './components/MacroDefinition';
 import { NoteState } from './components/Note';
 import EvaluatorSpace from './components/ExpressionSpace';
@@ -35,15 +44,39 @@ export enum PromptPlaceholder {
   VALIDATE_MODE = 'HIT ENTER TO VALIDATE YOUR SKILL',
 }
 
+export enum EvaluationStrategy {
+  NORMAL = 'Normal Evaluation',
+  APPLICATIVE = 'Applicative Evaluation',
+  OPTIMISATION = 'Optimisation - η Conversion ',
+}
+
+export type Evaluator = NormalEvaluator | ApplicativeEvaluator | OptimizeEvaluator
+
+export function strategyToEvaluator (strategy : EvaluationStrategy) : Evaluator {
+  switch (strategy) {
+    case EvaluationStrategy.NORMAL:
+      return NormalEvaluator as any
+ 
+    case EvaluationStrategy.APPLICATIVE:
+      return ApplicativeEvaluator as any
+
+    case EvaluationStrategy.OPTIMISATION:
+      return OptimizeEvaluator as any
+  }
+}
+
 export interface AppState {
   editorState : {
     placeholder : string
     expression : string
     caretPosition : number
     syntaxError : Error | null
+    strategy : EvaluationStrategy
+    singleLetterNames : boolean
+    isExercise : boolean
   }
   
-  singleLetterVars : boolean
+  // singleLetterVars : boolean
   macroTable : MacroMap
 
   submittedExpressions : Array<BoxState>
@@ -51,7 +84,7 @@ export interface AppState {
   activeBox : number
 }
 
-export default class App extends Component<any, AppState> {
+export default class App extends Component<{}, AppState> {
   constructor (props : object) {
     super(props)
 
@@ -70,6 +103,13 @@ export default class App extends Component<any, AppState> {
     this.onStep = this.onStep.bind(this)
     this.onRemoveLastStep = this.onRemoveLastStep.bind(this)
     this.onExerciseStep = this.onExerciseStep.bind(this)
+    this.onRun = this.onRun.bind(this)
+    this._onRun = this._onRun.bind(this)
+    this.__onRun = this.__onRun.bind(this)
+    this.onStop = this.onStop.bind(this)
+    this.onClear = this.onClear.bind(this)
+
+    this.onRun = this.onRun.bind(this)
 
     window.addEventListener('hashchange', this.updateFromURL)
 
@@ -81,8 +121,11 @@ export default class App extends Component<any, AppState> {
         expression,
         caretPosition : expression.length,
         syntaxError : null,
+        strategy : EvaluationStrategy.NORMAL,
+        singleLetterNames : false,
+        isExercise : false,
       },
-      singleLetterVars : false,
+      // singleLetterVars : false,
       macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
       submittedExpressions : [],
       screen : Screen.main,
@@ -92,8 +135,8 @@ export default class App extends Component<any, AppState> {
 
   render () {
     const {
-      editorState : { expression, caretPosition, syntaxError, placeholder },
-      singleLetterVars,
+      editorState : { expression, caretPosition, syntaxError, placeholder, isExercise },
+      // singleLetterVars,
       macroTable,
       submittedExpressions,
       screen,
@@ -105,15 +148,20 @@ export default class App extends Component<any, AppState> {
       removeExpression={ this.onRemoveExpression }
       updateState={ this.onUpdateEvaluationState }
       submittedExpressions={ submittedExpressions }
-      editExpression={ (ast : AST) => this.setState({
-        ...this.state,
-        editorState : {
-          placeholder : PromptPlaceholder.INIT,
-          expression : ast.toString(),
-          caretPosition : ast.toString().length,
-          syntaxError : null
-        }
-      }) }
+      editExpression={ (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) =>
+        this.setState({
+          ...this.state,
+          editorState : {
+            placeholder : PromptPlaceholder.INIT,
+            expression : ast.toString(),
+            caretPosition : ast.toString().length,
+            syntaxError : null,
+            strategy,
+            singleLetterNames,
+            isExercise : false, // TODO: jenom momentalni rozhodnuti - popremyslim
+          }
+        })
+      }
       activeBox={ activeBox }
       makeActive={ (index : number) => this.setState({
         ...this.state,
@@ -172,6 +220,32 @@ export default class App extends Component<any, AppState> {
           onExpression={ this.onExpression }
           onEnter={ this.onEnter }
           syntaxError={ syntaxError }
+          onRun={ this.onRun }
+          onReset={ this.onClear }
+          strategy={ this.state.editorState.strategy }
+          onStrategy={ (strategy : EvaluationStrategy) => this.setState({
+            ...this.state,
+            editorState : {
+              ...this.state.editorState,
+              strategy,
+            }
+          }) }
+          singleLetterNames={ this.state.editorState.singleLetterNames }
+          onSingleLetterNames={ (enable : boolean) => this.setState({
+            ...this.state,
+            editorState : {
+              ...this.state.editorState,
+              singleLetterNames : enable,
+            }
+          }) }
+          isExercise={ isExercise }
+          onExercise={ (enable : boolean) => this.setState({
+            ...this.state,
+            editorState : {
+              ...this.state.editorState,
+              isExercise : enable,
+            }
+          }) }
           // onDelete={ this.onRemoveExpression }
           // onStepBack={ this.onRemoveLastStep }
         />
@@ -193,12 +267,16 @@ export default class App extends Component<any, AppState> {
   }
 
   onExpression (expression : string, caretPosition : number) : void {
-    this.setState({ ...this.state, editorState : {
-      placeholder : this.state.editorState.placeholder,
-      expression,
-      caretPosition,
-      syntaxError : null
-     } } )
+    this.setState({
+      ...this.state,
+      editorState : {
+        ...this.state.editorState,
+        placeholder : this.state.editorState.placeholder,
+        expression,
+        caretPosition,
+        syntaxError : null,
+      }
+    } )
     this.updateURL(expression)
   }
 
@@ -257,9 +335,229 @@ export default class App extends Component<any, AppState> {
     // })
   }
 
+  //
+  // TODO: refactor heavily PLS
+  onRun () : void {
+    const { submittedExpressions, activeBox } = this.state
+    const activeExpression = submittedExpressions[activeBox]
+
+    if (activeExpression.type === BoxType.expression) {
+      const activeExp = activeExpression as EvaluationState
+
+      if (activeExp.isRunning === false) {
+        this._onRun()
+      }
+      else {
+        this.onStop()
+      }
+    }
+    else {
+      return
+    }
+  }
+
+  onUpdateBoxState (state : BoxState) : void {
+    const { submittedExpressions, activeBox } = this.state
+
+    submittedExpressions[activeBox] = state
+
+    this.setState({
+      ...this.state,
+      submittedExpressions,
+    })
+  }
+
+  _onRun () : void {
+    const { submittedExpressions, activeBox } = this.state
+    const evalState = submittedExpressions[activeBox] as EvaluationState
+
+    const { timeout, history } = evalState
+    const stepRecord = history[history.length - 1]
+  
+    if (stepRecord.isNormalForm) {
+      return
+    }
+    
+    const { ast, step, lastReduction, isNormalForm, message } = stepRecord
+    history[history.length - 1].message = 'Skipping some steps...'
+    history.push({ ast : ast.clone(), step, lastReduction, message, isNormalForm })
+
+    this.onUpdateBoxState({
+      ...evalState,
+      history,
+      isRunning : true,
+      timeoutID : window.setTimeout(this.__onRun, timeout),
+    })
+  }
+
+  __onRun () {
+    const { submittedExpressions, activeBox } = this.state
+    const evalState = submittedExpressions[activeBox] as EvaluationState
+    
+    let { history, isRunning, breakpoints, timeoutID, timeout, strategy } = evalState
+    const stepRecord : StepRecord = history[history.length - 1]
+    const { isNormalForm, step } = stepRecord
+    let { lastReduction } = stepRecord
+
+    if ( ! isRunning) {
+      return
+    }
+    
+    if (isNormalForm) {
+      this.onUpdateBoxState({
+        ...evalState,
+        isRunning : false,
+        timeoutID : undefined,
+      })
+  
+      return
+    }
+  
+    let ast : AST = history[history.length - 1].ast
+    const normal : Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
+    lastReduction = normal.nextReduction
+    
+    if (normal.nextReduction instanceof None) {
+      history.pop()
+      history.push({
+        ast,
+        lastReduction : stepRecord.lastReduction,
+        step,
+        message : 'Expression is in normal form.',
+        isNormalForm : true
+      })
+  
+      this.onUpdateBoxState({
+        ...evalState,
+        history,
+        // steps,
+        isRunning : false,
+        timeoutID : undefined,
+      })
+  
+      return
+    }
+  
+    // TODO: maybe refactor a little
+    const breakpoint : Breakpoint | undefined = breakpoints.find(
+      (breakpoint : Breakpoint) =>
+        this.shouldBreak(breakpoint, normal.nextReduction)
+    )
+  
+    if (breakpoint !== undefined) {
+      if (normal.nextReduction instanceof Expansion) {
+        breakpoint.broken.add(normal.nextReduction.target)
+      }
+      // TODO: ADD FOR BETA AND OTHERS TOO
+
+      window.clearTimeout(timeoutID)
+      
+      this.onUpdateBoxState({
+        ...evalState,
+        isRunning : false,
+        breakpoints,
+        timeoutID : undefined,
+      })
+
+      return
+    }
+  
+    ast = normal.perform()
+    // steps++
+
+    history[history.length - 1] = { ast, lastReduction, step : step + 1, message : '', isNormalForm }
+  
+    this.onUpdateBoxState({
+      ...evalState,
+      history,
+      // steps,
+      // lastReduction,
+      timeoutID : window.setTimeout(this.__onRun, timeout),
+    })
+  }
+
+  onStop () : void {
+    const { submittedExpressions, activeBox } = this.state
+    const evalState = submittedExpressions[activeBox] as EvaluationState
+    const { timeoutID } = evalState
+  
+    window.clearTimeout(timeoutID)
+  
+    this.onUpdateBoxState({
+      ...evalState,
+      isRunning : false,
+      timeoutID : undefined
+    })
+  }
+
+  shouldBreak (breakpoint : Breakpoint, reduction : ASTReduction) : boolean {
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Beta && breakpoint.context instanceof Lambda
+        && reduction.target.identifier === breakpoint.context.body.identifier
+      ) {
+        return true
+    }
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Beta && breakpoint.context instanceof Variable
+        && reduction.redex.left instanceof Lambda
+        && reduction.redex.left.argument.identifier === breakpoint.context.identifier
+        // && ! breakpoint.broken.has(reduction.redex.left.argument)
+    ) {
+      return true
+    }
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Expansion && breakpoint.context instanceof ChurchNumeral
+        && reduction.target.identifier === breakpoint.context.identifier
+        && ! breakpoint.broken.has(reduction.target)
+    ) {
+      return true
+    }
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Expansion && breakpoint.context instanceof Macro
+        && reduction.target.identifier === breakpoint.context.identifier
+        && ! breakpoint.broken.has(reduction.target)
+    ) {
+      return true
+    }
+  
+    return false
+  }
+
+  onClear () : void {
+    const { submittedExpressions, activeBox } = this.state
+    
+    if (submittedExpressions[activeBox] === undefined) {
+      return
+    }
+
+    if (submittedExpressions[activeBox].type !== BoxType.expression) {
+      return
+    }
+
+    const evalState = submittedExpressions[activeBox] as EvaluationState
+
+    this.onUpdateBoxState({
+      ...evalState,
+      history : [ {
+        ast : evalState.ast.clone(),
+        lastReduction : None,
+        step : 0,
+        message : '',
+        isNormalForm : false
+      } ],
+      // steps : 0,
+      isRunning : false,
+      // lastReduction : null,
+      breakpoints : [],
+    })
+  }
+
+  // TODO: hope you refactored ^^ heavily
+  //
+
   onEnter () : void {
-    const { editorState : { expression }, submittedExpressions } = this.state
-    const activeExpression : BoxState = submittedExpressions[submittedExpressions.length - 1]
+    const { editorState : { expression }, submittedExpressions, activeBox } = this.state
+    const activeExpression : BoxState = submittedExpressions[activeBox]
 
     if (activeExpression !== undefined && (activeExpression as EvaluationState).isExercise) {
       this.onExerciseStep()
@@ -273,32 +571,43 @@ export default class App extends Component<any, AppState> {
   }
 
   onExerciseStep () {
-    console.log('VALIDATE MY EXP')
     const { editorState : { expression } } = this.state
     try {
       const userAst : AST = this.parseExpression(expression)
 
       const { submittedExpressions, activeBox } = this.state
-      const activeExpression : EvaluationState = submittedExpressions[activeBox] as EvaluationState
-      let { history, steps, lastReduction } = activeExpression
-    
-      if (lastReduction instanceof None) {
+      const evalState : EvaluationState = submittedExpressions[activeBox] as EvaluationState
+      let { history, strategy } = evalState
+      const stepRecord : StepRecord = history[history.length - 1]
+      const { isNormalForm, step } = stepRecord
+      let { ast, lastReduction } = stepRecord
+      ast = ast.clone()
+
+      if (isNormalForm) {
         // TODO: do something about it
         // say user - there are no more steps and it is in normal form
+        stepRecord.message = 'No more steps available. Expression is in normal form.'
+
+        this.setState({
+          ...this.state,
+          submittedExpressions,
+        })
+
         return
       }
     
-      let ast = history[history.length - 1].ast.clone()
-      // TODO: take evaluation strategy from activeExpression
-      const normal : NormalEvaluator = new NormalEvaluator(ast)
-    
+      // TODO: take evaluation strategy from evalState
+      const normal : Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
       lastReduction = normal.nextReduction
     
       if (normal.nextReduction instanceof None) {
+        // TODO: refactor PLS - update history
         // TODO: say user it is in normal form and they are mistaken
+        stepRecord.isNormalForm = true
+        stepRecord.message = 'Expression is already in normal form.'
         submittedExpressions[activeBox] = {
-          ...activeExpression,
-          lastReduction,
+          ...evalState,
+          history,
         }
 
         this.setState({
@@ -310,25 +619,23 @@ export default class App extends Component<any, AppState> {
       }
     
       ast = normal.perform()
-      steps++
     
+      let message : string = ''
       const comparator : TreeComparator = new TreeComparator([ userAst, ast ])
       if (comparator.equals) {
         ast = userAst
+        message = 'Correct.'
       }
       else {
         // TODO: say user it was incorrect
         // TODO: na to se pouzije uvnitr EvaluatorState prop messages nebo tak neco
         console.log('Incorrect step')
+        message = `Incorrect step. ${expression}`
       }
 
-
-
       submittedExpressions[activeBox] = {
-        ...activeExpression,
-        history : [ ...history, { ast, lastReduction, step : steps } ],
-        steps,
-        lastReduction,
+        ...evalState,
+        history : [ ...history, { ast, lastReduction, step : step + 1, message, isNormalForm : false } ],
       }
 
       this.setState({
@@ -349,42 +656,30 @@ export default class App extends Component<any, AppState> {
 
       this.onSubmit()
     }
-
-    // TODO: compare expression ast with nextstep ast
-
-
-    // this.setState({
-    //   ...this.state,
-    //   editorState : {
-    //     ...this.state.editorState,
-    //     expression : '',
-    //   }
-    // })
-
-    // this.onStep();
-
-
   }
 
   onStep () : void {
     const { submittedExpressions, activeBox } = this.state
-    const activeExpression : EvaluationState = submittedExpressions[activeBox] as EvaluationState
-    let { history, steps, lastReduction } = activeExpression
+    const evalState : EvaluationState = submittedExpressions[activeBox] as EvaluationState
+    let { history, strategy } = evalState
+    const stepRecord = history[history.length - 1]
+    const { isNormalForm, step } = stepRecord
+    let { ast, lastReduction } = stepRecord
+    ast = ast.clone()
   
-    if (lastReduction instanceof None) {
+    if (isNormalForm) {
       return
     }
-  
-    let ast = history[history.length - 1].ast.clone()
-    
-    const normal : NormalEvaluator = new NormalEvaluator(ast)
-  
+
+    const normal : Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
     lastReduction = normal.nextReduction
   
     if (normal.nextReduction instanceof None) {
+      stepRecord.isNormalForm = true
+      stepRecord.message = 'Expression is in normal form.'
       submittedExpressions[activeBox] = {
-        ...activeExpression,
-        lastReduction,
+        ...evalState,
+        history,
       }
 
       this.setState({
@@ -396,13 +691,10 @@ export default class App extends Component<any, AppState> {
     }
   
     ast = normal.perform()
-    steps++
   
     submittedExpressions[activeBox] = {
-      ...activeExpression,
-      history : [ ...history, { ast, lastReduction, step : steps } ],
-      steps,
-      lastReduction,
+      ...evalState,
+      history : [ ...history, { ast, lastReduction, step : step + 1, message : '', isNormalForm : false } ],
     }
 
     this.setState({
@@ -455,10 +747,13 @@ export default class App extends Component<any, AppState> {
           expression : '',
           caretPosition : 0,
           syntaxError : null,
+          strategy : this.state.editorState.strategy,
+          singleLetterNames : this.state.editorState.singleLetterNames,
+          isExercise : this.state.editorState.isExercise,
         },
         submittedExpressions : [ ...submittedExpressions, macroState ],
         macroTable : newMacroTable,
-        activeBox : activeBox + 1,
+        activeBox : submittedExpressions.length,
       })
 
       this.updateMacros(newMacroTable)
@@ -480,9 +775,12 @@ export default class App extends Component<any, AppState> {
           expression : '',
           caretPosition : 0,
           syntaxError : null,
+          strategy : this.state.editorState.strategy,
+          singleLetterNames : this.state.editorState.singleLetterNames,
+          isExercise : this.state.editorState.isExercise,
         },
         submittedExpressions : [ ...submittedExpressions, noteState ],
-        activeBox : activeBox + 1,
+        activeBox : submittedExpressions.length,
       })
     }
 
@@ -497,15 +795,15 @@ export default class App extends Component<any, AppState> {
           __key : Date.now().toString(),
           expression,
           ast,
-          history : [ { ast : ast.clone(), lastReduction : None, step : 0 } ],
-          steps : 0,
+          history : [ { ast : ast.clone(), lastReduction : None, step : 0, message : '', isNormalForm : false } ],
           // isStepping : false,
           isRunning : false,
-          lastReduction : null,
           breakpoints : [],
           timeoutID : undefined,
           timeout : 10,
-          isExercise : false
+          isExercise : this.state.editorState.isExercise,
+          strategy : this.state.editorState.strategy,
+          singleLetterNames : this.state.editorState.singleLetterNames,
         }
   
         this.setState({
@@ -515,9 +813,12 @@ export default class App extends Component<any, AppState> {
             expression : '',
             caretPosition : 0,
             syntaxError : null,
+            strategy : this.state.editorState.strategy,
+            singleLetterNames : this.state.editorState.singleLetterNames,
+            isExercise : this.state.editorState.isExercise,
           },
           submittedExpressions : [ ...submittedExpressions, evaluationState ],
-          activeBox : activeBox + 1,
+          activeBox : submittedExpressions.length,
         })
     
       } catch (exception) {
@@ -531,6 +832,9 @@ export default class App extends Component<any, AppState> {
             expression,
             caretPosition,
             syntaxError : exception,
+            strategy : this.state.editorState.strategy,
+            singleLetterNames : this.state.editorState.singleLetterNames,
+            isExercise : this.state.editorState.isExercise,
           }
         })
       }
@@ -553,15 +857,19 @@ export default class App extends Component<any, AppState> {
         placeholder : this.state.editorState.placeholder,
         expression,
         caretPosition : expression.length,
-        syntaxError : null
+        syntaxError : null,
+        strategy : this.state.editorState.strategy,
+        singleLetterNames : this.state.editorState.singleLetterNames,
+        isExercise : this.state.editorState.isExercise,
       }
     })
   }
 
   // THROWS Exceptions
   parseExpression (expression : string) : AST {
-    const { singleLetterVars, macroTable } : AppState = this.state
-    
+    const { macroTable } : AppState = this.state
+    const { singleLetterNames : singleLetterVars } = this.state.editorState
+
     const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars })
     const ast : AST = parse(tokens, macroTable)
 

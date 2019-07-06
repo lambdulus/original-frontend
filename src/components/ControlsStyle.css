@@ -3,13 +3,7 @@
 }
 
 .enabled {
-  /* background: none; */
-  /* border-style: none; */
-	/* border-bottom: 2px solid navy; */
-  /* margin-left: 5px; */
-  /* margin-right: 5px;   */
   cursor: pointer;
-  /* padding-left: 5px; */
 }
 
 .disabled {
@@ -20,4 +14,17 @@
 #controls i {
   padding-left: 5px;
   padding-right: 5px;
+}
+
+.badge > .strategies {
+  display: none;
+}
+
+.badge:hover > .strategies {
+  display: inline-block;
+  border: none;
+}
+
+.badge:hover > .strategyName {
+  min-width: 13em;
 }

@@ -1,6 +1,9 @@
 import React, { ChangeEvent, useState, SetStateAction, Dispatch, KeyboardEvent } from 'react'
+const { Switch, Radio } = require('pretty-checkbox-react')
+import 'pretty-checkbox'
 
 import './EditorStyle.css'
+import { EvaluationStrategy } from '../App';
 
 
 interface EditorProperties {
@@ -9,9 +12,17 @@ interface EditorProperties {
   caretPosition : number
   onExpression (newExpression : string, caretPosition : number) : void
   onEnter () : void
+  onRun () : void
+  onReset () : void
+  onStrategy (strategy : EvaluationStrategy) : void
   // onDelete () : void
   // onStepBack () : void
   syntaxError : Error | null
+  strategy : EvaluationStrategy
+  singleLetterNames : boolean
+  onSingleLetterNames (enable : boolean) : void
+  isExercise : boolean,
+  onExercise (enable : boolean) : void
 }
 
 export default function Editor (props : EditorProperties) : JSX.Element {
@@ -21,8 +32,16 @@ export default function Editor (props : EditorProperties) : JSX.Element {
     caretPosition,
     onExpression,
     onEnter,
-    // onDelete,
+    onRun,
+    onReset,
     syntaxError,
+    strategy,
+    onStrategy,
+    singleLetterNames,
+    onSingleLetterNames,
+    isExercise,
+    onExercise,
+    // onDelete,
     // onStepBack,
   } : EditorProperties = props
   const lines : number = expression.split('\n').length
@@ -38,15 +57,54 @@ export default function Editor (props : EditorProperties) : JSX.Element {
   }
 
   const onKeyDown = (event : KeyboardEvent<HTMLTextAreaElement>) => {
-    if (! event.shiftKey && event.key === 'Enter') {
+    if (! event.shiftKey && ! event.ctrlKey && event.key === 'Enter') {
       event.preventDefault()
       onEnter()
     }
+    if (event.ctrlKey && event.key === 'Enter') {
+      event.preventDefault()
+      onRun()
+    }
+
+    if (event.ctrlKey && event.key === 'r') {
+      event.preventDefault()
+      onReset()
+    }
+
   }
 
   return (
     <div className='editorContainer'>
-      { syntaxError ? `${syntaxError}` : null }
+      <p className='badge'>ENTER for STEP</p>
+      <p className='badge'>CTRL + ENTER for RUN</p>
+      <p className='badge'>CTRL + R for RESET</p>
+
+      <div className='editorSettings'>
+        <Switch
+          checked={ singleLetterNames }
+          onChange={ (e : ChangeEvent<HTMLInputElement>) => onSingleLetterNames(e.target.checked) }
+          shape="slim"
+        >
+          single letter names
+        </Switch>
+
+        <Switch
+          checked={ isExercise }
+          onChange={ (e : ChangeEvent<HTMLInputElement>) => onExercise(e.target.checked) }
+          shape="slim"
+        >
+          exercise
+        </Switch>
+
+        <div className='strategies inlineblock'>
+          <Radio name="strategy" checked={ strategy === EvaluationStrategy.NORMAL } onChange={ () => onStrategy(EvaluationStrategy.NORMAL) } >Normal Evaluation</Radio>
+          <Radio name="strategy" checked={ strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => onStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative Evaluation</Radio>
+          <Radio name="strategy" checked={ strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => onStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio>
+        </div>
+      </div>
+      <p>
+        { syntaxError ? `${syntaxError}` : null }
+      </p>
 
       <div className="editor">
         <InputField
@@ -57,7 +115,6 @@ export default function Editor (props : EditorProperties) : JSX.Element {
           onChange={ onChange }
           onKeyDown={ onKeyDown }
         />
-        {/* <i id='editorEnter' className="fas fa-plus" onClick={ onEnter } /> */}
         </div>
 
     </div>

@@ -17,14 +17,14 @@ interface StepProperties {
 
 export default function Step (props : StepProperties) : JSX.Element | null {
   const { stepRecord, addBreakpoint, breakpoints, children } = props
-  const { ast : tree, lastReduction, step } = stepRecord
+  const { ast : tree, lastReduction, step, message } = stepRecord
 
   if (tree === null) {
     return null
   }
 
   // TODO: tohle se musi fixnout
-  // validni regex se musi dostat ze statu a ne si ho tedka vymyslet sam
+  // validni redex se musi dostat ze statu a ne si ho tedka vymyslet sam
 
   let redex : AST | null  = null
   const normal : NormalEvaluator = new NormalEvaluator(tree)
@@ -48,6 +48,14 @@ export default function Step (props : StepProperties) : JSX.Element | null {
         </p>
         { printer.print() }
         { children }
+        {
+          stepRecord.message === '' ?
+            null
+            :
+            <p className='stepMessage'>
+              { stepRecord.message }
+            </p>
+        }
       </div>
     </span>
   )

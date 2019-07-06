@@ -2,13 +2,14 @@ import React from 'react'
 import Box, { BoxState } from './Box';
 import { EvaluationState } from './Evaluator';
 import { AST } from 'lambdulus-core';
+import { EvaluationStrategy } from '../App';
 
 
 export interface EvaluatorProperties {
   submittedExpressions : Array<BoxState>
   updateState (state : BoxState, index : number) : void
   removeExpression (index : number) : void
-  editExpression (ast : AST) : void
+  editExpression (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) : void
   activeBox : number
   makeActive (index : number) : void
 }

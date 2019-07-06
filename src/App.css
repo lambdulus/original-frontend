@@ -40,7 +40,7 @@ li {
   width: 93vw;
   margin-left: 6em;
   margin-bottom: 5em;
-  height: 88vh;
+  height: 84vh;
   overflow-y: scroll
 }
 
@@ -67,5 +67,5 @@ li {
 }
 
 .macroSpace .box {
-  font-size: 1.5em;
+  font-size: 1.1em;
 }

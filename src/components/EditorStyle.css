@@ -30,6 +30,17 @@
   justify-content: space-between;
 }
 
+.editorSettings {
+  margin-left: 10px;
+}
+
+.strategies {
+  border: 0.1em solid gray;
+  border-left: 5px solid cadetblue;
+  padding: 3px;
+  border-radius: 0.5em;
+}
+
 #editorEnter {
   vertical-align: baseline;
   font-size: 2em;

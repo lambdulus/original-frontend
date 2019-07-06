@@ -77,7 +77,7 @@ function dehydrateBox (box : BoxState) : BoxState {
       ast : null as any,
       history : [],
       isRunning : false,
-      lastReduction : null,
+      // lastReduction : null,
       breakpoints : [],
       timeoutID : undefined,
     }
@@ -95,16 +95,17 @@ function dehydrate (state : AppState) : AppState {
   }
 }
 
-function hydrateBox (box : BoxState, config : Config) : BoxState {
+function hydrateBox (box : BoxState, macroTable : MacroMap) : BoxState {
   const { type } : BoxState = box
   
   if (type === BoxType.expression) {
-    const ast : AST = parseExpression((box as EvaluationState).expression, config)
+    const { singleLetterNames } = box as EvaluationState
+    const ast : AST = parseExpression((box as EvaluationState).expression, { macroTable, singleLetterNames })
 
     return {
       ...box,
       ast,
-      history : [ { ast, lastReduction : None, step : 0 } ],
+      history : [ { ast, lastReduction : None, step : 0, message : '', isNormalForm : false } ],
     }
   }
 
@@ -112,22 +113,22 @@ function hydrateBox (box : BoxState, config : Config) : BoxState {
 }
 
 function hydrate (dehydrated : AppState) : AppState {
-  const { singleLetterVars, macroTable } = dehydrated
-  const config = { singleLetterVars, macroTable }
+  const { macroTable } = dehydrated
+  const config = { macroTable }
 
   return {
     ...dehydrated,
-    submittedExpressions : dehydrated.submittedExpressions.map((box) => hydrateBox(box, config))
+    submittedExpressions : dehydrated.submittedExpressions.map((box) => hydrateBox(box, macroTable))
   }
 }
 
 interface Config {
-  singleLetterVars : boolean
+  singleLetterNames : boolean
   macroTable : MacroMap
 }
 
 function parseExpression (expression : string, config : Config) : AST {
-  const { singleLetterVars, macroTable } : Config = config
+  const { singleLetterNames : singleLetterVars, macroTable } : Config = config
   
   const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars })
   const ast : AST = parse(tokens, macroTable)

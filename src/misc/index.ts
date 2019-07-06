@@ -1,4 +1,3 @@
-import { strict } from "assert";
 import { MacroMap } from "lambdulus-core";
 
 export function debounce (fn : Function, treshold : number)

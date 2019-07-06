@@ -3,7 +3,7 @@ import { BoxType, BoxState } from './Box';
 
 
 export interface NoteState {
-    __key : string
+  __key : string
   type : BoxType
   note : string
 }

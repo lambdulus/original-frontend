@@ -60,6 +60,14 @@
   margin-right: 1em;
 }
 
+.stepMessage {
+  color: gray;
+  /* display: inline-block; */
+  /* margin: 0; */
+  font-size: 0.8em;
+  margin-left: 1.5em;
+}
+
 .inlineblock {
   display: inline-block;
 }
