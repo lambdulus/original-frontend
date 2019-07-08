@@ -6,6 +6,7 @@ import './StepStyle.css'
 import { Breakpoint, StepRecord } from './Evaluator'
 import ReactPrinter from './ReactPrinter';
 import ReductionMessage from './ReductionMessage';
+import { strategyToEvaluator, EvaluationStrategy, Evaluator } from '../App';
 
 
 interface StepProperties {
@@ -13,10 +14,11 @@ interface StepProperties {
   breakpoints : Array<Breakpoint>
   addBreakpoint (breakpoint : Breakpoint) : void
   children : JSX.Element
+  strategy : EvaluationStrategy
 }
 
 export default function Step (props : StepProperties) : JSX.Element | null {
-  const { stepRecord, addBreakpoint, breakpoints, children } = props
+  const { stepRecord, addBreakpoint, breakpoints, children, strategy } = props
   const { ast : tree, lastReduction, step, message } = stepRecord
 
   if (tree === null) {
@@ -27,7 +29,8 @@ export default function Step (props : StepProperties) : JSX.Element | null {
   // validni redex se musi dostat ze statu a ne si ho tedka vymyslet sam
 
   let redex : AST | null  = null
-  const normal : NormalEvaluator = new NormalEvaluator(tree)
+  // const normal : Evaluator = new NormalEvaluator(tree)
+  const normal : Evaluator = new (strategyToEvaluator(strategy) as any)(tree)
   
   if (normal.nextReduction instanceof Beta) {
     redex = normal.nextReduction.redex

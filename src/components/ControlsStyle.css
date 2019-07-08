@@ -28,3 +28,7 @@
 .badge:hover > .strategyName {
   min-width: 13em;
 }
+
+.tabbar {
+  width: 15vw;
+}

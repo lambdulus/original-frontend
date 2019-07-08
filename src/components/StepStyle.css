@@ -4,17 +4,29 @@
 }
 
 .left.redex {
-  background-color: #69f0ae;
-  border-radius: 5px;
-  /* padding: 1px; */
+  border-bottom: 2px solid #00701a;
+}
 
+.substitutedArg {
+  background-color: #81c784;
+  padding-left: 1px;
+  padding-right: 1px;
+  border-radius: 2px;
+}
+
+.right.redex > .substitutedArg {
+  background-color: #ffa4a2; /* #ec407a */
+  border-radius: 5px;
+  /* color: white; */
+
+  /* padding: 1px; */
 }
 
 .right.redex {
-  background-color: #ff80ab;
+  background-color: #ffa4a2; /* #ec407a */
   border-radius: 5px;
+  /* color: white; */
   /* padding: 1px; */
-
 }
 
 .activeStep .macro, .activeStep .lambda, .activeStep .argument, .activeStep .churchnumeral {
@@ -35,14 +47,22 @@
 
 }
 
-.breakpoint {
-  border-bottom: 3px solid black;
-  /* border-radius: 5px; */
+.breakpoint::after {
+  /* border-bottom: 3px solid black; */
+  content: "";
+  background-color: #ff1744;
+  border: 0.5px solid gray;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  top: -0.5em;
 }
 
-.application, .function, .variable, .macro, .churchnumeral {
-  /* padding: 10px; */
-}
+/* .application, .function, .variable, .macro, .churchnumeral {
+  padding: 10px;
+} */
 
 .lastReduction {
   color: gray;

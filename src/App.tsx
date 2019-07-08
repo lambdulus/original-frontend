@@ -108,6 +108,7 @@ export default class App extends Component<{}, AppState> {
     this.__onRun = this.__onRun.bind(this)
     this.onStop = this.onStop.bind(this)
     this.onClear = this.onClear.bind(this)
+    this.shouldBreak = this.shouldBreak.bind(this)
 
     this.onRun = this.onRun.bind(this)
 
@@ -379,8 +380,9 @@ export default class App extends Component<{}, AppState> {
     }
     
     const { ast, step, lastReduction, isNormalForm, message } = stepRecord
-    history[history.length - 1].message = 'Skipping some steps...'
-    history.push({ ast : ast.clone(), step, lastReduction, message, isNormalForm })
+    history.push(history[history.length - 1])
+    // history[history.length - 1].message = 'Skipping some steps...'
+    history[history.length - 2] = { ast : ast.clone(), step, lastReduction, message : 'Skipping some steps...', isNormalForm }
 
     this.onUpdateBoxState({
       ...evalState,
@@ -505,6 +507,7 @@ export default class App extends Component<{}, AppState> {
     ) {
       return true
     }
+
     if (reduction instanceof (breakpoint.type as any)
         && reduction instanceof Expansion && breakpoint.context instanceof ChurchNumeral
         && reduction.target.identifier === breakpoint.context.identifier

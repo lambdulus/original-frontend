@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState, SetStateAction, Dispatch, KeyboardEvent } from 'react'
-const { Switch, Radio } = require('pretty-checkbox-react')
+const { Switch, Radio, Checkbox } = require('pretty-checkbox-react')
 import 'pretty-checkbox'
 
 import './EditorStyle.css'
@@ -80,10 +80,11 @@ export default function Editor (props : EditorProperties) : JSX.Element {
       <p className='badge'>CTRL + R for RESET</p>
 
       <div className='editorSettings'>
+
         <Switch
           checked={ singleLetterNames }
           onChange={ (e : ChangeEvent<HTMLInputElement>) => onSingleLetterNames(e.target.checked) }
-          shape="slim"
+          shape="fill"
         >
           single letter names
         </Switch>
@@ -91,15 +92,15 @@ export default function Editor (props : EditorProperties) : JSX.Element {
         <Switch
           checked={ isExercise }
           onChange={ (e : ChangeEvent<HTMLInputElement>) => onExercise(e.target.checked) }
-          shape="slim"
+          shape="fill"
         >
           exercise
         </Switch>
 
         <div className='strategies inlineblock'>
-          <Radio name="strategy" checked={ strategy === EvaluationStrategy.NORMAL } onChange={ () => onStrategy(EvaluationStrategy.NORMAL) } >Normal Evaluation</Radio>
-          <Radio name="strategy" checked={ strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => onStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative Evaluation</Radio>
-          <Radio name="strategy" checked={ strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => onStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio>
+          <Radio style="fill" name="strategy" checked={ strategy === EvaluationStrategy.NORMAL } onChange={ () => onStrategy(EvaluationStrategy.NORMAL) } >Normal Evaluation</Radio>
+          <Radio style="fill" name="strategy" checked={ strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => onStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative Evaluation</Radio>
+          <Radio style="fill" name="strategy" checked={ strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => onStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio>
         </div>
       </div>
       <p>

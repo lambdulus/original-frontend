@@ -48,6 +48,14 @@ li:hover .hiddenMacroIcon {
   display: inline;
 }
 
+.controlBtn {
+  --mdc-theme-primary: #1976d2;
+  display: inline-block;
+  font-size: 0.5em;
+  margin-right: 1em;
+
+}
+
 .badge {
   padding: 2px;
   padding-left: 10px;
@@ -55,9 +63,13 @@ li:hover .hiddenMacroIcon {
   border: 2px solid black;
   border-radius: 1rem;
   display: inline-block;
-  font-size: 0.6em;
+  font-size: 0.5em;
   margin-right: 1em;
 }
+
+/* .mdc-button__label, .mdc-button--outlined {
+  border-color: black;
+} */
 
 .makeBadge {
   cursor: pointer;

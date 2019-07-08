@@ -97,6 +97,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
                   breakpoints={ breakpoints }
                   addBreakpoint={ () => {} }
                   stepRecord={ stepRecord }
+                  strategy={ strategy }
                 >
                   <i
                     className="hiddenIcon fas fa-pencil-alt"
@@ -110,6 +111,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
               breakpoints={ breakpoints }
               addBreakpoint={ this.addBreakpoint }
               stepRecord={ history[history.length - 1] }
+              strategy={ strategy }
             >
                 <i
                   className="hiddenIcon fas fa-pencil-alt"

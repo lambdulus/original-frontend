@@ -7,6 +7,7 @@ import { Breakpoint } from "./Evaluator";
 
 export default class ReactPrinter extends ASTVisitor {
   private rendered : JSX.Element | null = null
+  private argument : Variable | null = null
 
   private printMultiLambda (lambda : Lambda, accumulator : JSX.Element) : void {
     if (lambda.body instanceof Lambda) {
@@ -17,6 +18,13 @@ export default class ReactPrinter extends ASTVisitor {
         className += ' breakpoint'
       }
 
+      // TODO: same here
+      if (this.argument
+          &&
+          this.argument.name() === context.name()) {
+            className += ' substitutedArg'
+        }
+
       const args : JSX.Element = (
         <span className='arguments'>
           { accumulator } {' '}
@@ -24,7 +32,7 @@ export default class ReactPrinter extends ASTVisitor {
             className={ className }
             onClick={ () => this.onClick({ type : Beta, context, broken : new Set }) }
           >
-            { lambda.body.argument.name() }
+            { context.name() }
           </span>
         </span>
       )
@@ -77,7 +85,7 @@ export default class ReactPrinter extends ASTVisitor {
   }
 
   // TODO: little bit refactored, maybe keep going
-  onApplication(application: Application) : void {
+  onApplication (application: Application) : void {
     let leftClassName : string = 'left'
     let rightClassName : string = 'right'
 
@@ -89,6 +97,12 @@ export default class ReactPrinter extends ASTVisitor {
       ) {
         leftClassName += ' redex'
         rightClassName += ' redex'
+
+        // TODO: this is probably not good and should be done other way
+
+        if (application.left instanceof Lambda) {
+          this.argument = application.left.argument
+        }
     }
 
     if (application.right instanceof Application) {
@@ -115,16 +129,37 @@ export default class ReactPrinter extends ASTVisitor {
         { left } { right }
       </span>
     }
+
+    this.argument = null
   }
   
   // TODO: little bit refactored, maybe keep going
-  onLambda(lambda: Lambda) : void {
+  onLambda (lambda: Lambda) : void {
+    // TODO: this seems also not smart and clean
+    let argument : Variable | null = this.argument
+    if (this.argument !== lambda.argument
+        &&
+        this.argument !== null
+        &&
+        this.argument.name() === lambda.argument.name()) {
+      this.argument = null
+    }
+
+
+    // multilambda
     if (lambda.body instanceof Lambda) {
       const context : Variable = lambda.argument
       let className : string = 'argument'
 
       if (this.isBreakpoint(lambda.argument)) {
         className += ' breakpoint'
+      }
+
+      // TODO: same here
+      if (this.argument
+        &&
+        this.argument.name() === context.name()) {
+          className += ' substitutedArg'
       }
 
       const acc : JSX.Element = (
@@ -174,10 +209,14 @@ export default class ReactPrinter extends ASTVisitor {
         </span>
       )
     }
+
+    if (argument !== null) {
+      this.argument = argument
+    }
   }
   
   // TODO: little bit refactored, maybe keep going
-  onChurchNumeral(churchNumber: ChurchNumeral) : void {
+  onChurchNumeral (churchNumber: ChurchNumeral) : void {
     let className : string = 'churchnumeral'
 
     if (this.redex !== null
@@ -204,7 +243,7 @@ export default class ReactPrinter extends ASTVisitor {
   }
 
   // TODO: little bit refactored, maybe keep going  
-  onMacro(macro: Macro) : void {
+  onMacro (macro: Macro) : void {
     let className = 'macro'
 
     if (this.redex !== null && this.redex.identifier === macro.identifier && this.redex === macro) {
@@ -225,7 +264,16 @@ export default class ReactPrinter extends ASTVisitor {
     )
   }
   
-  onVariable(variable: Variable): void {
-    this.rendered = <span className='variable' >{ variable.name() }</span>
+  onVariable (variable: Variable): void {
+    // TODO: same here - not so clean
+    let className : string = 'variable'
+
+    if (this.argument
+        &&
+        this.argument.name() === variable.name()) {
+          className += ' substitutedArg'
+      }
+
+    this.rendered = <span className={ className } >{ variable.name() }</span>
   }
 }
