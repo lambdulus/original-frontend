@@ -1,8 +1,4 @@
 .box {
-  /* border-bottom-left-radius: 5px; */
-  /* border-bottom-right-radius: 5px; */
-
-  /* border: 1px solid black; */
   border-top: none;
   padding-left: 10px;
   padding-top: 10px;
@@ -11,7 +7,6 @@
 
   border: 1px solid #eee;
   border-radius: .25rem;
-  /* display: inline-block; */
 }
 
 .boxEval {
@@ -57,7 +52,7 @@ li:hover .hiddenMacroIcon {
 }
 
 .badge {
-  padding: 2px;
+  padding: 5px;
   padding-left: 10px;
   padding-right: 10px;
   border: 2px solid black;
@@ -66,10 +61,6 @@ li:hover .hiddenMacroIcon {
   font-size: 0.5em;
   margin-right: 1em;
 }
-
-/* .mdc-button__label, .mdc-button--outlined {
-  border-color: black;
-} */
 
 .makeBadge {
   cursor: pointer;

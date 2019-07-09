@@ -445,12 +445,23 @@ export default class App extends Component<{}, AppState> {
       (breakpoint : Breakpoint) =>
         this.shouldBreak(breakpoint, normal.nextReduction)
     )
-  
-    if (breakpoint !== undefined) {
+
+    if (breakpoint !== undefined
+        && history[history.length - 2].step === history[history.length - 1].step) {
       if (normal.nextReduction instanceof Expansion) {
         breakpoint.broken.add(normal.nextReduction.target)
       }
-      // TODO: ADD FOR BETA AND OTHERS TOO
+      if (normal.nextReduction instanceof Beta && normal.nextReduction.redex.left instanceof Lambda) {
+        breakpoint.broken.add(normal.nextReduction.redex.left.argument)
+      }
+    }
+    else if (breakpoint !== undefined) {
+      if (normal.nextReduction instanceof Expansion) {
+        breakpoint.broken.add(normal.nextReduction.target)
+      }
+      if (normal.nextReduction instanceof Beta && normal.nextReduction.redex.left instanceof Lambda) {
+        breakpoint.broken.add(normal.nextReduction.redex.left.argument)
+      }
 
       window.clearTimeout(timeoutID)
       
@@ -493,17 +504,17 @@ export default class App extends Component<{}, AppState> {
   }
 
   shouldBreak (breakpoint : Breakpoint, reduction : ASTReduction) : boolean {
-    if (reduction instanceof (breakpoint.type as any)
-        && reduction instanceof Beta && breakpoint.context instanceof Lambda
-        && reduction.target.identifier === breakpoint.context.body.identifier
-      ) {
-        return true
-    }
+    // if (reduction instanceof (breakpoint.type as any)
+    //     && reduction instanceof Beta && breakpoint.context instanceof Lambda
+    //     && reduction.target.identifier === breakpoint.context.body.identifier
+    //   ) {
+    //     return true
+    // }
     if (reduction instanceof (breakpoint.type as any)
         && reduction instanceof Beta && breakpoint.context instanceof Variable
         && reduction.redex.left instanceof Lambda
         && reduction.redex.left.argument.identifier === breakpoint.context.identifier
-        // && ! breakpoint.broken.has(reduction.redex.left.argument)
+        && ! breakpoint.broken.has(reduction.redex.left.argument)
     ) {
       return true
     }

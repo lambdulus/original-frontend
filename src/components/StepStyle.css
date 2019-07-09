@@ -29,7 +29,7 @@
   /* padding: 1px; */
 }
 
-.activeStep .macro, .activeStep .lambda, .activeStep .argument, .activeStep .churchnumeral {
+.activeStep .macro, .activeStep .argument, .activeStep .churchnumeral {
   cursor: pointer;
 }
 

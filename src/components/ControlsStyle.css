@@ -23,12 +23,13 @@
 .badge:hover > .strategies {
   display: inline-block;
   border: none;
+  /* padding: 0; */
 }
 
 .badge:hover > .strategyName {
   min-width: 13em;
 }
 
-.tabbar {
-  width: 15vw;
+.strategies {
+  padding: 0;
 }

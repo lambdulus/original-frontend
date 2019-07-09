@@ -30,7 +30,10 @@ export default class ReactPrinter extends ASTVisitor {
           { accumulator } {' '}
           <span
             className={ className }
-            onClick={ () => this.onClick({ type : Beta, context, broken : new Set }) }
+            onClick={ () => {
+              (context as any).identifier = Symbol()
+              this.onClick({ type : Beta, context, broken : new Set }) }
+            }
           >
             { context.name() }
           </span>
@@ -49,9 +52,11 @@ export default class ReactPrinter extends ASTVisitor {
           (
           <span
             className='lambda'
-            onClick={ () => {
-              this.onClick({ type : Beta, context : lambda, broken : new Set })}
-            }>
+            // onClick={ () => {
+            //   (lambda as any).identifier = Symbol()
+            //   this.onClick({ type : Beta, context : lambda, broken : new Set })}
+            // }
+            >
               λ { ' ' }
           </span>
           { accumulator } . { body }
@@ -165,7 +170,10 @@ export default class ReactPrinter extends ASTVisitor {
       const acc : JSX.Element = (
         <span
           className={ className }
-          onClick={ () => this.onClick({ type : Beta, context, broken : new Set }) }
+          onClick={ () => {
+            (context as any).identifier = Symbol()
+            this.onClick({ type : Beta, context, broken : new Set }) }
+          }
         >
           { lambda.argument.name() }
         </span>
@@ -193,14 +201,19 @@ export default class ReactPrinter extends ASTVisitor {
           (
           <span
             className='lambda'
-            onClick={ () => {
-              this.onClick({ type: Beta, context: lambda, broken : new Set })}
-            }>
+            // onClick={ () => {
+            //   (lambda as any).identifier = Symbol()
+            //   this.onClick({ type: Beta, context: lambda, broken : new Set })}
+            // }
+            >
               λ { ' ' }
           </span>
           <span
             className={ className }
-            onClick={ () => this.onClick({ type : Beta, context, broken : new Set }) }
+            onClick={ () => {
+              (context as any).identifier = Symbol()              
+              this.onClick({ type : Beta, context, broken : new Set }) }
+            }
           >
             { args } { ' ' }
           </span>
@@ -235,7 +248,10 @@ export default class ReactPrinter extends ASTVisitor {
     this.rendered = (
       <span
         className={ className }
-        onClick={ () => this.onClick({ type: Expansion, context : churchNumber, broken : new Set }) }
+        onClick={ () => {
+          (churchNumber as any).identifier = Symbol()
+          this.onClick({ type: Expansion, context : churchNumber, broken : new Set }) }
+        }
       >
         { churchNumber.name() }
       </span>
@@ -257,7 +273,10 @@ export default class ReactPrinter extends ASTVisitor {
     this.rendered = (
       <span
         className={ className }
-        onClick={ () => this.onClick({ type: Expansion, context : macro, broken : new Set }) }
+        onClick={ () => {
+          (macro as any).identifier = Symbol()
+          this.onClick({ type: Expansion, context : macro, broken : new Set }) }
+        }
       >
         { macro.name() }
       </span>
