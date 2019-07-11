@@ -21,6 +21,7 @@ interface BoxProperties {
   editExpression (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) : void
   isActive : boolean
   makeActive () : void
+  editor : JSX.Element
 }
 
 export default function Box (props : BoxProperties) : JSX.Element {
@@ -36,6 +37,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
           editExpression={ props.editExpression }
           isActive={ isActive }
           makeActive={ props.makeActive }
+          editor={ props.editor }
         />
       </div>
     )

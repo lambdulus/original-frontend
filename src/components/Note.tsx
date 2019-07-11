@@ -1,4 +1,6 @@
 import React from 'react'
+const ReactMarkdown = require('react-markdown')
+
 import { BoxType, BoxState } from './Box';
 
 
@@ -17,7 +19,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
 
   return (
     <div className='box boxNote'>
-      { note }
+      <ReactMarkdown source={ note } />
     </div>
   )
 }

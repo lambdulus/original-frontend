@@ -12,6 +12,7 @@ export interface EvaluatorProperties {
   editExpression (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) : void
   activeBox : number
   makeActive (index : number) : void
+  editor : JSX.Element
 }
 
 export default function EvaluatorSpace (props: EvaluatorProperties) : JSX.Element {
@@ -31,6 +32,7 @@ export default function EvaluatorSpace (props: EvaluatorProperties) : JSX.Elemen
                   editExpression={ props.editExpression }
                   isActive={ i === activeBox }
                   makeActive={ () => makeActive(i) }
+                  editor={ props.editor }
                 />
               </li>
               ) }

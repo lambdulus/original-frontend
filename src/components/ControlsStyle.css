@@ -23,13 +23,18 @@
 .badge:hover > .strategies {
   display: inline-block;
   border: none;
-  /* padding: 0; */
 }
 
 .badge:hover > .strategyName {
-  min-width: 13em;
+  min-width: 11em;
 }
 
-.strategies {
+.badge .strategies {
   padding: 0;
+  margin-top: 0px;
+  padding: 0px;
+}
+
+.exerciseSwitch {
+  font-size: 0.8em;
 }

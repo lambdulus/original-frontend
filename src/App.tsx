@@ -1,4 +1,6 @@
-import React, { Component } from 'react';
+import React, { Component, ChangeEvent } from 'react';
+const { Switch, Radio, Checkbox } = require('pretty-checkbox-react')
+import 'pretty-checkbox'
 
 import {
   AST,
@@ -20,8 +22,8 @@ import {
 } from 'lambdulus-core'
 
 import './App.css'
-import Editor from './components/Editor'
-import { debounce, trimStr, HANDY_MACROS, getExpressionFromURL, isNote, isMacroDefinition, getSavedMacros } from './misc';
+import Editor, { ActionType } from './components/Editor'
+import { debounce, trimStr, HANDY_MACROS, getExpressionFromURL, isMacroDefinition, getSavedMacros } from './misc';
 import { EvaluationState, Breakpoint, StepRecord } from './components/Evaluator';
 import TopBar from './components/MenuBar';
 import { BoxState, BoxType } from './components/Box';
@@ -41,7 +43,7 @@ export enum Screen {
 export enum PromptPlaceholder {
   INIT = 'type λ expression',
   EVAL_MODE = 'HIT ENTER AGAIN FOR NEXT STEP',
-  VALIDATE_MODE = 'HIT ENTER TO VALIDATE YOUR SKILL',
+  VALIDATE_MODE = 'write next step and hit enter for validation',
 }
 
 export enum EvaluationStrategy {
@@ -74,6 +76,8 @@ export interface AppState {
     strategy : EvaluationStrategy
     singleLetterNames : boolean
     isExercise : boolean
+    action : ActionType
+    isMarkDown : boolean
   }
   
   // singleLetterVars : boolean
@@ -109,6 +113,7 @@ export default class App extends Component<{}, AppState> {
     this.onStop = this.onStop.bind(this)
     this.onClear = this.onClear.bind(this)
     this.shouldBreak = this.shouldBreak.bind(this)
+    this.isNote = this.isNote.bind(this)
 
     this.onRun = this.onRun.bind(this)
 
@@ -125,6 +130,8 @@ export default class App extends Component<{}, AppState> {
         strategy : EvaluationStrategy.NORMAL,
         singleLetterNames : false,
         isExercise : false,
+        action : ActionType.ENTER_EXPRESSION,
+        isMarkDown : false,
       },
       // singleLetterVars : false,
       macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
@@ -144,6 +151,98 @@ export default class App extends Component<{}, AppState> {
       activeBox,
     } : AppState = this.state
 
+    let shouldRenderEditor : boolean = true
+
+    if (submittedExpressions[activeBox] !== undefined &&
+        submittedExpressions[activeBox].type === BoxType.expression &&
+        (submittedExpressions[activeBox] as EvaluationState).isExercise
+      ) {
+        shouldRenderEditor = false
+      }
+
+      const changeStrategy = (strategy : EvaluationStrategy) =>
+        this.setState({
+          ...this.state,
+          editorState : {
+            ...this.state.editorState,
+            strategy,
+          }
+        })
+
+      const getEditor = () =>
+      <Editor
+        placeholder={ placeholder }
+        expression={ expression }
+        caretPosition={ caretPosition }
+        onExpression={ this.onExpression }
+        onEnter={ this.onEnter }
+        syntaxError={ syntaxError }
+        onRun={ this.onRun }
+        onReset={ this.onClear }
+        strategy={ this.state.editorState.strategy }
+        onStrategy={ (strategy : EvaluationStrategy) => this.setState({
+          ...this.state,
+          editorState : {
+            ...this.state.editorState,
+            strategy,
+          }
+        }) }
+        singleLetterNames={ this.state.editorState.singleLetterNames }
+        onSingleLetterNames={ (enable : boolean) => this.setState({
+          ...this.state,
+          editorState : {
+            ...this.state.editorState,
+            singleLetterNames : enable,
+          }
+        }) }
+        isExercise={ isExercise }
+        onExercise={ (enable : boolean) => this.setState({
+          ...this.state,
+          editorState : {
+            ...this.state.editorState,
+            isExercise : enable,
+          }
+        }) }
+        // onDelete={ this.onRemoveExpression }
+        // onStepBack={ this.onRemoveLastStep }
+        action={ this.state.editorState.action }
+        onActionSelect={ (action : ActionType) => this.setState({
+          ...this.state,
+          editorState : {
+            ...this.state.editorState,
+            action,
+          }
+        }) }
+        onActionClick={ () => {
+          const { editorState : { action } } = this.state
+
+          if (action === ActionType.ENTER_EXPRESSION) {
+            this.onEnter()
+            return
+          }
+          if (action === ActionType.NEXT_STEP) {
+            this.onStep()
+            return
+          }
+          if (action === ActionType.RUN) {
+            // implement
+            return
+          }
+          if (action === ActionType.ENTER_EXERCISE) {
+            this.setState({
+              ...this.state,
+              editorState : {
+                ...this.state.editorState,
+                isExercise : true,
+              }
+            }, () => this.onEnter())
+          }
+          else {
+            // implement or delete 
+          }
+        } }
+      />
+
     const getEvaluatorSpace = () =>
     <EvaluatorSpace
       removeExpression={ this.onRemoveExpression }
@@ -160,6 +259,8 @@ export default class App extends Component<{}, AppState> {
             strategy,
             singleLetterNames,
             isExercise : false, // TODO: jenom momentalni rozhodnuti - popremyslim
+            action : this.state.editorState.action,
+            isMarkDown : this.state.editorState.isMarkDown,
           }
         })
       }
@@ -168,6 +269,7 @@ export default class App extends Component<{}, AppState> {
         ...this.state,
         activeBox : index,
       }) }
+      editor={ getEditor() }
     />
 
     const getMacroSpace = () =>
@@ -204,6 +306,66 @@ export default class App extends Component<{}, AppState> {
           }) }
          />
 
+
+        <div className='editorSettings'>
+          <div className='strategies'>
+            <p className='stratsLabel inlineblock'>Evaluation Strategies:</p>
+            <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.NORMAL } onChange={ () => changeStrategy(EvaluationStrategy.NORMAL) } >Normal</Radio>
+            <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => changeStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative</Radio>
+            {/* <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => changeStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio> */}
+          </div>
+
+          <Switch
+            checked={ this.state.editorState.singleLetterNames }
+            onChange={ (e : ChangeEvent<HTMLInputElement>) =>
+              this.setState({
+                ...this.state,
+                editorState : {
+                  ...this.state.editorState,
+                  singleLetterNames : e.target.checked,
+                }
+              })
+            }
+            disabled={ this.state.editorState.isMarkDown }
+            shape="fill"
+          >
+            Single Letter Names
+          </Switch>
+
+          <Switch
+            checked={ isExercise }
+            onChange={ (e : ChangeEvent<HTMLInputElement>) =>
+              this.setState({
+                ...this.state,
+                editorState : {
+                  ...this.state.editorState,
+                  isExercise : e.target.checked,
+                }
+              })
+            }
+            disabled={ this.state.editorState.isMarkDown }
+            shape="fill"
+          >
+            Exercise Mode
+          </Switch>
+
+          <Switch
+            checked={ this.state.editorState.isMarkDown }
+            onChange={ (e : ChangeEvent<HTMLInputElement>) =>
+              this.setState({
+                ...this.state,
+                editorState : {
+                  ...this.state.editorState,
+                  isMarkDown : e.target.checked,
+                }
+              })
+            }
+            shape="fill"
+          >
+            MarkDown Mode
+          </Switch>
+        </div>
+
         {
           screen === Screen.main ?
             getEvaluatorSpace()
@@ -214,42 +376,16 @@ export default class App extends Component<{}, AppState> {
               notebooks
         }
 
-        <Editor
-          placeholder={ placeholder }
-          expression={ expression }
-          caretPosition={ caretPosition }
-          onExpression={ this.onExpression }
-          onEnter={ this.onEnter }
-          syntaxError={ syntaxError }
-          onRun={ this.onRun }
-          onReset={ this.onClear }
-          strategy={ this.state.editorState.strategy }
-          onStrategy={ (strategy : EvaluationStrategy) => this.setState({
-            ...this.state,
-            editorState : {
-              ...this.state.editorState,
-              strategy,
-            }
-          }) }
-          singleLetterNames={ this.state.editorState.singleLetterNames }
-          onSingleLetterNames={ (enable : boolean) => this.setState({
-            ...this.state,
-            editorState : {
-              ...this.state.editorState,
-              singleLetterNames : enable,
-            }
-          }) }
-          isExercise={ isExercise }
-          onExercise={ (enable : boolean) => this.setState({
-            ...this.state,
-            editorState : {
-              ...this.state.editorState,
-              isExercise : enable,
-            }
-          }) }
-          // onDelete={ this.onRemoveExpression }
-          // onStepBack={ this.onRemoveLastStep }
-        />
+        { getEditor() }
+
+        {/* {
+          shouldRenderEditor ?
+            (
+              getEditor()
+            )
+            :
+            null
+        } */}
 
         {/* <div id="anchor"></div> */}
 
@@ -341,6 +477,10 @@ export default class App extends Component<{}, AppState> {
   onRun () : void {
     const { submittedExpressions, activeBox } = this.state
     const activeExpression = submittedExpressions[activeBox]
+
+    if (activeExpression === undefined) {
+      return // maybe in future it will submit first expression and immidiately run it idk
+    }
 
     if (activeExpression.type === BoxType.expression) {
       const activeExp = activeExpression as EvaluationState
@@ -446,16 +586,17 @@ export default class App extends Component<{}, AppState> {
         this.shouldBreak(breakpoint, normal.nextReduction)
     )
 
-    if (breakpoint !== undefined
-        && history[history.length - 2].step === history[history.length - 1].step) {
-      if (normal.nextReduction instanceof Expansion) {
-        breakpoint.broken.add(normal.nextReduction.target)
-      }
-      if (normal.nextReduction instanceof Beta && normal.nextReduction.redex.left instanceof Lambda) {
-        breakpoint.broken.add(normal.nextReduction.redex.left.argument)
-      }
-    }
-    else if (breakpoint !== undefined) {
+    // if (breakpoint !== undefined
+    //     && history[history.length - 2].step === history[history.length - 1].step) {
+    //   if (normal.nextReduction instanceof Expansion) {
+    //     breakpoint.broken.add(normal.nextReduction.target)
+    //   }
+    //   if (normal.nextReduction instanceof Beta && normal.nextReduction.redex.left instanceof Lambda) {
+    //     breakpoint.broken.add(normal.nextReduction.redex.left.argument)
+    //   }
+    // }
+    // else
+    if (breakpoint !== undefined) {
       if (normal.nextReduction instanceof Expansion) {
         breakpoint.broken.add(normal.nextReduction.target)
       }
@@ -764,6 +905,8 @@ export default class App extends Component<{}, AppState> {
           strategy : this.state.editorState.strategy,
           singleLetterNames : this.state.editorState.singleLetterNames,
           isExercise : this.state.editorState.isExercise,
+          action : this.state.editorState.action,
+          isMarkDown : this.state.editorState.isMarkDown,
         },
         submittedExpressions : [ ...submittedExpressions, macroState ],
         macroTable : newMacroTable,
@@ -773,13 +916,13 @@ export default class App extends Component<{}, AppState> {
       this.updateMacros(newMacroTable)
     }
 
-    else if (isNote(expression)) {
+    else if (this.isNote(expression)) {
       history.pushState({}, "", "#" + encodeURI(''))
 
       const noteState : NoteState = {
         type : BoxType.note,
         __key : Date.now().toString(),
-        note : expression.substring(1)
+        note : expression,
       }
 
       this.setState({
@@ -792,6 +935,8 @@ export default class App extends Component<{}, AppState> {
           strategy : this.state.editorState.strategy,
           singleLetterNames : this.state.editorState.singleLetterNames,
           isExercise : this.state.editorState.isExercise,
+          action : this.state.editorState.action,
+          isMarkDown : this.state.editorState.isMarkDown,
         },
         submittedExpressions : [ ...submittedExpressions, noteState ],
         activeBox : submittedExpressions.length,
@@ -830,6 +975,8 @@ export default class App extends Component<{}, AppState> {
             strategy : this.state.editorState.strategy,
             singleLetterNames : this.state.editorState.singleLetterNames,
             isExercise : this.state.editorState.isExercise,
+            action : this.state.editorState.action,
+            isMarkDown : this.state.editorState.isMarkDown,
           },
           submittedExpressions : [ ...submittedExpressions, evaluationState ],
           activeBox : submittedExpressions.length,
@@ -849,6 +996,8 @@ export default class App extends Component<{}, AppState> {
             strategy : this.state.editorState.strategy,
             singleLetterNames : this.state.editorState.singleLetterNames,
             isExercise : this.state.editorState.isExercise,
+            action : this.state.editorState.action,
+            isMarkDown : this.state.editorState.isMarkDown,
           }
         })
       }
@@ -875,6 +1024,8 @@ export default class App extends Component<{}, AppState> {
         strategy : this.state.editorState.strategy,
         singleLetterNames : this.state.editorState.singleLetterNames,
         isExercise : this.state.editorState.isExercise,
+        action : this.state.editorState.action,
+        isMarkDown : this.state.editorState.isMarkDown,
       }
     })
   }
@@ -906,5 +1057,9 @@ export default class App extends Component<{}, AppState> {
 
   updateMacros (macroTable : MacroMap) : void {
     window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
+  }
+
+  isNote (expression : string) : boolean {
+    return this.state.editorState.isMarkDown
   }
 }

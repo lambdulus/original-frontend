@@ -93,10 +93,11 @@ export default class ReactPrinter extends ASTVisitor {
   onApplication (application: Application) : void {
     let leftClassName : string = 'left'
     let rightClassName : string = 'right'
+    let set : boolean = false
 
     if (this.redex !== null
           &&
-        this.redex.identifier === application.identifier
+        this.redex.identifier === application.identifier // tohle je asi trosku useles
           &&
         this.redex === application
       ) {
@@ -107,12 +108,19 @@ export default class ReactPrinter extends ASTVisitor {
 
         if (application.left instanceof Lambda) {
           this.argument = application.left.argument
+          set = true
         }
     }
 
     if (application.right instanceof Application) {
       application.left.visit(this)
       const left : JSX.Element | null = <span className={ leftClassName }>{this.rendered}</span>
+
+      // tohle delam proto, ze se nesmi vypnout this.argument u libovolne aplikace, jenom u te ktera ho setnula
+      // priklad + 2 3a krokuj - zakomentuj a krokuj znovu Y se bude chovat spatne hned v prvnich krocich
+      if (set) {
+        this.argument = null
+      }
 
       application.right.visit(this)
       const right : JSX.Element | null = <span className={ rightClassName }>( { this.rendered } )</span>
@@ -126,6 +134,12 @@ export default class ReactPrinter extends ASTVisitor {
       application.left.visit(this)
       const left : JSX.Element | null = <span className={ leftClassName }>{this.rendered}</span>
 
+      // tohle delam proto, ze se nesmi vypnout this.argument u libovolne aplikace, jenom u te ktera ho setnula
+      // priklad + 2 3a krokuj - zakomentuj a krokuj znovu Y se bude chovat spatne hned v prvnich krocich
+      if (set) {
+        this.argument = null
+      }
+
       application.right.visit(this)
       const right : JSX.Element | null = <span className={ rightClassName }>{ this.rendered }</span>
 
@@ -134,8 +148,6 @@ export default class ReactPrinter extends ASTVisitor {
         { left } { right }
       </span>
     }
-
-    this.argument = null
   }
   
   // TODO: little bit refactored, maybe keep going

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ChangeEvent } from 'react'
 const { Switch, Radio } = require('pretty-checkbox-react')
 
 // import { Button } from '@material/react-button'
@@ -47,34 +47,45 @@ export default function Controls (props : ControlsProps) : JSX.Element {
     <div id="controls">
       
       {
-        isActive ?
+        // isActive ?
           <div>
-            <div className='badge inlineblock'>
+            {/* <div className='badge inlineblock'>
               active
-            </div>
+            </div> */}
             {
               singleLetterNames ?
               <div className='badge inlineblock'>
-                single letter names
+                Single Letter Names
               </div>
                 :
                 null
             }
             {
-              isExercise ?
-                <button
-                  className='controlBtn'
-                  onClick={ endExercise }
-                >
-                  end exercise
-                </button>
-                :
-                <button
-                  className='controlBtn'
-                  onClick={ makeExercise }
-                >
-                  make exercise
-                </button>
+              <Switch
+                className='exerciseSwitch'
+                checked={ isExercise }
+                onChange={ (e : ChangeEvent<HTMLInputElement>) =>
+                  e.target.checked ? makeExercise() : endExercise()
+                }
+                shape="fill"
+              >
+                Exercise
+              </Switch>
+
+              // isExercise ?
+              //   <button
+              //     className='controlBtn'
+              //     onClick={ endExercise }
+              //   >
+              //     end exercise
+              //   </button>
+              //   :
+              //   <button
+              //     className='controlBtn'
+              //     onClick={ makeExercise }
+              //   >
+              //     make exercise
+              //   </button>
             }
             <div className='badge'>
               <div className='strategyName inlineblock'>
@@ -83,7 +94,7 @@ export default function Controls (props : ControlsProps) : JSX.Element {
               <div className='strategies inlineblock'>
                 <Radio style="fill" name={ "strategy" + __key } checked={ strategy === EvaluationStrategy.NORMAL } onChange={ () => onStrategy(EvaluationStrategy.NORMAL) } >Normal Evaluation</Radio>
                 <Radio style="fill" name={ "strategy" + __key } checked={ strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => onStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative Evaluation</Radio>
-                <Radio style="fill" name={ "strategy" + __key } checked={ strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => onStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio>
+                {/* <Radio style="fill" name={ "strategy" + __key } checked={ strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => onStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio> */}
               </div>
             </div>
           </div>
@@ -91,18 +102,18 @@ export default function Controls (props : ControlsProps) : JSX.Element {
 
 
 
-            :
+            // :
 
 
 
 
-        <button
-          className='controlBtn'
-          color="primary"
-          onClick={ makeActive }
-        >
-          make active
-        </button>
+        // <button
+        //   className='controlBtn'
+        //   color="primary"
+        //   onClick={ makeActive }
+        // >
+        //   make active
+        // </button>
       }
       
       {/* <i

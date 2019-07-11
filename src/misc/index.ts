@@ -95,11 +95,6 @@ export function isMacroDefinition (expression : string) : boolean {
 }
 
 // TODO: does not have to be in this class
-export function isNote (expression : string) : boolean {
-  return expression.indexOf('#') === 0
-}
-
-// TODO: does not have to be in this class
 export function getExpressionFromURL () : string {
   return decodeURI(window.location.hash.substring(1))
 }

@@ -38,7 +38,7 @@ li {
 .evaluatorSpace, .macroSpace {
   padding-top: 10px;
   width: 93vw;
-  margin-left: 6em;
+  margin-left: 6vw;
   margin-bottom: 5em;
   height: 84vh;
   overflow-y: scroll
@@ -69,3 +69,25 @@ li {
 .macroSpace .box {
   font-size: 1.1em;
 }
+
+.editorSettings {
+  /* border: 2px solid red; */
+  width: 93vw;
+  margin-left: 6vw;
+  padding-top: 0px;
+  padding-bottom: 20px;
+  /* border: 0.1em solid grey; */
+  /* border-radius: 0.25rem; */
+}
+
+.strategies {
+  margin-top: 0px;
+  /* border: 0.1em solid gray; */
+  /* border-left: 5px solid cadetblue; */
+  padding: 3px;
+  /* border-radius: 0.5em; */
+}
+
+.stratsLabel {
+  margin-right: 10px;
+} 

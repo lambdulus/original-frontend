@@ -6,7 +6,6 @@
   outline: none;
   resize: none;
   border-style: none;
-  width:100%;
 }
 
 .editorContainer {
@@ -21,6 +20,33 @@
   border-radius: .25rem;
 }
 
+.boxExercise .editorContainer {
+  position: relative;
+
+  /* bottom: 1px; */
+  width: 99%;
+  left: 0;
+  border: 1px solid gray;
+  border-radius: 5px;
+
+  border-top: 5px solid cornflowerblue;
+  border-radius: .25rem;
+}
+
+.boxExercise .prompt {
+  font-size: 1.5em;
+  border: none;
+  overflow: auto;
+  outline: none;
+  resize: none;
+  border-style: none;
+}
+
+.boxExercise .editorError {
+  font-size: 0.5em;
+  margin: 5px;
+}
+
 .editor {
   position: relative;
   bottom: 0;
@@ -30,24 +56,13 @@
   justify-content: space-between;
 }
 
-.editorSettings {
-  margin-left: 10px;
-}
-
-.strategies {
-  border: 0.1em solid gray;
-  border-left: 5px solid cadetblue;
-  padding: 3px;
-  border-radius: 0.5em;
-}
-
-#editorEnter {
+#editorSplitDropBtn {
   vertical-align: baseline;
   font-size: 2em;
-  color: grey;
-  cursor: pointer;
+  /* color: grey; */
+  /* cursor: pointer; */
   display: inline-block;
-  padding: 12px;
+  /* padding: 12px; */
 }
 
 #editorEnter:hover {
@@ -57,3 +72,4 @@
 #editorEnter:active {
   color: #164b80;
 }
+

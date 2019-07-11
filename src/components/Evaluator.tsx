@@ -64,6 +64,7 @@ interface EvaluationProperties {
   editExpression (ast : AST, strategy : EvaluationStrategy, singleLEtterNames : boolean) : void
   makeActive () : void
   isActive : boolean
+  editor : JSX.Element
 }
 
 export default class Evaluator extends PureComponent<EvaluationProperties, EvaluationState> {
@@ -74,7 +75,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
   }
 
   render () : JSX.Element {
-    const { state, updateState } : EvaluationProperties = this.props
+    const { state, updateState, isActive, editor } : EvaluationProperties = this.props
     const {
       __key,
       history,
@@ -86,9 +87,69 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
     } : EvaluationState = state
 
     const stepRecord : StepRecord = history[history.length - 1]
+    let className : string = 'box boxEval'
+
+    if (isExercise) {
+      className += ' boxExercise'
+    }
+
+    if ( ! isActive) {
+      return (
+        <div className={ className } onDoubleClick={ this.props.makeActive } >
+          <ul>
+            {/* {
+              mapLeftFromTo(0, history.length - 2, history, (stepRecord, i) =>
+                <li key={ i } className='inactiveStep' >
+                  <Step
+                    breakpoints={ breakpoints }
+                    addBreakpoint={ () => {} }
+                    stepRecord={ stepRecord }
+                    strategy={ strategy }
+                  >
+                    <i
+                      className="hiddenIcon fas fa-pencil-alt"
+                      onClick={ () => this.props.editExpression(stepRecord.ast, state.strategy, singleLetterNames) }
+                    />
+                  </Step>
+                </li>)
+            } */}
+            <li key={ 0 } className='activeStep'>
+              <Step
+                breakpoints={ breakpoints }
+                addBreakpoint={ () => {} } // blank function - NOOP
+                stepRecord={ history[0] }
+                strategy={ strategy }
+              >
+                <i
+                  className="hiddenIcon fas fa-pencil-alt"
+                  onClick={ () => this.props.editExpression(history[0].ast, state.strategy, singleLetterNames) }
+                />
+              </Step>
+            </li>
+          </ul>
+          <p className='inactiveMessage'>
+            Collapsing { history.length - 1 } steps. Double click to activate this box.
+          </p>
+          {/* <Controls
+            isRunning={ isRunning }
+            isActive={ this.props.isActive }
+            makeActive={ this.props.makeActive }
+            isExercise={ isExercise }
+            makeExercise={ () => this.props.updateState({ isExercise : true }) }
+            endExercise={ () => this.props.updateState({ isExercise : false })  }
+            strategy={ strategy }
+            onStrategy={ (strategy : EvaluationStrategy) => updateState({
+              strategy
+            })  }
+            __key={ __key }
+            singleLetterNames={ singleLetterNames }
+          /> */}
+        </div>
+      )
+    }
 
     return (
-      <div className='box boxEval'>
+      <div className={ className }>
         <ul>
           {
             mapLeftFromTo(0, history.length - 2, history, (stepRecord, i) =>
@@ -134,6 +195,13 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
           __key={ __key }
           singleLetterNames={ singleLetterNames }
         />
+        {/* {
+          isExercise ?
+            editor
+            :
+            null
+        } */}
+
       </div>
     )
   }
