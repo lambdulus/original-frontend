@@ -20,7 +20,8 @@
   border-radius: .25rem;
 }
 
-.boxExercise .editorContainer {
+.box .editorContainer {
+  /* background-color: gray; */
   position: relative;
 
   /* bottom: 1px; */
@@ -29,11 +30,12 @@
   border: 1px solid gray;
   border-radius: 5px;
 
-  border-top: 5px solid cornflowerblue;
+  /* border-top: 5px solid cornflowerblue; */
   border-radius: .25rem;
 }
 
-.boxExercise .prompt {
+.box .prompt {
+  background-color: rgb(243, 243, 243);
   font-size: 1.5em;
   border: none;
   overflow: auto;
@@ -42,7 +44,7 @@
   border-style: none;
 }
 
-.boxExercise .editorError {
+.box .editorError {
   font-size: 0.5em;
   margin: 5px;
 }

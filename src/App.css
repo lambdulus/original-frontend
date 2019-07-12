@@ -39,13 +39,13 @@ i {
   padding-top: 10px;
   width: 93vw;
   margin-left: 6vw;
-  margin-bottom: 5em;
-  height: 80vh;
-  overflow-y: scroll
+  /* margin-bottom: 5em; */
+  height: 86vh;
+  /* overflow-y: scroll */
 }
 
-.evaluationHeader, .macroHeader, .noteHeader {
-  /* height: 1em; */
+/* .evaluationHeader, .macroHeader, .noteHeader {
+  height: 1em;
   background-color: #0091ea;
   color: white;
   border-top-left-radius: 5px;
@@ -55,8 +55,8 @@ i {
 
   font-size: 1.5em;
 
-  /* font-size: 1.5em; */
-}
+  /* font-size: 1.5em;
+} */
 
 .evaluationHeader i {
   color: white;
@@ -90,4 +90,50 @@ i {
 
 .stratsLabel {
   margin-right: 10px;
-} 
+}
+
+.bigEmpty {
+  width: 100%;
+}
+.emptyC {
+  margin: 0;
+  margin: auto;
+
+  padding: 0;
+  border-radius: 0.25rem;
+  text-align: center;
+  /* height: 10%; */
+  width: 5%;
+  padding: 5px;
+  background-color: rgb(243, 243, 243);
+}
+
+.bigEmpty .plusBtn {
+  font-size: 1em;
+  color: rgb(143, 143, 143);
+  vertical-align: center;
+  position: relative;
+  top: 30%;
+  /* padding-bottom: 50%; */
+  cursor: pointer;
+}
+
+.smallEmpty {
+  width: 100%;
+
+  /* margin: 0;
+  padding: 0;
+  border-radius: 0.25rem;
+  text-align: center;
+  background-color: rgb(243, 243, 243);
+  height: 10%; */
+}
+.smallEmpty .plusBtn {
+  font-size: 1em;
+  color: rgb(143, 143, 143);
+  vertical-align: center;
+  position: relative;
+  top: 30%;
+  /* padding-bottom: 50%; */
+  cursor: pointer;
+}

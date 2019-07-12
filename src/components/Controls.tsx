@@ -52,14 +52,14 @@ export default function Controls (props : ControlsProps) : JSX.Element {
             {/* <div className='badge inlineblock'>
               active
             </div> */}
-            {
+            {/* {
               singleLetterNames ?
               <div className='badge inlineblock'>
                 Single Letter Names
               </div>
                 :
                 null
-            }
+            } */}
             {
               <Switch
                 className='exerciseSwitch'
@@ -87,16 +87,16 @@ export default function Controls (props : ControlsProps) : JSX.Element {
               //     make exercise
               //   </button>
             }
-            <div className='badge'>
+            {/* <div className='badge'>
               <div className='strategyName inlineblock'>
                 { strategy }
               </div>
               <div className='strategies inlineblock'>
                 <Radio style="fill" name={ "strategy" + __key } checked={ strategy === EvaluationStrategy.NORMAL } onChange={ () => onStrategy(EvaluationStrategy.NORMAL) } >Normal Evaluation</Radio>
-                <Radio style="fill" name={ "strategy" + __key } checked={ strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => onStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative Evaluation</Radio>
+                <Radio style="fill" name={ "strategy" + __key } checked={ strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => onStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative Evaluation</Radio> */}
                 {/* <Radio style="fill" name={ "strategy" + __key } checked={ strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => onStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio> */}
-              </div>
-            </div>
+              {/* </div>
+            </div> */}
           </div>
 
 

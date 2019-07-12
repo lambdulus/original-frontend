@@ -28,7 +28,7 @@ export interface EvaluationState {
   __key : string
   type : BoxType
   expression : string
-  ast : AST
+  ast : AST | null
   history : Array<StepRecord>
   // steps : number
   isRunning : boolean
@@ -45,7 +45,7 @@ export interface EvaluationStatePatch {
   __key? : string
   type? : BoxType
   expression? : string
-  ast? : AST
+  ast? : AST | null
   history? : Array<StepRecord>
   // steps? : number
   isRunning? : boolean
@@ -65,6 +65,7 @@ interface EvaluationProperties {
   makeActive () : void
   isActive : boolean
   editor : JSX.Element
+  globalStrategy : EvaluationStrategy
 }
 
 export default class Evaluator extends PureComponent<EvaluationProperties, EvaluationState> {
@@ -84,10 +85,32 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
       isExercise,
       strategy,
       singleLetterNames,
+      expression,
     } : EvaluationState = state
 
-    const stepRecord : StepRecord = history[history.length - 1]
     let className : string = 'box boxEval'
+
+    if (expression === '') {
+      return (
+        <div className={ className + ' inactiveBox' } onDoubleClick={ this.props.makeActive } >
+          <p>Empty expression box. Write λ expression and hit enter.</p>
+          {
+            isActive ?
+              (
+                editor
+              )
+              :
+              (
+                <p className='inactiveMessage'>
+                  Collapsing { history.length - 1 } steps. Double click to activate this box.
+                </p>
+              )
+          }
+        </div>
+      )
+    }
+
+    const stepRecord : StepRecord = history[history.length - 1]
 
     if (isExercise) {
       className += ' boxExercise'
@@ -118,7 +141,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
                 breakpoints={ breakpoints }
                 addBreakpoint={ () => {} } // blank function - NOOP
                 stepRecord={ history[0] }
-                strategy={ strategy }
+                strategy={ this.props.globalStrategy }
               >
                 <i
                   className="hiddenIcon fas fa-pencil-alt"
@@ -150,37 +173,6 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
 
     return (
       <div className={ className }>
-        <ul className='UL'>
-          {
-            mapLeftFromTo(0, history.length - 2, history, (stepRecord, i) =>
-              <li key={ i } className='inactiveStep LI' >
-                <Step
-                  breakpoints={ breakpoints }
-                  addBreakpoint={ () => {} }
-                  stepRecord={ stepRecord }
-                  strategy={ strategy }
-                >
-                  <i
-                    className="hiddenIcon fas fa-pencil-alt"
-                    onClick={ () => this.props.editExpression(stepRecord.ast, state.strategy, singleLetterNames) }
-                  />
-                </Step>
-              </li>)
-          }
-          <li key={history.length - 1} className='activeStep LI'>
-            <Step
-              breakpoints={ breakpoints }
-              addBreakpoint={ this.addBreakpoint }
-              stepRecord={ history[history.length - 1] }
-              strategy={ strategy }
-            >
-                <i
-                  className="hiddenIcon fas fa-pencil-alt"
-                  onClick={ () => this.props.editExpression(history[history.length - 1].ast, state.strategy, singleLetterNames) }
-                />
-            </Step>
-          </li>
-        </ul>
         <Controls
           isRunning={ isRunning }
           isActive={ this.props.isActive }
@@ -195,12 +187,39 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
           __key={ __key }
           singleLetterNames={ singleLetterNames }
         />
-        {/* {
-          isExercise ?
-            editor
-            :
-            null
-        } */}
+        <ul className='UL'>
+          {
+            mapLeftFromTo(0, history.length - 2, history, (stepRecord, i) =>
+              <li key={ i } className='inactiveStep LI' >
+                <Step
+                  breakpoints={ breakpoints }
+                  addBreakpoint={ () => {} }
+                  stepRecord={ stepRecord }
+                  strategy={ this.props.globalStrategy }
+                >
+                  <i
+                    className="hiddenIcon fas fa-pencil-alt"
+                    onClick={ () => this.props.editExpression(stepRecord.ast, state.strategy, singleLetterNames) }
+                  />
+                </Step>
+              </li>)
+          }
+          <li key={history.length - 1} className='activeStep LI'>
+            <Step
+              breakpoints={ breakpoints }
+              addBreakpoint={ this.addBreakpoint }
+              stepRecord={ history[history.length - 1] }
+              strategy={ this.props.globalStrategy }
+            >
+                <i
+                  className="hiddenIcon fas fa-pencil-alt"
+                  onClick={ () => this.props.editExpression(history[history.length - 1].ast, state.strategy, singleLetterNames) }
+                />
+            </Step>
+          </li>
+        </ul>
+
+        { editor }
 
       </div>
     )

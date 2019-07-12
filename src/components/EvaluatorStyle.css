@@ -1,4 +1,5 @@
 .box {
+  position: relative;
   border-top: none;
   padding-left: 10px;
   padding-top: 10px;

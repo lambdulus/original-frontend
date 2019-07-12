@@ -22,6 +22,9 @@ interface BoxProperties {
   isActive : boolean
   makeActive () : void
   editor : JSX.Element
+  globalStrategy : EvaluationStrategy
+  onEnter () : void
+  onEditNote () : void
 }
 
 export default function Box (props : BoxProperties) : JSX.Element {
@@ -38,6 +41,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
           isActive={ isActive }
           makeActive={ props.makeActive }
           editor={ props.editor }
+          globalStrategy={ props.globalStrategy }
         />
       </div>
     )
@@ -54,7 +58,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
   if (type === BoxType.note) {
     return (
       <div className=''>
-        <Note state={ state as NoteState } />
+        <Note state={ state as NoteState } onEditNote={ props.onEditNote } editor={ props.editor } isActive={ isActive } onEnter={ props.onEnter } />
       </div>
     )
   }

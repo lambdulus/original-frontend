@@ -34,6 +34,7 @@ interface EditorProperties {
   action : ActionType
   onActionClick () : void
   onActionSelect (action : ActionType) : void
+  isMarkDown : boolean
 }
 
 export default function Editor (props : EditorProperties) : JSX.Element {
@@ -57,6 +58,7 @@ export default function Editor (props : EditorProperties) : JSX.Element {
     action,
     onActionClick,
     onActionSelect,
+    isMarkDown,
   } : EditorProperties = props
   const lines : number = expression.split('\n').length
 
@@ -71,6 +73,14 @@ export default function Editor (props : EditorProperties) : JSX.Element {
 
   const onKeyDown = (event : KeyboardEvent<HTMLTextAreaElement>) => {
     if (! event.shiftKey && ! event.ctrlKey && event.key === 'Enter') {
+      if (isMarkDown) {
+        return
+      }
+      event.preventDefault()
+      onEnter()
+    }
+
+    if (event.shiftKey && event.key === 'Enter' && isMarkDown) {
       event.preventDefault()
       onEnter()
     }

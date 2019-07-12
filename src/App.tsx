@@ -1,5 +1,5 @@
 import React, { Component, ChangeEvent } from 'react';
-const { Switch, Radio, Checkbox } = require('pretty-checkbox-react')
+const { Switch, Radio } = require('pretty-checkbox-react')
 import 'pretty-checkbox'
 
 import {
@@ -42,7 +42,7 @@ export enum Screen {
 
 export enum PromptPlaceholder {
   INIT = 'type λ expression',
-  EVAL_MODE = 'HIT ENTER AGAIN FOR NEXT STEP',
+  EVAL_MODE = 'hit enter for next step',
   VALIDATE_MODE = 'write next step and hit enter for validation',
 }
 
@@ -80,7 +80,6 @@ export interface AppState {
     isMarkDown : boolean
   }
   
-  // singleLetterVars : boolean
   macroTable : MacroMap
 
   submittedExpressions : Array<BoxState>
@@ -114,6 +113,9 @@ export default class App extends Component<{}, AppState> {
     this.onClear = this.onClear.bind(this)
     this.shouldBreak = this.shouldBreak.bind(this)
     this.isNote = this.isNote.bind(this)
+    this.addEmptyExp = this.addEmptyExp.bind(this)
+    this.addEmptyNote = this.addEmptyNote.bind(this)
+    this.onEditNote = this.onEditNote.bind(this)
 
     this.onRun = this.onRun.bind(this)
 
@@ -241,6 +243,7 @@ export default class App extends Component<{}, AppState> {
             // implement or delete 
           }
         } }
+        isMarkDown={ this.state.editorState.isMarkDown }
       />
 
     const getEvaluatorSpace = () =>
@@ -270,6 +273,11 @@ export default class App extends Component<{}, AppState> {
         activeBox : index,
       }) }
       editor={ getEditor() }
+      addEmptyExp={ this.addEmptyExp }
+      addEmptyNote={ this.addEmptyNote }
+      globalStrategy={ this.state.editorState.strategy }
+      onEnter={ this.onEnter }
+      onEditNote={ this.onEditNote }
     />
 
     const getMacroSpace = () =>
@@ -308,13 +316,7 @@ export default class App extends Component<{}, AppState> {
 
 
         <div className='editorSettings'>
-          <div className='strategies'>
-            <p className='stratsLabel inlineblock'>Evaluation Strategies:</p>
-            <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.NORMAL } onChange={ () => changeStrategy(EvaluationStrategy.NORMAL) } >Normal</Radio>
-            <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => changeStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative</Radio>
-            {/* <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => changeStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio> */}
-          </div>
-
+          
           <Switch
             checked={ this.state.editorState.singleLetterNames }
             onChange={ (e : ChangeEvent<HTMLInputElement>) =>
@@ -329,41 +331,51 @@ export default class App extends Component<{}, AppState> {
             disabled={ this.state.editorState.isMarkDown }
             shape="fill"
           >
-            Single Letter Names
+              Single Letter Names
           </Switch>
 
-          <Switch
-            checked={ isExercise }
-            onChange={ (e : ChangeEvent<HTMLInputElement>) =>
-              this.setState({
-                ...this.state,
-                editorState : {
-                  ...this.state.editorState,
-                  isExercise : e.target.checked,
-                }
-              })
-            }
-            disabled={ this.state.editorState.isMarkDown }
-            shape="fill"
-          >
-            Exercise Mode
-          </Switch>
+          <div className='strategies inlineblock'>
+            <p className='stratsLabel inlineblock'>Evaluation Strategies:</p>
+            <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.NORMAL } onChange={ () => changeStrategy(EvaluationStrategy.NORMAL) } >Normal</Radio>
+            <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => changeStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative</Radio>
+            {/* <Radio style="fill" name="strategy" checked={ this.state.editorState.strategy === EvaluationStrategy.OPTIMISATION } onChange={ () => changeStrategy(EvaluationStrategy.OPTIMISATION) } >Optimisation</Radio> */}
+          </div>
+          
 
-          <Switch
-            checked={ this.state.editorState.isMarkDown }
-            onChange={ (e : ChangeEvent<HTMLInputElement>) =>
-              this.setState({
-                ...this.state,
-                editorState : {
-                  ...this.state.editorState,
-                  isMarkDown : e.target.checked,
-                }
-              })
-            }
-            shape="fill"
-          >
-            MarkDown Mode
-          </Switch>
+          {/* <div className='inlineblock'>
+            <Switch
+              checked={ isExercise }
+              onChange={ (e : ChangeEvent<HTMLInputElement>) =>
+                this.setState({
+                  ...this.state,
+                  editorState : {
+                    ...this.state.editorState,
+                    isExercise : e.target.checked,
+                  }
+                })
+              }
+              disabled={ this.state.editorState.isMarkDown }
+              shape="fill"
+            >
+              Exercise Mode
+            </Switch>
+
+            <Switch
+              checked={ this.state.editorState.isMarkDown }
+              onChange={ (e : ChangeEvent<HTMLInputElement>) =>
+                this.setState({
+                  ...this.state,
+                  editorState : {
+                    ...this.state.editorState,
+                    isMarkDown : e.target.checked,
+                  }
+                })
+              }
+              shape="fill"
+            >
+              MarkDown Mode
+            </Switch>
+          </div> */}
         </div>
 
         {
@@ -376,7 +388,7 @@ export default class App extends Component<{}, AppState> {
               notebooks
         }
 
-        { getEditor() }
+        {/* { getEditor() } */}
 
         {/* {
           shouldRenderEditor ?
@@ -391,6 +403,63 @@ export default class App extends Component<{}, AppState> {
 
       </div>
     )
+  }
+
+  onEditNote (index : number) {
+    (this.state.submittedExpressions[index] as NoteState).isEditing = true
+
+
+    this.setState({
+      ...this.state,
+      activeBox : index,
+      editorState : {
+        ...this.state.editorState,
+        isMarkDown : true,
+        expression : (this.state.submittedExpressions[index] as NoteState).note
+      },
+    })
+  }
+
+  addEmptyNote () : void {
+    this.setState({
+      ...this.state,
+      editorState : {
+        ...this.state.editorState,
+        isMarkDown : true,
+      },
+      submittedExpressions : [ ...this.state.submittedExpressions, {
+        type : BoxType.note,
+        __key : Date.now().toString(),
+        note : '',
+        isEditing : true,
+      } ],
+      activeBox : this.state.activeBox + 1,
+    })
+  }
+
+  addEmptyExp () : void {
+    this.setState({
+      ...this.state,
+      editorState : {
+        ...this.state.editorState,
+        isMarkDown : false,
+      },
+      submittedExpressions : [ ...this.state.submittedExpressions, {
+          type : BoxType.expression,
+          __key : Date.now().toString(),
+          expression : '',
+          ast : null,
+          history : [ ],
+          isRunning : false,
+          breakpoints : [],
+          timeoutID : undefined,
+          timeout : 10,
+          isExercise : false,
+          strategy : this.state.editorState.strategy,
+          singleLetterNames : this.state.editorState.singleLetterNames,
+      } ],
+      activeBox : this.state.activeBox + 1,
+    })
   }
 
   // TODO: does not have to be in this class
@@ -533,10 +602,10 @@ export default class App extends Component<{}, AppState> {
   }
 
   __onRun () {
-    const { submittedExpressions, activeBox } = this.state
+    const { submittedExpressions, activeBox, editorState : { strategy } } = this.state
     const evalState = submittedExpressions[activeBox] as EvaluationState
     
-    let { history, isRunning, breakpoints, timeoutID, timeout, strategy } = evalState
+    let { history, isRunning, breakpoints, timeoutID, timeout } = evalState
     const stepRecord : StepRecord = history[history.length - 1]
     const { isNormalForm, step } = stepRecord
     let { lastReduction } = stepRecord
@@ -694,7 +763,7 @@ export default class App extends Component<{}, AppState> {
     this.onUpdateBoxState({
       ...evalState,
       history : [ {
-        ast : evalState.ast.clone(),
+        ast : (evalState.ast as AST).clone(),
         lastReduction : None,
         step : 0,
         message : '',
@@ -726,13 +795,13 @@ export default class App extends Component<{}, AppState> {
   }
 
   onExerciseStep () {
-    const { editorState : { expression } } = this.state
+    const { editorState : { expression, strategy } } = this.state
     try {
       const userAst : AST = this.parseExpression(expression)
 
       const { submittedExpressions, activeBox } = this.state
       const evalState : EvaluationState = submittedExpressions[activeBox] as EvaluationState
-      let { history, strategy } = evalState
+      let { history } = evalState
       const stepRecord : StepRecord = history[history.length - 1]
       const { isNormalForm, step } = stepRecord
       let { ast, lastReduction } = stepRecord
@@ -814,9 +883,9 @@ export default class App extends Component<{}, AppState> {
   }
 
   onStep () : void {
-    const { submittedExpressions, activeBox } = this.state
+    const { submittedExpressions, activeBox, editorState : { strategy } } = this.state
     const evalState : EvaluationState = submittedExpressions[activeBox] as EvaluationState
-    let { history, strategy } = evalState
+    let { history } = evalState
     const stepRecord = history[history.length - 1]
     const { isNormalForm, step } = stepRecord
     let { ast, lastReduction } = stepRecord
@@ -910,7 +979,7 @@ export default class App extends Component<{}, AppState> {
         },
         submittedExpressions : [ ...submittedExpressions, macroState ],
         macroTable : newMacroTable,
-        activeBox : submittedExpressions.length,
+        activeBox : submittedExpressions.length - 1,
       })
 
       this.updateMacros(newMacroTable)
@@ -923,7 +992,10 @@ export default class App extends Component<{}, AppState> {
         type : BoxType.note,
         __key : Date.now().toString(),
         note : expression,
+        isEditing : false,
       }
+
+      submittedExpressions[submittedExpressions.length - 1] = noteState
 
       this.setState({
         ...this.state,
@@ -936,10 +1008,10 @@ export default class App extends Component<{}, AppState> {
           singleLetterNames : this.state.editorState.singleLetterNames,
           isExercise : this.state.editorState.isExercise,
           action : this.state.editorState.action,
-          isMarkDown : this.state.editorState.isMarkDown,
+          isMarkDown : false,
         },
-        submittedExpressions : [ ...submittedExpressions, noteState ],
-        activeBox : submittedExpressions.length,
+        submittedExpressions,
+        activeBox : submittedExpressions.length - 1,
       })
     }
 
@@ -964,6 +1036,8 @@ export default class App extends Component<{}, AppState> {
           strategy : this.state.editorState.strategy,
           singleLetterNames : this.state.editorState.singleLetterNames,
         }
+
+        submittedExpressions[submittedExpressions.length - 1] = evaluationState
   
         this.setState({
           ...this.state,
@@ -978,8 +1052,8 @@ export default class App extends Component<{}, AppState> {
             action : this.state.editorState.action,
             isMarkDown : this.state.editorState.isMarkDown,
           },
-          submittedExpressions : [ ...submittedExpressions, evaluationState ],
-          activeBox : submittedExpressions.length,
+          submittedExpressions,
+          activeBox : submittedExpressions.length - 1,
         })
     
       } catch (exception) {

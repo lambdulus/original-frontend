@@ -1,4 +1,7 @@
 #controls {
+  position: absolute;
+  top: 0;
+  right: 0;
   margin-bottom: 10px;
 }
 
