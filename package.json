@@ -14,6 +14,7 @@
     "@types/react-bootstrap": "^0.32.19",
     "@types/react-dom": "16.8.2",
     "@types/react-sidebar": "^3.0.0",
+    "github-markdown-css": "^3.0.1",
     "lambdulus-core": "git+ssh://git@github.com/Taskkill/lambdulus-core.git",
     "material-ui": "^0.20.2",
     "pretty-checkbox": "^3.0.3",

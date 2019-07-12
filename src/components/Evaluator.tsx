@@ -95,8 +95,8 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
 
     if ( ! isActive) {
       return (
-        <div className={ className } onDoubleClick={ this.props.makeActive } >
-          <ul>
+        <div className={ className + ' inactiveBox' } onDoubleClick={ this.props.makeActive } >
+          <ul className='UL'>
             {/* {
               mapLeftFromTo(0, history.length - 2, history, (stepRecord, i) =>
                 <li key={ i } className='inactiveStep' >
@@ -113,7 +113,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
                   </Step>
                 </li>)
             } */}
-            <li key={ 0 } className='activeStep'>
+            <li key={ 0 } className='activeStep LI'>
               <Step
                 breakpoints={ breakpoints }
                 addBreakpoint={ () => {} } // blank function - NOOP
@@ -150,10 +150,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
 
     return (
       <div className={ className }>
-        <ul>
+        <ul className='UL'>
           {
             mapLeftFromTo(0, history.length - 2, history, (stepRecord, i) =>
-              <li key={ i } className='inactiveStep' >
+              <li key={ i } className='inactiveStep LI' >
                 <Step
                   breakpoints={ breakpoints }
                   addBreakpoint={ () => {} }
@@ -167,7 +167,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
                 </Step>
               </li>)
           }
-          <li key={history.length - 1} className='activeStep'>
+          <li key={history.length - 1} className='activeStep LI'>
             <Step
               breakpoints={ breakpoints }
               addBreakpoint={ this.addBreakpoint }

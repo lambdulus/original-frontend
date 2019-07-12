@@ -22,9 +22,9 @@ export default function EvaluatorSpace (props: EvaluatorProperties) : JSX.Elemen
     <div className='evaluatorSpace'>
       {
         submittedExpressions.length ?
-          <ul className='evaluatorList'>
+          <ul className='evaluatorList UL'>
             { submittedExpressions.map((state : BoxState, i : number) =>
-              <li key={ state.__key }>
+              <li className='LI' key={ state.__key }>
                 <Box
                   state={ state }
                   updateState={ (state : EvaluationState) => updateState(state, i) }

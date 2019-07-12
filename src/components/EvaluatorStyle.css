@@ -13,6 +13,10 @@
   border-left: 5px solid cornflowerblue;
 }
 
+.boxEval.inactiveBox {
+  border-left: 5px solid rgb(150, 187, 255);
+}
+
 .boxMacro {
   border-left: 5px solid darkgoldenrod;
   padding-top: 2px;
@@ -22,6 +26,8 @@
 .boxNote {
   padding-top: 5px;
   padding-bottom: 5px;
+  font-size: 1em;
+
 }
 
 .inactiveStep {

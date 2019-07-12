@@ -1,5 +1,7 @@
 import React from 'react'
 const ReactMarkdown = require('react-markdown')
+// const renderers = require('react-markdown-github-renderers')
+import 'github-markdown-css'
 
 import { BoxType, BoxState } from './Box';
 
@@ -18,7 +20,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
   const { state : { note } } : NoteProperties = props
 
   return (
-    <div className='box boxNote'>
+    <div className='box boxNote markdown-body'>
       <ReactMarkdown source={ note } />
     </div>
   )

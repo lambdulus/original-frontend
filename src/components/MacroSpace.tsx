@@ -13,10 +13,10 @@ export default function MacroSpace (props : MacroProperties) : JSX.Element {
   return (
     <div className='macroSpace'>
       <p>Built-in Macros</p>
-      <ul>
+      <ul className='UL'>
         { Object.entries(builtinMacros).map(([macroName, macroExpression]) =>
           <div key={ macroName }>
-            <li>
+            <li className='LI'>
               <div className='box boxMacro'>
                 { macroName } := { macroExpression }
               </div>
@@ -29,7 +29,7 @@ export default function MacroSpace (props : MacroProperties) : JSX.Element {
       <ul>
         { Object.entries(macroTable).map(([macroName, macroExpression]) =>
             <div key={ macroName }>
-              <li>
+              <li className='LI'>
                 <div className='box boxMacro'>
                   { macroName } := { macroExpression }
                   <i className="hiddenMacroIcon far fa-trash-alt" onClick={ () => removeMacro(macroName) } />

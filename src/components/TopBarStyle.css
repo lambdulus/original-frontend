@@ -67,13 +67,22 @@
   }
 
   .evaluatorSpace, .macroSpace {
-    margin-top: 5em;
+    margin-top: 10em;
     margin-left: 1vw;
+    height: 70vh;
   }
 
   .editorContainer {
     bottom: 1px;
     width: 98vw;
     left: 1vw;
+  }
+  
+  .editorSettings {
+    position: fixed;
+    top: 8vw;
+    left: 0;
+    margin-left: 20px;
+    margin-top: 0vh;
   }
 }
