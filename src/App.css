@@ -94,18 +94,30 @@ i {
 
 .bigEmpty {
   width: 100%;
+  position: relative;
 }
 .emptyC {
   margin: 0;
-  margin: auto;
-
-  padding: 0;
+  /* margin: auto; */
+  position: absolute;
+  right: 20px;
   border-radius: 0.25rem;
   text-align: center;
   /* height: 10%; */
-  width: 5%;
+  /* width: 5%; */
   padding: 5px;
   background-color: rgb(243, 243, 243);
+}
+
+.emptyC p {
+  border-radius: 0.25rem;
+  padding-right: 10px;
+  margin: 0;
+}
+
+.emptyC p:hover {
+  background-color: rgb(194, 194, 194);
+  
 }
 
 .bigEmpty .plusBtn {

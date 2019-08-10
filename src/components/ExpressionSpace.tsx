@@ -28,9 +28,9 @@ export default function EvaluatorSpace (props: EvaluatorProperties) : JSX.Elemen
       <div className='evaluatorSpace'>
         <div className='bigEmpty'>
           <div className='emptyC'>
-            <p className='plusBtn' onClick={ props.addEmptyExp }><i>+ λ</i></p>
-            <p className='plusBtn' onClick={ props.addEmptyExp }><i>+ Macro</i></p>
-            <p className='plusBtn' onClick={ props.addEmptyNote }><i>+ MD</i></p>          
+            <p className='plusBtn inlineblock' onClick={ props.addEmptyExp }><i>+ λ</i></p>
+            <p className='plusBtn inlineblock' onClick={ props.addEmptyExp }><i>+ Macro</i></p>
+            <p className='plusBtn inlineblock' onClick={ props.addEmptyNote }><i>+ MD</i></p>          
           </div>
         </div>
       </div>
@@ -60,9 +60,9 @@ export default function EvaluatorSpace (props: EvaluatorProperties) : JSX.Elemen
               ) }
               <div className='smallEmpty'>
                 <div className='emptyC'>
-                  <p className='plusBtn' onClick={ props.addEmptyExp }><i>+ λ</i></p>
-                  <p className='plusBtn' onClick={ props.addEmptyExp }><i>+ Macro</i></p>
-                  <p className='plusBtn' onClick={ props.addEmptyNote }><i>+ MD</i></p>
+                  <p className='plusBtn inlineblock' onClick={ props.addEmptyExp }><i>+ λ</i></p>
+                  <p className='plusBtn inlineblock' onClick={ props.addEmptyExp }><i>+ Macro</i></p>
+                  <p className='plusBtn inlineblock' onClick={ props.addEmptyNote }><i>+ MD</i></p>
                 </div>
               </div>
           </ul>

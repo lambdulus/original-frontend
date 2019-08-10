@@ -130,7 +130,7 @@ export default class App extends Component<{}, AppState> {
         caretPosition : expression.length,
         syntaxError : null,
         strategy : EvaluationStrategy.NORMAL,
-        singleLetterNames : false,
+        singleLetterNames : true,
         isExercise : false,
         action : ActionType.ENTER_EXPRESSION,
         isMarkDown : false,
@@ -1101,7 +1101,7 @@ export default class App extends Component<{}, AppState> {
         action : this.state.editorState.action,
         isMarkDown : this.state.editorState.isMarkDown,
       }
-    })
+    }, () => this.addEmptyExp())
   }
 
   // THROWS Exceptions

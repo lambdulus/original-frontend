@@ -93,7 +93,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties, Evalu
     if (expression === '') {
       return (
         <div className={ className + ' inactiveBox' } onDoubleClick={ this.props.makeActive } >
-          <p>Empty expression box. Write λ expression and hit enter.</p>
+          <p className='emptyStep'>Empty expression box. Write λ expression and hit enter.</p>
           {
             isActive ?
               (

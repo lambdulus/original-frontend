@@ -15,7 +15,7 @@
 }
 
 .boxEval.inactiveBox {
-  border-left: 5px solid rgb(150, 187, 255);
+  border-left: 5px solid rgb(167, 197, 255);
 }
 
 .boxMacro {
@@ -81,4 +81,10 @@ li:hover .hiddenMacroIcon {
   color: gray;
   font-size: 0.6em;
   margin-left: 0;
+}
+
+.emptyStep {
+  margin-top: 0;
+  margin-bottom: 5px;
+
 }
