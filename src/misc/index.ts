@@ -5,6 +5,20 @@ export function getSavedMacros () : MacroMap {
   return JSON.parse(window.localStorage.getItem('macrotable') || '{}')
 }
 
+export function mapLeftFromTo(
+  from : number,
+  to : number,
+  sequence : Array<any>,
+  fn : (...args : Array<any>) => any) {
+    const result : Array<any> = new Array(to - from + 1)
+
+    for (let e = 0, i = from; i <= to; ++i) {
+      result[e++] = fn(sequence[i], i)
+    }
+
+    return result
+  }
+
 export const HANDY_MACROS : MacroMap = {
   FACT : '(Y (λ f n . (<= n 1) 1 (* n (f (- n 1)))))',
   FACCT : '(λ n . (Y (λ f n a . IF (= n 1) a (f (- n 1) (* n a)))) (- n 1) (n))',

@@ -22,6 +22,8 @@ import {
 
 import './App.css'
 import { HANDY_MACROS, getSavedMacros } from './misc'
+import MenuBar from './components/MenuBar'
+import BoxSpace from './components/BoxSpace'
 
 
 export enum EvaluationStrategy {
@@ -57,7 +59,7 @@ export interface AppState {
     content : string
     caretPosition : number
     syntaxError : Error | null
-    action : ActionTyp
+    action : ActionType
   }
   
   macroTable : MacroMap
@@ -201,7 +203,7 @@ export default class App extends Component<{}, AppState> {
     />
 
     const getEvaluatorSpace = () =>
-    <EvaluatorSpace
+    <BoxSpace
       removeExpression={ this.onRemoveExpression }
       updateState={ this.onUpdateEvaluationState }
       submittedExpressions={ submittedExpressions }
@@ -245,7 +247,7 @@ export default class App extends Component<{}, AppState> {
     return (
       <div className='app'>
 
-        <TopBar
+        <MenuBar
           state={this.state}
           onImport={ (state : AppState) => this.setState(state) }
           onScreenChange={ (screen : Screen) => this.setState({
