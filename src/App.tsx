@@ -45,13 +45,6 @@ export interface AppState {
     isExercise : boolean
     isMarkDown : boolean 
   }
-  editor : { // pokud si kazdy Box bude renderovat svuj editor, tak tady tohle nebude globalni state prop
-    placeholder : string
-    content : string
-    caretPosition : number
-    syntaxError : Error | null
-    action : ActionType
-  }
   
   macroTable : MacroMap
 
@@ -86,13 +79,6 @@ export default class App extends Component<{}, AppState> {
         isExercise : false,
         isMarkDown : false,
       },
-      editor : {
-        placeholder : PromptPlaceholder.INIT,
-        content : '',
-        caretPosition : 0,
-        syntaxError : null,
-        action : ActionType.ENTER_EXPRESSION,
-      },
       macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
       submittedBoxes : [],
       screen : Screen.main,
@@ -103,7 +89,6 @@ export default class App extends Component<{}, AppState> {
   render () : JSX.Element {
     const {
       settings : { isExercise },
-      editor : { content, caretPosition, syntaxError, placeholder },
       macroTable,
       submittedBoxes,
       screen,
@@ -119,81 +104,6 @@ export default class App extends Component<{}, AppState> {
         }
       })
 
-
-    const getEditor = () =>
-    <Editor
-      placeholder={ placeholder } // data
-      content={ content } // data
-      caretPosition={ caretPosition } // data
-      syntaxError={ syntaxError } // data
-      strategy={ this.state.settings.strategy } // data
-      singleLetterNames={ this.state.settings.singleLetterNames } // data
-      isExercise={ isExercise } // data
-      action={ this.state.editor.action } // data
-      isMarkDown={ this.state.settings.isMarkDown } // data
-
-      onContent={ this.onExpression } // fn
-      onEnter={ this.onEnter } // fn
-      onRun={ this.onRun } // fn
-      onReset={ this.onClear } // fn
-      onStrategy={ (strategy : EvaluationStrategy) => this.setState({
-        ...this.state,
-        settings : {
-          ...this.state.settings,
-          strategy,
-        }
-      }) }
-      onSingleLetterNames={ (enabled : boolean) => this.setState({
-        ...this.state,
-        settings : {
-          ...this.state.settings,
-          singleLetterNames : enabled,
-        }
-      }) }
-      onExercise={ (enabled : boolean) => this.setState({
-        ...this.state,
-        settings : {
-          ...this.state.settings,
-          isExercise : enabled,
-        }
-      }) }
-      onActionSelect={ (action : ActionType) => this.setState({
-        ...this.state,
-        editor : {
-          ...this.state.editor,
-          action,
-        }
-      }) }
-      onActionClick={ () => {
-        const { editor : { action } } = this.state
-
-        if (action === ActionType.ENTER_EXPRESSION) {
-          this.onEnter()
-          return
-        }
-        if (action === ActionType.NEXT_STEP) {
-          this.onStep()
-          return
-        }
-        if (action === ActionType.RUN) {
-          // implement
-          return
-        }
-        if (action === ActionType.ENTER_EXERCISE) {
-          this.setState({
-            ...this.state,
-            settings : {
-              ...this.state.settings,
-              isExercise : true,
-            }
-          }, () => this.onEnter())
-        }
-        else {
-          // implement or delete 
-        }
-      } }
-    />
-
     const getEvaluatorSpace = () =>
     <BoxSpace
       submittedBoxes={ submittedBoxes }
@@ -207,6 +117,7 @@ export default class App extends Component<{}, AppState> {
       addEmptyNote={ this.addEmptyNote }
       onEditNote={ this.onEditNote }
 
+      // TODO: tohle je asi spatne, chce to metodu ktera updatne konkretni BoxState a nic vic neni potreba
       editExpression={ (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) =>
         this.setState({
           ...this.state,
@@ -216,22 +127,12 @@ export default class App extends Component<{}, AppState> {
             isExercise : false, // TODO: jenom momentalni rozhodnuti - popremyslim
             isMarkDown : this.state.settings.isMarkDown,
           },
-          editor : {
-            placeholder : PromptPlaceholder.INIT,
-            content : ast.toString(),
-            caretPosition : ast.toString().length,
-            syntaxError : null,
-            action : this.state.editor.action,
-          }
         })
       }
       makeActive={ (index : number) => this.setState({
         ...this.state,
         activeBoxIndex : index,
       }) }
-      
-      
-      editor={ getEditor() } // tohle delat nebudu - kazdy box si vyrenderuje svuj editor rekl bych
     />
 
     const getMacroSpace = () =>

@@ -8,6 +8,13 @@ export interface MacroDefinitionState {
   type : BoxType
   macroName : string
   macroExpression : string
+  editor : {
+    placeholder : string
+    content : string
+    caretPosition : number
+    syntaxError : Error | null
+    // action : ActionType
+  }
 }
 
 export interface MacroDefinitionProperties {
@@ -16,6 +23,8 @@ export interface MacroDefinitionProperties {
 
 export default function MacroDefinition (props : MacroDefinitionProperties) : JSX.Element {
   const { state : { macroName, macroExpression } } : MacroDefinitionProperties = props
+
+  // TODO: implement same as Evaluator - editor and stuff
 
   return (
     <div className='box boxMacro'>
