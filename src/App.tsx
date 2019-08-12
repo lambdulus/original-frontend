@@ -45,7 +45,7 @@ export interface AppState {
     isExercise : boolean
     isMarkDown : boolean 
   }
-  editor : {
+  editor : { // pokud si kazdy Box bude renderovat svuj editor, tak tady tohle nebude globalni state prop
     placeholder : string
     content : string
     caretPosition : number
@@ -197,9 +197,16 @@ export default class App extends Component<{}, AppState> {
     const getEvaluatorSpace = () =>
     <BoxSpace
       submittedBoxes={ submittedBoxes }
+      activeBoxIndex={ activeBoxIndex }
+      globalStrategy={ this.state.settings.strategy }
 
       removeExpression={ this.onRemoveExpression }
       updateState={ this.onUpdateEvaluationState }
+      addEmptyExp={ this.addEmptyExp }
+      onEnter={ this.onEnter }
+      addEmptyNote={ this.addEmptyNote }
+      onEditNote={ this.onEditNote }
+
       editExpression={ (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) =>
         this.setState({
           ...this.state,
@@ -218,22 +225,19 @@ export default class App extends Component<{}, AppState> {
           }
         })
       }
-      activeBoxIndex={ activeBoxIndex }
       makeActive={ (index : number) => this.setState({
         ...this.state,
         activeBoxIndex : index,
       }) }
-      editor={ getEditor() }
-      addEmptyExp={ this.addEmptyExp }
-      addEmptyNote={ this.addEmptyNote }
-      globalStrategy={ this.state.settings.strategy }
-      onEnter={ this.onEnter }
-      onEditNote={ this.onEditNote }
+      
+      
+      editor={ getEditor() } // tohle delat nebudu - kazdy box si vyrenderuje svuj editor rekl bych
     />
 
     const getMacroSpace = () =>
     <MacroSpace
       macroTable={ macroTable }
+
       removeMacro={ this.onRemoveMacro }
     />
 
@@ -242,7 +246,9 @@ export default class App extends Component<{}, AppState> {
 
         <MenuBar
           state={this.state} // to je nutny
+          
           onImport={ (state : AppState) => this.setState(state) } // to je docela kratky OK
+          
           onScreenChange={(screen : Screen) => // mozna tohle zmenit nejakym patternem
             this.setState({
               ...this.state,
@@ -257,6 +263,7 @@ export default class App extends Component<{}, AppState> {
             checked={ this.state.settings.singleLetterNames }
             disabled={ this.state.settings.isMarkDown }
             shape="fill"
+            
             onChange={ (e : ChangeEvent<HTMLInputElement>) => // taky nejakej pattern
               this.setState({
                 ...this.state,
@@ -276,6 +283,7 @@ export default class App extends Component<{}, AppState> {
               name="strategy"
               style="fill"
               checked={ this.state.settings.strategy === EvaluationStrategy.NORMAL }
+              
               onChange={ () => changeStrategy(EvaluationStrategy.NORMAL) }
             >
               Normal
@@ -284,6 +292,7 @@ export default class App extends Component<{}, AppState> {
               style="fill"
               name="strategy"
               checked={ this.state.settings.strategy === EvaluationStrategy.APPLICATIVE }
+              
               onChange={ () => changeStrategy(EvaluationStrategy.APPLICATIVE) }
             >
               Applicative
