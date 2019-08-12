@@ -3,19 +3,8 @@ const { Switch, Radio } = require('pretty-checkbox-react')
 
 import {
   AST,
-  tokenize,
-  parse,
-  Token,
   MacroMap,
-  None,
   NormalEvaluator,
-  Expansion,
-  Macro,
-  ChurchNumeral,
-  Variable,
-  Lambda,
-  Beta,
-  ASTReduction,
   ApplicativeEvaluator,
   OptimizeEvaluator
 } from 'lambdulus-core'
@@ -24,12 +13,14 @@ import './App.css'
 import { HANDY_MACROS, getSavedMacros } from './misc'
 import MenuBar from './components/MenuBar'
 import BoxSpace from './components/BoxSpace'
+import Editor, { ActionType } from './components/Editor'
+import { BoxState } from './components/Box'
 
 
 export enum EvaluationStrategy {
   NORMAL = 'Normal Evaluation',
   APPLICATIVE = 'Applicative Evaluation',
-  OPTIMISATION = 'Optimisation - η Conversion ',
+  OPTIMISATION = 'Optimisation - η Conversion',
 }
 
 export enum Screen {
@@ -131,15 +122,20 @@ export default class App extends Component<{}, AppState> {
 
     const getEditor = () =>
     <Editor
-      placeholder={ placeholder }
-      content={ content }
-      caretPosition={ caretPosition }
-      onContent={ this.onExpression }
-      onEnter={ this.onEnter }
-      syntaxError={ syntaxError }
-      onRun={ this.onRun }
-      onReset={ this.onClear }
-      strategy={ this.state.settings.strategy }
+      placeholder={ placeholder } // data
+      content={ content } // data
+      caretPosition={ caretPosition } // data
+      syntaxError={ syntaxError } // data
+      strategy={ this.state.settings.strategy } // data
+      singleLetterNames={ this.state.settings.singleLetterNames } // data
+      isExercise={ isExercise } // data
+      action={ this.state.editor.action } // data
+      isMarkDown={ this.state.settings.isMarkDown } // data
+
+      onContent={ this.onExpression } // fn
+      onEnter={ this.onEnter } // fn
+      onRun={ this.onRun } // fn
+      onReset={ this.onClear } // fn
       onStrategy={ (strategy : EvaluationStrategy) => this.setState({
         ...this.state,
         settings : {
@@ -147,7 +143,6 @@ export default class App extends Component<{}, AppState> {
           strategy,
         }
       }) }
-      singleLetterNames={ this.state.settings.singleLetterNames }
       onSingleLetterNames={ (enabled : boolean) => this.setState({
         ...this.state,
         settings : {
@@ -155,7 +150,6 @@ export default class App extends Component<{}, AppState> {
           singleLetterNames : enabled,
         }
       }) }
-      isExercise={ isExercise }
       onExercise={ (enabled : boolean) => this.setState({
         ...this.state,
         settings : {
@@ -163,7 +157,6 @@ export default class App extends Component<{}, AppState> {
           isExercise : enabled,
         }
       }) }
-      action={ this.state.editor.action }
       onActionSelect={ (action : ActionType) => this.setState({
         ...this.state,
         editor : {
@@ -199,14 +192,14 @@ export default class App extends Component<{}, AppState> {
           // implement or delete 
         }
       } }
-      isMarkDown={ this.state.settings.isMarkDown }
     />
 
     const getEvaluatorSpace = () =>
     <BoxSpace
+      submittedBoxes={ submittedBoxes }
+
       removeExpression={ this.onRemoveExpression }
       updateState={ this.onUpdateEvaluationState }
-      submittedExpressions={ submittedExpressions }
       editExpression={ (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) =>
         this.setState({
           ...this.state,
@@ -248,18 +241,23 @@ export default class App extends Component<{}, AppState> {
       <div className='app'>
 
         <MenuBar
-          state={this.state}
-          onImport={ (state : AppState) => this.setState(state) }
-          onScreenChange={ (screen : Screen) => this.setState({
-            ...this.state,
-            screen,
-          }) }
+          state={this.state} // to je nutny
+          onImport={ (state : AppState) => this.setState(state) } // to je docela kratky OK
+          onScreenChange={(screen : Screen) => // mozna tohle zmenit nejakym patternem
+            this.setState({
+              ...this.state,
+              screen,
+            })
+          }
          />
 
+        {/* celou tuhle componentu bych klidne mohl wrapnout v nejaky custom comp */}
         <div className='editorSettings'>
           <Switch
             checked={ this.state.settings.singleLetterNames }
-            onChange={ (e : ChangeEvent<HTMLInputElement>) =>
+            disabled={ this.state.settings.isMarkDown }
+            shape="fill"
+            onChange={ (e : ChangeEvent<HTMLInputElement>) => // taky nejakej pattern
               this.setState({
                 ...this.state,
                 settings : {
@@ -268,15 +266,28 @@ export default class App extends Component<{}, AppState> {
                 }
               })
             }
-            disabled={ this.state.settings.isMarkDown }
-            shape="fill">
-              Single Letter Names
+          >
+            Single Letter Names
           </Switch>
 
           <div className='strategies inlineblock'>
             <p className='stratsLabel inlineblock'>Evaluation Strategies:</p>
-            <Radio style="fill" name="strategy" checked={ this.state.settings.strategy === EvaluationStrategy.NORMAL } onChange={ () => changeStrategy(EvaluationStrategy.NORMAL) } >Normal</Radio>
-            <Radio style="fill" name="strategy" checked={ this.state.settings.strategy === EvaluationStrategy.APPLICATIVE } onChange={ () => changeStrategy(EvaluationStrategy.APPLICATIVE) } >Applicative</Radio>
+            <Radio
+              name="strategy"
+              style="fill"
+              checked={ this.state.settings.strategy === EvaluationStrategy.NORMAL }
+              onChange={ () => changeStrategy(EvaluationStrategy.NORMAL) }
+            >
+              Normal
+            </Radio>
+            <Radio
+              style="fill"
+              name="strategy"
+              checked={ this.state.settings.strategy === EvaluationStrategy.APPLICATIVE }
+              onChange={ () => changeStrategy(EvaluationStrategy.APPLICATIVE) }
+            >
+              Applicative
+            </Radio>
           </div>
           
         </div>
