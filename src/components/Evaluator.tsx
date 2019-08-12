@@ -166,18 +166,18 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     return (
       <div className={ className }>
         <Controls
-          isRunning={ isRunning }
-          isActive={ this.props.isActive }
-          makeActive={ this.props.makeActive }
+          // isRunning={ isRunning }
+          // isActive={ this.props.isActive }
+          // makeActive={ this.props.makeActive }
           isExercise={ isExercise }
           makeExercise={ () => this.props.updateState({ isExercise : true }) }
           endExercise={ () => this.props.updateState({ isExercise : false })  }
-          strategy={ strategy }
-          onStrategy={ (strategy : EvaluationStrategy) => updateState({
-            strategy
-          })  }
-          __key={ __key }
-          singleLetterNames={ singleLetterNames }
+          // strategy={ strategy }
+          // onStrategy={ (strategy : EvaluationStrategy) => updateState({
+          //   strategy
+          // })  }
+          // __key={ __key }
+          // singleLetterNames={ singleLetterNames }
         />
         <ul className='UL'>
           {
@@ -224,65 +224,65 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
           singleLetterNames={ this.state.settings.singleLetterNames } // data
 
           onContent={ this.onExpression } // fn
-          onEnter={ this.onEnter } // fn
-          onRun={ this.onRun } // fn
-          onReset={ this.onClear } // fn
-          onStrategy={ (strategy : EvaluationStrategy) => this.setState({
-            ...this.state,
-            settings : {
-              ...this.state.settings,
-              strategy,
-            }
-          }) }
-          onSingleLetterNames={ (enabled : boolean) => this.setState({
-            ...this.state,
-            settings : {
-              ...this.state.settings,
-              singleLetterNames : enabled,
-            }
-          }) }
-          onExercise={ (enabled : boolean) => this.setState({
-            ...this.state,
-            settings : {
-              ...this.state.settings,
-              isExercise : enabled,
-            }
-          }) }
-          onActionSelect={ (action : ActionType) => this.setState({
-            ...this.state,
-            editor : {
-              ...this.state.editor,
-              action,
-            }
-          }) }
-          onActionClick={ () => {
-            const { editor : { action } } = this.state
+          onEnter={ this.onEnter } // fn // tohle asi bude potreba
+          onRun={ this.onRun } // fn // tohle asi bude potreba
+          // onReset={ this.onClear } // fn // tohle asi prozatim nepouziju/smazu
+          // onStrategy={ (strategy : EvaluationStrategy) => this.setState({
+          //   ...this.state,
+          //   settings : {
+          //     ...this.state.settings,
+          //     strategy,
+          //   }
+          // }) }
+          // onSingleLetterNames={ (enabled : boolean) => this.setState({
+          //   ...this.state,
+          //   settings : {
+          //     ...this.state.settings,
+          //     singleLetterNames : enabled,
+          //   }
+          // }) }
+          // onExercise={ (enabled : boolean) => this.setState({
+          //   ...this.state,
+          //   settings : {
+          //     ...this.state.settings,
+          //     isExercise : enabled,
+          //   }
+          // }) }
+          // onActionSelect={ (action : ActionType) => this.setState({
+          //   ...this.state,
+          //   editor : {
+          //     ...this.state.editor,
+          //     action,
+          //   }
+          // }) }
+          // onActionClick={ () => {
+          //   const { editor : { action } } = this.state
 
-            if (action === ActionType.ENTER_EXPRESSION) {
-              this.onEnter()
-              return
-            }
-            if (action === ActionType.NEXT_STEP) {
-              this.onStep()
-              return
-            }
-            if (action === ActionType.RUN) {
-              // implement
-              return
-            }
-            if (action === ActionType.ENTER_EXERCISE) {
-              this.setState({
-                ...this.state,
-                settings : {
-                  ...this.state.settings,
-                  isExercise : true,
-                }
-              }, () => this.onEnter())
-            }
-            else {
-              // implement or delete 
-            }
-          } }
+          //   if (action === ActionType.ENTER_EXPRESSION) {
+          //     this.onEnter()
+          //     return
+          //   }
+          //   if (action === ActionType.NEXT_STEP) {
+          //     this.onStep()
+          //     return
+          //   }
+          //   if (action === ActionType.RUN) {
+          //     // implement
+          //     return
+          //   }
+          //   if (action === ActionType.ENTER_EXERCISE) {
+          //     this.setState({
+          //       ...this.state,
+          //       settings : {
+          //         ...this.state.settings,
+          //         isExercise : true,
+          //       }
+          //     }, () => this.onEnter())
+          //   }
+          //   else {
+          //     // implement or delete 
+          //   }
+          // } }
         />
 
       </div>

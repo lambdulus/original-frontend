@@ -72,6 +72,10 @@ export default class App extends Component<{}, AppState> {
   constructor (props : object) {
     super(props)
 
+    this.updateBoxState = this.updateBoxState.bind(this)
+    this.addEmptyBox = this.addEmptyBox.bind(this)
+    this.changeActiveBox = this.changeActiveBox.bind(this)
+
     this.state = {
       settings : {
         strategy : EvaluationStrategy.NORMAL,
@@ -110,36 +114,22 @@ export default class App extends Component<{}, AppState> {
       activeBoxIndex={ activeBoxIndex }
       globalStrategy={ this.state.settings.strategy }
 
-      removeExpression={ this.onRemoveExpression }
-      updateState={ this.onUpdateEvaluationState }
-      addEmptyExp={ this.addEmptyExp }
-      onEnter={ this.onEnter }
-      addEmptyNote={ this.addEmptyNote }
-      onEditNote={ this.onEditNote }
+      makeActive={ this.changeActiveBox }
+      updateBoxState={ this.updateBoxState }
+      addEmptyBox={ this.addEmptyBox }
+      // removeExpression={ this.onRemoveExpression } // to bude asi potreba az zbytek bude hotovej 
+      
+      
+      // onEnter={ this.onEnter } // ten se presune dolu do Boxu
+      // onEditNote={ this.onEditNote } // zmeni se na onChangeActiveBox a isEditing se udela v Boxu
 
-      // TODO: tohle je asi spatne, chce to metodu ktera updatne konkretni BoxState a nic vic neni potreba
-      editExpression={ (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) =>
-        this.setState({
-          ...this.state,
-          settings : {
-            strategy,
-            singleLetterNames,
-            isExercise : false, // TODO: jenom momentalni rozhodnuti - popremyslim
-            isMarkDown : this.state.settings.isMarkDown,
-          },
-        })
-      }
-      makeActive={ (index : number) => this.setState({
-        ...this.state,
-        activeBoxIndex : index,
-      }) }
     />
 
     const getMacroSpace = () =>
     <MacroSpace
       macroTable={ macroTable }
 
-      removeMacro={ this.onRemoveMacro }
+      // removeMacro={ this.onRemoveMacro } // zatim neumim removnout macro takze nepotrebuju
     />
 
     return (
@@ -212,5 +202,33 @@ export default class App extends Component<{}, AppState> {
     )
   }
 
+  updateBoxState (index : number, boxState : BoxState) : void {
+    const { submittedBoxes } = this.state
+
+    // TODO: consider immutability
+    submittedBoxes[index] = boxState
+
+    this.setState({
+      ...this.state,
+      submittedBoxes,
+    })
+  }
+
+  addEmptyBox (boxState : BoxState) : void {
+    const { submittedBoxes, activeBoxIndex } = this.state
+
+    this.setState({
+      ...this.state,
+      submittedBoxes : [ ...submittedBoxes, boxState ],
+      activeBoxIndex : activeBoxIndex + 1,
+    })
+  }
+
+  changeActiveBox (activeBoxIndex : number) : void {
+    this.setState({
+      ...this.state,
+      activeBoxIndex,
+    })
+  } 
   
 }

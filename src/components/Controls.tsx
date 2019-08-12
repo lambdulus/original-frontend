@@ -6,16 +6,16 @@ import './ControlsStyle.css'
 import { EvaluationStrategy } from '../App';
 
 export interface ControlsProps {
-  __key : string
-  isRunning : boolean
-  isActive : boolean
-  makeActive () : void
+  // __key : string
+  // isRunning : boolean
+  // isActive : boolean
+  // makeActive () : void
   isExercise : boolean
   makeExercise () : void
   endExercise () : void
-  strategy : EvaluationStrategy
-  onStrategy (strategy : EvaluationStrategy) : void
-  singleLetterNames : boolean
+  // strategy : EvaluationStrategy
+  // onStrategy (strategy : EvaluationStrategy) : void
+  // singleLetterNames : boolean
 }
 
 export default function Controls (props : ControlsProps) : JSX.Element {
