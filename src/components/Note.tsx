@@ -22,10 +22,8 @@ export interface NoteState {
 
 export interface NoteProperties {
   state : NoteState
-  editor : JSX.Element
   isActive : boolean
-  onEnter () : void
-  onEditNote () : void
+  setBoxState (state : BoxState) : void
 }
 
 export default function Note (props : NoteProperties) : JSX.Element {
@@ -40,78 +38,18 @@ export default function Note (props : NoteProperties) : JSX.Element {
           content={ content } // data
           caretPosition={ caretPosition } // data
           syntaxError={ syntaxError } // data
+          isMarkDown={ true } // data
           
-          strategy={ this.state.settings.strategy } // data
-          singleLetterNames={ this.state.settings.singleLetterNames } // data
-          isExercise={ isExercise } // data
-          action={ this.state.editor.action } // data
-          isMarkDown={ this.state.settings.isMarkDown } // data
-
-          onContent={ this.onExpression } // fn
-          onEnter={ this.onEnter } // fn
-          onRun={ this.onRun } // fn
-          onReset={ this.onClear } // fn
-          onStrategy={ (strategy : EvaluationStrategy) => this.setState({
-            ...this.state,
-            settings : {
-              ...this.state.settings,
-              strategy,
-            }
-          }) }
-          onSingleLetterNames={ (enabled : boolean) => this.setState({
-            ...this.state,
-            settings : {
-              ...this.state.settings,
-              singleLetterNames : enabled,
-            }
-          }) }
-          onExercise={ (enabled : boolean) => this.setState({
-            ...this.state,
-            settings : {
-              ...this.state.settings,
-              isExercise : enabled,
-            }
-          }) }
-          onActionSelect={ (action : ActionType) => this.setState({
-            ...this.state,
-            editor : {
-              ...this.state.editor,
-              action,
-            }
-          }) }
-          onActionClick={ () => {
-            const { editor : { action } } = this.state
-
-            if (action === ActionType.ENTER_EXPRESSION) {
-              this.onEnter()
-              return
-            }
-            if (action === ActionType.NEXT_STEP) {
-              this.onStep()
-              return
-            }
-            if (action === ActionType.RUN) {
-              // implement
-              return
-            }
-            if (action === ActionType.ENTER_EXERCISE) {
-              this.setState({
-                ...this.state,
-                settings : {
-                  ...this.state.settings,
-                  isExercise : true,
-                }
-              }, () => this.onEnter())
-            }
-            else {
-              // implement or delete 
-            }
-          } }
+          onContent={ () => {} } // fn
+          onEnter={ () => {} } // fn
+          onExecute={ () => {} } // fn
+          // onReset={ this.onClear } // fn not yet
         />
 
 
+        {/* fix onClick */}
         <div id="controls">
-          <button onClick={ props.onEnter }>
+          <button onClick={ () => {} }>
             Save
           </button>
         </div>
@@ -124,7 +62,8 @@ export default function Note (props : NoteProperties) : JSX.Element {
     <div className='box boxNote markdown-body'>
       <ReactMarkdown source={ note } />
       <div id="controls">
-          <button onClick={ props.onEditNote }>
+        {/* fix onClick */}
+          <button onClick={ () => {} }>
             Edit
           </button>
         </div>

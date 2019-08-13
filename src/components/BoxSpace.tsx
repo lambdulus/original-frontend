@@ -1,38 +1,62 @@
 import React from 'react'
-import { AST } from 'lambdulus-core'
 
-import Box, { BoxState } from './Box'
+import Box, { BoxState, BoxType } from './Box'
 import { EvaluationState } from './Evaluator'
 import { EvaluationStrategy } from '../App'
+import { MacroDefinitionState } from './MacroDefinition'
+import { NoteState } from './Note'
 
 
 export interface BoxSpaceProperties {
-  submittedExpressions : Array<BoxState>
-  updateState (state : BoxState, index : number) : void
-  removeExpression (index : number) : void
-  editExpression (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) : void
-  activeBox : number
-  makeActive (index : number) : void
-  editor : JSX.Element
-  addEmptyExp () : void
-  addEmptyNote () : void
+  submittedBoxes : Array<BoxState>
+  activeBoxIndex : number
   globalStrategy : EvaluationStrategy
-  onEnter () : void
-  onEditNote (index : number) : void
+  singleLetterNames : boolean
+  
+  makeActive (index : number) : void
+  setBoxState (index : number, state : BoxState) : void
+  addEmptyBox (boxState : BoxState) : void
+  // removeExpression (index : number) : void // not yet
 }
 
 export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
-  const { submittedExpressions, updateState, removeExpression, activeBox, makeActive } = props
+  const {
+    globalStrategy : strategy,
+    singleLetterNames,
+    submittedBoxes,
+    activeBoxIndex,
+    setBoxState,
+    makeActive
+  } = props
 
-  if (submittedExpressions.length === 0) {
+  const addBoxControls : JSX.Element = (
+    <div className='emptyC'>
+      <p
+        className='plusBtn inlineblock'
+        onClick={ () => props.addEmptyBox(createEmptyExp(strategy, singleLetterNames)) }
+      >
+        <i>+ λ</i>
+      </p>
+      <p
+        className='plusBtn inlineblock'
+        onClick={ () => props.addEmptyBox(createEmptyMacro(singleLetterNames)) }
+      >
+        <i>+ Macro
+        </i></p>
+      <p
+        className='plusBtn inlineblock'
+        onClick={ () => props.addEmptyBox(createEmptyNote()) }
+      >
+        <i>+ MD</i>
+      </p>
+    </div>
+  )
+
+  if (submittedBoxes.length === 0) {
     return (
       <div className='evaluatorSpace'>
         <div className='bigEmpty'>
-          <div className='emptyC'>
-            <p className='plusBtn inlineblock' onClick={ props.addEmptyExp }><i>+ λ</i></p>
-            <p className='plusBtn inlineblock' onClick={ props.addEmptyExp }><i>+ Macro</i></p>
-            <p className='plusBtn inlineblock' onClick={ props.addEmptyNote }><i>+ MD</i></p>          
-          </div>
+          { addBoxControls }
         </div>
       </div>
     )
@@ -40,36 +64,77 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
 
   return (
     <div className='evaluatorSpace'>
-      {
-        submittedExpressions.length ?
-          <ul className='evaluatorList UL'>
-            { submittedExpressions.map((state : BoxState, i : number) =>
-              <li className='LI' key={ state.__key }>
-                <Box
-                  state={ state }
-                  updateState={ (state : EvaluationState) => updateState(state, i) }
-                  removeExpression={ () => removeExpression(i) }
-                  editExpression={ props.editExpression }
-                  isActive={ i === activeBox }
-                  makeActive={ () => makeActive(i) }
-                  editor={ props.editor }
-                  globalStrategy={ props.globalStrategy }
-                  onEnter={ props.onEnter }
-                  onEditNote={ () => props.onEditNote(i) }
-                />
-              </li>
-              ) }
-              <div className='smallEmpty'>
-                <div className='emptyC'>
-                  <p className='plusBtn inlineblock' onClick={ props.addEmptyExp }><i>+ λ</i></p>
-                  <p className='plusBtn inlineblock' onClick={ props.addEmptyExp }><i>+ Macro</i></p>
-                  <p className='plusBtn inlineblock' onClick={ props.addEmptyNote }><i>+ MD</i></p>
-                </div>
-              </div>
-          </ul>
-          :
-          null
-      }
+      <ul className='evaluatorList UL'>
+        { submittedBoxes.map((boxState : BoxState, i : number) =>
+          <li className='LI' key={ boxState.__key }>
+            <Box
+              state={ boxState }
+              globalStrategy={ props.globalStrategy }
+              isActive={ i === activeBoxIndex }
+              
+              setBoxState={ (state : EvaluationState) => setBoxState(i, state) }
+              makeActive={ () => makeActive(i) }
+              // removeExpression={ () => removeExpression(i) }
+            />
+          </li>
+          ) }
+          <div className='smallEmpty'>
+          { addBoxControls }
+          </div>
+      </ul>
     </div>
   )
+}
+
+function createEmptyExp (strategy : EvaluationStrategy, singleLetterNames : boolean) : EvaluationState {
+  return {
+    type : BoxType.expression,
+    __key : Date.now().toString(),
+    expression : '',
+    ast : null,
+    history : [],
+    isRunning : false,
+    breakpoints : [],
+    timeoutID : undefined,
+    timeout : 10,
+    isExercise : false,
+    strategy,
+    singleLetterNames,
+    editor : {
+      placeholder : 'Type λ expression and hit enter', // TODO: tohle bude chtit fixnout - je nekde nejakej enum na placeholdery???
+      content : '',
+      caretPosition : 0,
+      syntaxError : null,
+    }
+  }
+}
+
+function createEmptyMacro (singleLetterNames : boolean) : MacroDefinitionState {
+  return {
+    type : BoxType.macro,
+    __key : Date.now().toString(),
+    macroName : '',
+    macroExpression : '',
+    editor : {
+      placeholder : 'Type macro definition i.e. NAME := [λ expression] and hit enter',
+      content : '',
+      caretPosition : 0,
+      syntaxError : null
+    }
+  }
+}
+
+function createEmptyNote () : NoteState {
+  return {
+    type : BoxType.note,
+    __key : Date.now().toString(),
+    note : '',
+    isEditing : true,
+    editor : {
+      placeholder : 'Type note and hit shift enter',
+      content : '',
+      caretPosition : 0,
+      syntaxError : null,
+    }
+  }
 }

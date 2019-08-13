@@ -1,5 +1,4 @@
 import React from 'react'
-import { AST } from 'lambdulus-core'
 
 import Evaluator, { EvaluationState } from './Evaluator'
 import MacroDefinition, { MacroDefinitionState } from './MacroDefinition'
@@ -7,6 +6,7 @@ import Note, { NoteState } from './Note'
 import { EvaluationStrategy } from '../App'
 
 
+// TODO: rename EXPRESSION, MACRO, NOTE
 export enum BoxType {
   expression,
   macro,
@@ -17,19 +17,16 @@ export type BoxState = EvaluationState | MacroDefinitionState | NoteState
 
 interface BoxProperties {
   state : BoxState
-  updateState (state : BoxState) : void
-  removeExpression () : void
-  editExpression (ast : AST, strategy : EvaluationStrategy, singleLetterNames : boolean) : void
-  isActive : boolean
-  makeActive () : void
-  editor : JSX.Element
   globalStrategy : EvaluationStrategy
-  onEnter () : void
-  onEditNote () : void
+  isActive : boolean
+
+  setBoxState (state : BoxState) : void
+  makeActive () : void
+  // removeExpression () : void // not yet
 }
 
 export default function Box (props : BoxProperties) : JSX.Element {
-  const { state, updateState, isActive } : BoxProperties = props
+  const { state, isActive, setBoxState, makeActive } : BoxProperties = props
   const { type } = state
 
   if (type === BoxType.expression) {
@@ -37,12 +34,11 @@ export default function Box (props : BoxProperties) : JSX.Element {
       <div className=''>
         <Evaluator
           state={ state as EvaluationState }
-          updateState={ updateState }
-          editExpression={ props.editExpression }
-          isActive={ isActive }
-          makeActive={ props.makeActive }
-          editor={ props.editor }
           globalStrategy={ props.globalStrategy }
+          isActive={ isActive }
+          
+          setBoxState={ setBoxState }
+          makeActive={ props.makeActive }
         />
       </div>
     )
@@ -59,7 +55,12 @@ export default function Box (props : BoxProperties) : JSX.Element {
   if (type === BoxType.note) {
     return (
       <div className=''>
-        <Note state={ state as NoteState } onEditNote={ props.onEditNote } editor={ props.editor } isActive={ isActive } onEnter={ props.onEnter } />
+        <Note
+          state={ state as NoteState }
+          isActive={ isActive }
+
+          setBoxState={ setBoxState }
+        />
       </div>
     )
   }

@@ -15,6 +15,7 @@ import MenuBar from './components/MenuBar'
 import BoxSpace from './components/BoxSpace'
 import Editor, { ActionType } from './components/Editor'
 import { BoxState } from './components/Box'
+import MacroSpace from './components/MacroSpace'
 
 
 export enum EvaluationStrategy {
@@ -40,10 +41,10 @@ export enum PromptPlaceholder {
 // na druhou stranu, melo by si to pamatovat po prepnuti z MD znova do expr strategy a podobne
 export interface AppState {
   settings : {
-    strategy : EvaluationStrategy
-    singleLetterNames : boolean
-    isExercise : boolean
-    isMarkDown : boolean 
+    strategy : EvaluationStrategy // podle me to tu nema co delat - je to specific pro aktivni Box
+    singleLetterNames : boolean // podle me to tu nema co delat - je to specific pro aktivni Box
+    isExercise : boolean // podle me to tu nema co delat - je to specific pro aktivni Box
+    isMarkDown : boolean // podle me to tu nema co delat - je to specific pro aktivni Box
   }
   
   macroTable : MacroMap
@@ -72,12 +73,12 @@ export default class App extends Component<{}, AppState> {
   constructor (props : object) {
     super(props)
 
-    this.updateBoxState = this.updateBoxState.bind(this)
+    this.setBoxState = this.setBoxState.bind(this)
     this.addEmptyBox = this.addEmptyBox.bind(this)
     this.changeActiveBox = this.changeActiveBox.bind(this)
 
     this.state = {
-      settings : {
+      settings : { // TODO: mel bych se tohohle uplne zbavit
         strategy : EvaluationStrategy.NORMAL,
         singleLetterNames : true,
         isExercise : false,
@@ -92,13 +93,14 @@ export default class App extends Component<{}, AppState> {
 
   render () : JSX.Element {
     const {
-      settings : { isExercise },
+      settings : { strategy, singleLetterNames },
       macroTable,
       submittedBoxes,
       screen,
       activeBoxIndex,
     } : AppState = this.state
 
+    // TODO: co to tady vubec dela??? udelat z toho nejakou metodu nebo inline
     const changeStrategy = (strategy : EvaluationStrategy) =>
       this.setState({
         ...this.state,
@@ -112,10 +114,11 @@ export default class App extends Component<{}, AppState> {
     <BoxSpace
       submittedBoxes={ submittedBoxes }
       activeBoxIndex={ activeBoxIndex }
-      globalStrategy={ this.state.settings.strategy }
+      globalStrategy={ strategy }
+      singleLetterNames={ singleLetterNames }
 
       makeActive={ this.changeActiveBox }
-      updateBoxState={ this.updateBoxState }
+      setBoxState={ this.setBoxState }
       addEmptyBox={ this.addEmptyBox }
       // removeExpression={ this.onRemoveExpression } // to bude asi potreba az zbytek bude hotovej 
       
@@ -129,7 +132,7 @@ export default class App extends Component<{}, AppState> {
     <MacroSpace
       macroTable={ macroTable }
 
-      // removeMacro={ this.onRemoveMacro } // zatim neumim removnout macro takze nepotrebuju
+      removeMacro={ this.removeMacro }
     />
 
     return (
@@ -149,6 +152,8 @@ export default class App extends Component<{}, AppState> {
          />
 
         {/* celou tuhle componentu bych klidne mohl wrapnout v nejaky custom comp */}
+        {/* taky je dulezity odkud bude tahle kompontnta brat stav - z aktivniho Boxu */}
+        {/* kdyz neni zadnej box - tedy neni zadnej aktivni - tak nejakej default */}
         <div className='editorSettings'>
           <Switch
             checked={ this.state.settings.singleLetterNames }
@@ -202,7 +207,7 @@ export default class App extends Component<{}, AppState> {
     )
   }
 
-  updateBoxState (index : number, boxState : BoxState) : void {
+  setBoxState (index : number, boxState : BoxState) : void {
     const { submittedBoxes } = this.state
 
     // TODO: consider immutability
@@ -229,6 +234,24 @@ export default class App extends Component<{}, AppState> {
       ...this.state,
       activeBoxIndex,
     })
-  } 
+  }
+
+  removeMacro (name : string) : void {
+    const { macroTable } = this.state
+    
+    const newMacroTable = { ...macroTable }
+    delete newMacroTable[name]
+
+    this.setState({
+      ...this.state,
+      macroTable : newMacroTable
+    })
+
+    this.updateMacros(newMacroTable)
+  }
+
+  updateMacros (macroTable : MacroMap) : void {
+    window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
+  }
   
 }

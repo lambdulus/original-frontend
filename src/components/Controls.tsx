@@ -2,22 +2,15 @@ import React, { ChangeEvent } from 'react'
 const { Switch, Radio } = require('pretty-checkbox-react')
 
 
-import './ControlsStyle.css'
-import { EvaluationStrategy } from '../App';
+// import './ControlsStyle.css'
 
 export interface ControlsProps {
-  // __key : string
-  // isRunning : boolean
-  // isActive : boolean
-  // makeActive () : void
   isExercise : boolean
   makeExercise () : void
   endExercise () : void
-  // strategy : EvaluationStrategy
-  // onStrategy (strategy : EvaluationStrategy) : void
-  // singleLetterNames : boolean
 }
 
+// TODO: maybe not really needed or rename it accordingly
 export default function Controls (props : ControlsProps) : JSX.Element {
   const {
     isExercise,
@@ -27,22 +20,18 @@ export default function Controls (props : ControlsProps) : JSX.Element {
 
   return (
     <div id="controls">
-      {
-        <div>
-          {
-            <Switch
-              className='exerciseSwitch'
-              checked={ isExercise }
-              onChange={ (e : ChangeEvent<HTMLInputElement>) =>
-                e.target.checked ? makeExercise() : endExercise()
-              }
-              shape="fill"
-            >
-              Exercise
-            </Switch>
+      <div>
+        <Switch
+          className='exerciseSwitch'
+          checked={ isExercise }
+          onChange={ (e : ChangeEvent<HTMLInputElement>) =>
+            e.target.checked ? makeExercise() : endExercise()
           }
-        </div>
-      }
+          shape="fill"
+        >
+          Exercise
+        </Switch>
+      </div>
     </div>
   )
 }

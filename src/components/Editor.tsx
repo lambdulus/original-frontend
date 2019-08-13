@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useState, SetStateAction, Dispatch, KeyboardEvent } from 'react'
 
-import './EditorStyle.css'
+// import './EditorStyle.css'
 import { EvaluationStrategy } from '../App'
 
 
@@ -14,38 +14,30 @@ export enum ActionType {
 
 interface EditorProperties {
   placeholder: string
-  expression : string
+  content : string
   caretPosition : number
-  onExpression (newExpression : string, caretPosition : number) : void
-  onEnter () : void
-  onRun () : void
-  onReset () : void
-  onStrategy (strategy : EvaluationStrategy) : void
   syntaxError : Error | null
-  strategy : EvaluationStrategy
-  singleLetterNames : boolean
-  onSingleLetterNames (enable : boolean) : void
-  isExercise : boolean,
-  onExercise (enable : boolean) : void
-  action : ActionType
-  onActionClick () : void
-  onActionSelect (action : ActionType) : void
   isMarkDown : boolean
+  
+  onContent (newExpression : string, caretPosition : number) : void
+  onEnter () : void
+  onExecute () : void
+  // onReset () : void
 }
 
 export default function Editor (props : EditorProperties) : JSX.Element {
   const {
     placeholder,
-    expression,
+    content,
     caretPosition,
-    onExpression,
-    onEnter,
-    onRun,
-    onReset,
     syntaxError,
     isMarkDown,
+
+    onContent,
+    onEnter,
+    onExecute,
   } : EditorProperties = props
-  const lines : number = expression.split('\n').length
+  const lines : number = content.split('\n').length
 
   const onChange = (event : ChangeEvent<HTMLTextAreaElement>) => {
     let { target : { value : expression } } : { target : { value : string } } = event
@@ -53,7 +45,7 @@ export default function Editor (props : EditorProperties) : JSX.Element {
 
     expression = expression.replace(/\\/g, 'λ')
 
-    onExpression(expression, caretPosition)
+    onContent(expression, caretPosition)
   }
 
   const onKeyDown = (event : KeyboardEvent<HTMLTextAreaElement>) => {
@@ -71,14 +63,14 @@ export default function Editor (props : EditorProperties) : JSX.Element {
     }
     if (event.ctrlKey && event.key === 'Enter') {
       event.preventDefault()
-      onRun()
+      onExecute()
     }
 
-    if (event.ctrlKey && event.key === 'r') {
-      event.preventDefault()
-      onReset()
-    }
-
+    // TODO: not yet
+    // if (event.ctrlKey && event.key === 'r') {
+    //   event.preventDefault()
+    //   onReset()
+    // }
   }
 
   return (
@@ -95,7 +87,7 @@ export default function Editor (props : EditorProperties) : JSX.Element {
       <div className="editor">
         <InputField
           placeholder={ placeholder }
-          expression={ expression }
+          content={ content }
           lines={ lines }
           caretPosition={ caretPosition }
           onChange={ onChange }
@@ -108,7 +100,7 @@ export default function Editor (props : EditorProperties) : JSX.Element {
 
 interface InputProps {
   placeholder : string
-  expression : string
+  content : string
   lines : number
   caretPosition : number
   onChange (event : ChangeEvent<HTMLTextAreaElement>) : void
@@ -116,14 +108,14 @@ interface InputProps {
 }
 
 function InputField (props : InputProps) : JSX.Element {
-  const { placeholder, expression, lines, onChange, onKeyDown, caretPosition } : InputProps = props
+  const { placeholder, content, lines, onChange, onKeyDown, caretPosition } : InputProps = props
 
   return (
     <textarea
       className='prompt'
       onKeyDown={ onKeyDown }
       onChange={ onChange }
-      value={ expression }
+      value={ content }
       placeholder={ placeholder }
       wrap='hard'
       autoFocus

@@ -12,13 +12,14 @@ import {
   Macro,
 } from "lambdulus-core"
 
-import './EvaluatorStyle.css'
+// import './EvaluatorStyle.css'
+
 import Controls from './Controls'
 import Step from './Step'
 import { mapLeftFromTo } from '../misc'
 import { BoxType } from './Box'
 import { EvaluationStrategy } from '../App'
-import { ActionType } from './Editor'
+import Editor, { ActionType } from './Editor'
 
 
 export type Breakpoint = {
@@ -53,34 +54,16 @@ export interface EvaluationState {
     content : string
     caretPosition : number
     syntaxError : Error | null
-    // action : ActionType
   }
 }
 
-export interface EvaluationStatePatch {
-  __key? : string
-  type? : BoxType
-  expression? : string
-  ast? : AST | null
-  history? : Array<StepRecord>
-  isRunning? : boolean
-  breakpoints? : Array<Breakpoint>
-  timeoutID? : number | undefined
-  timeout? : number
-  isExercise? : boolean
-  strategy? : EvaluationStrategy
-  singleLetterNames? : boolean
-}
-// editor patch???
-
 interface EvaluationProperties {
   state : EvaluationState
-  updateState (state : EvaluationStatePatch) : void
-  editExpression (ast : AST, strategy : EvaluationStrategy, singleLEtterNames : boolean) : void
-  makeActive () : void
-  isActive : boolean
-  editor : JSX.Element
   globalStrategy : EvaluationStrategy
+  isActive : boolean
+
+  setBoxState (state : EvaluationState) : void
+  makeActive () : void
 }
 
 export default class Evaluator extends PureComponent<EvaluationProperties> {
@@ -91,7 +74,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
   }
 
   render () : JSX.Element {
-    const { state, updateState, isActive, editor } : EvaluationProperties = this.props
+    const { state, isActive, setBoxState } : EvaluationProperties = this.props
     const {
       __key,
       history,
@@ -102,7 +85,6 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
       singleLetterNames,
       expression,
       editor : {
-        // action,
         caretPosition,
         content,
         placeholder,
@@ -119,7 +101,17 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
           {
             isActive ?
               (
-                editor
+                <Editor
+                  placeholder={ placeholder } // data
+                  content={ content } // data
+                  caretPosition={ caretPosition } // data
+                  syntaxError={ syntaxError } // data
+                  isMarkDown={ false } // data
+
+                  onContent={ () => {} } // fn
+                  onEnter={ () => {} } // fn // tohle asi bude potreba
+                  onExecute={ () => {} } // fn // tohle asi bude potreba
+                />
               )
               :
               (
@@ -151,7 +143,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
               >
                 <i
                   className="hiddenIcon fas fa-pencil-alt"
-                  onClick={ () => this.props.editExpression(history[0].ast, state.strategy, singleLetterNames) }
+                  onClick={ () => {}
+                    // TODO: na tohle chci pridat zpet handler - copyExpToNewBox nebo tak neco
+                    // this.props.editExpression(history[0].ast, state.strategy, singleLetterNames)
+                  }
                 />
               </Step>
             </li>
@@ -166,18 +161,19 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     return (
       <div className={ className }>
         <Controls
-          // isRunning={ isRunning }
-          // isActive={ this.props.isActive }
-          // makeActive={ this.props.makeActive }
           isExercise={ isExercise }
-          makeExercise={ () => this.props.updateState({ isExercise : true }) }
-          endExercise={ () => this.props.updateState({ isExercise : false })  }
-          // strategy={ strategy }
-          // onStrategy={ (strategy : EvaluationStrategy) => updateState({
-          //   strategy
-          // })  }
-          // __key={ __key }
-          // singleLetterNames={ singleLetterNames }
+          makeExercise={ () =>
+            this.props.setBoxState({
+              ...state,
+              isExercise : true
+            })
+          }
+          endExercise={ () =>
+            this.props.setBoxState({
+              ...state,
+              isExercise : false
+            })
+          }
         />
         <ul className='UL'>
           {
@@ -191,7 +187,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
                 >
                   <i
                     className="hiddenIcon fas fa-pencil-alt"
-                    onClick={ () => this.props.editExpression(stepRecord.ast, state.strategy, singleLetterNames) }
+                    onClick={ () => {}
+                      // TODO: na tohle chci pridat zpet handler - copyExpToNewBox nebo tak neco
+                      // this.props.editExpression(stepRecord.ast, state.strategy, singleLetterNames)
+                    }
                   />
                 </Step>
               </li>)
@@ -205,7 +204,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
             >
                 <i
                   className="hiddenIcon fas fa-pencil-alt"
-                  onClick={ () => this.props.editExpression(history[history.length - 1].ast, state.strategy, singleLetterNames) }
+                  onClick={ () => {}
+                    // TODO: na tohle chci pridat zpet handler - copyExpToNewBox nebo tak neco                    
+                    // this.props.editExpression(history[history.length - 1].ast, state.strategy, singleLetterNames)
+                  }
                 />
             </Step>
           </li>
@@ -216,73 +218,11 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
           content={ content } // data
           caretPosition={ caretPosition } // data
           syntaxError={ syntaxError } // data
-          isExercise={ isExercise } // data
-          // action={ action } // data // tohle pravdepodobne nebude potreba - je znamo co to bude za akci
           isMarkDown={ false } // data
 
-          strategy={ this.state.settings.strategy } // data
-          singleLetterNames={ this.state.settings.singleLetterNames } // data
-
-          onContent={ this.onExpression } // fn
-          onEnter={ this.onEnter } // fn // tohle asi bude potreba
-          onRun={ this.onRun } // fn // tohle asi bude potreba
-          // onReset={ this.onClear } // fn // tohle asi prozatim nepouziju/smazu
-          // onStrategy={ (strategy : EvaluationStrategy) => this.setState({
-          //   ...this.state,
-          //   settings : {
-          //     ...this.state.settings,
-          //     strategy,
-          //   }
-          // }) }
-          // onSingleLetterNames={ (enabled : boolean) => this.setState({
-          //   ...this.state,
-          //   settings : {
-          //     ...this.state.settings,
-          //     singleLetterNames : enabled,
-          //   }
-          // }) }
-          // onExercise={ (enabled : boolean) => this.setState({
-          //   ...this.state,
-          //   settings : {
-          //     ...this.state.settings,
-          //     isExercise : enabled,
-          //   }
-          // }) }
-          // onActionSelect={ (action : ActionType) => this.setState({
-          //   ...this.state,
-          //   editor : {
-          //     ...this.state.editor,
-          //     action,
-          //   }
-          // }) }
-          // onActionClick={ () => {
-          //   const { editor : { action } } = this.state
-
-          //   if (action === ActionType.ENTER_EXPRESSION) {
-          //     this.onEnter()
-          //     return
-          //   }
-          //   if (action === ActionType.NEXT_STEP) {
-          //     this.onStep()
-          //     return
-          //   }
-          //   if (action === ActionType.RUN) {
-          //     // implement
-          //     return
-          //   }
-          //   if (action === ActionType.ENTER_EXERCISE) {
-          //     this.setState({
-          //       ...this.state,
-          //       settings : {
-          //         ...this.state.settings,
-          //         isExercise : true,
-          //       }
-          //     }, () => this.onEnter())
-          //   }
-          //   else {
-          //     // implement or delete 
-          //   }
-          // } }
+          onContent={ () => {} } // fn
+          onEnter={ () => {} } // fn // tohle asi bude potreba
+          onExecute={ () => {} } // fn // tohle asi bude potreba
         />
 
       </div>
@@ -290,9 +230,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
   }
 
   addBreakpoint (breakpoint : Breakpoint) : void {
-    let { state, updateState } : EvaluationProperties = this.props
+    let { state, setBoxState } : EvaluationProperties = this.props
   
-    updateState({
+    setBoxState({
+      ...state,
       breakpoints : [ ...state.breakpoints, breakpoint ],
     })
   }
