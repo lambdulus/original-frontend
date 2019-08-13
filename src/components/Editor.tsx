@@ -19,7 +19,7 @@ interface EditorProperties {
   syntaxError : Error | null
   isMarkDown : boolean
   
-  onContent (newExpression : string, caretPosition : number) : void
+  onContent (content : string, caretPosition : number) : void
   onEnter () : void
   onExecute () : void
   // onReset () : void
@@ -40,12 +40,12 @@ export default function Editor (props : EditorProperties) : JSX.Element {
   const lines : number = content.split('\n').length
 
   const onChange = (event : ChangeEvent<HTMLTextAreaElement>) => {
-    let { target : { value : expression } } : { target : { value : string } } = event
+    let { target : { value : content } } : { target : { value : string } } = event
     const caretPosition : number = event.target.selectionEnd
 
-    expression = expression.replace(/\\/g, 'λ')
+    content = content.replace(/\\/g, 'λ')
 
-    onContent(expression, caretPosition)
+    onContent(content, caretPosition)
   }
 
   const onKeyDown = (event : KeyboardEvent<HTMLTextAreaElement>) => {

@@ -10,6 +10,9 @@ import {
   Expansion,
   ChurchNumeral,
   Macro,
+  Token,
+  tokenize,
+  parse,
 } from "lambdulus-core"
 
 // import './EvaluatorStyle.css'
@@ -18,7 +21,7 @@ import Controls from './Controls'
 import Step from './Step'
 import { mapLeftFromTo } from '../misc'
 import { BoxType } from './Box'
-import { EvaluationStrategy } from '../App'
+import { EvaluationStrategy, PromptPlaceholder } from '../App'
 import Editor, { ActionType } from './Editor'
 
 
@@ -71,6 +74,9 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     super(props)
 
     this.addBreakpoint = this.addBreakpoint.bind(this)
+    this.onContent = this.onContent.bind(this)
+    this.onSubmitExpression = this.onSubmitExpression.bind(this)
+    this.parseExpression = this.parseExpression.bind(this)
   }
 
   render () : JSX.Element {
@@ -108,8 +114,8 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
                   syntaxError={ syntaxError } // data
                   isMarkDown={ false } // data
 
-                  onContent={ () => {} } // fn
-                  onEnter={ () => {} } // fn // tohle asi bude potreba
+                  onContent={ this.onContent } // fn
+                  onEnter={ this.onSubmitExpression } // fn // tohle asi bude potreba
                   onExecute={ () => {} } // fn // tohle asi bude potreba
                 />
               )
@@ -220,8 +226,8 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
           syntaxError={ syntaxError } // data
           isMarkDown={ false } // data
 
-          onContent={ () => {} } // fn
-          onEnter={ () => {} } // fn // tohle asi bude potreba
+          onContent={ this.onContent } // fn
+          onEnter={ this.onSubmitExpression } // fn // tohle asi bude potreba
           onExecute={ () => {} } // fn // tohle asi bude potreba
         />
 
@@ -236,5 +242,79 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
       ...state,
       breakpoints : [ ...state.breakpoints, breakpoint ],
     })
+  }
+
+  onContent (content : string, caretPosition : number) : void {
+    const { state, setBoxState } = this.props
+
+    setBoxState({
+      ...state,
+      editor : {
+        ...state.editor,
+        content,
+        caretPosition,
+        syntaxError : null,
+      }
+    } )
+    // this.updateURL(expression) // tohle musim nejak vyresit - mozna ta metoda setBoxState v APP bude checkovat propisovat do URL
+  }
+
+  onSubmitExpression () : void {
+    const { state, setBoxState } = this.props
+    // TODO: maybe cancel and clear URL only after succsessful parsing
+    // this.cancelUpdate() // deal with it later
+    
+    const {
+      editor : { content },
+    } = state
+
+    // window.location.hash = encodeURI(expression)
+    // history.pushState({}, "", "#" + encodeURI(expression)) // TODO: deal with later
+
+    try {
+      const ast : AST = this.parseExpression(content)
+      // history.pushState({}, "", "#" + encodeURI('')) // // TODO: later
+
+      setBoxState({
+        ...state,
+        ast,
+        expression : content,
+        history : [ {
+          ast : ast.clone(),
+          lastReduction : None,
+          step : 0,
+          message : '',
+          isNormalForm : false
+        } ],
+        editor : {
+          content : '',
+          caretPosition : 0,
+          placeholder : PromptPlaceholder.EVAL_MODE,
+          syntaxError : null,
+        }
+      })
+
+    } catch (exception) {
+      // this.updateURL(expression) // TODO: later
+
+      setBoxState({
+        ...state,
+        editor : {
+          ...state.editor,
+          syntaxError : null,
+        }
+      })
+    }
+  }
+
+  // THROWS Exceptions
+  parseExpression (expression : string) : AST {
+    // const { macroTable } : AppState = this.state
+    const { singleLetterNames : singleLetterVars } = this.props.state
+
+    const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars })
+    const ast : AST = parse(tokens, {}) // TODO: fix macros - Context API
+
+    return ast
   }
 }

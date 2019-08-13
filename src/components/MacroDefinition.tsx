@@ -28,6 +28,7 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
 
   return (
     <div className='box boxMacro'>
+      <p>This is not working properly yet</p>
       { macroName } := { macroExpression }
     </div>
   )
