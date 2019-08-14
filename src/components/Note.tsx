@@ -55,12 +55,6 @@ export default function Note (props : NoteProperties) : JSX.Element {
       ...props.state,
       note : content,
       isEditing : false,
-      editor : {
-        ...props.state.editor,
-        content : '',
-        caretPosition : 0,
-        syntaxError : null,
-      }
     })
   }
 
@@ -84,10 +78,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
 
 
         <div id="controls">
-          <button onClick={ () => setBoxState({
-            ...props.state,
-            isEditing : false,
-          }) }>
+          <button onClick={ () => onSubmitNote }>
             Save
           </button>
         </div>

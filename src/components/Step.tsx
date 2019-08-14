@@ -1,12 +1,12 @@
 import React from 'react'
-import { AST, Beta, Expansion, NormalEvaluator, ASTReduction } from 'lambdulus-core';
+import { AST, Beta, Expansion, NormalEvaluator, ASTReduction } from 'lambdulus-core'
 
 // import './StepStyle.css'
 
-import { Breakpoint, StepRecord } from './Evaluator'
+import { Breakpoint, StepRecord, _Evaluator, strategyToEvaluator } from './Evaluator'
 import ReactPrinter from './ReactPrinter'
 import ReductionMessage from './ReductionMessage'
-import { strategyToEvaluator, EvaluationStrategy, Evaluator } from '../App';
+import { EvaluationStrategy, } from '../App';
 
 
 interface StepProperties {
@@ -30,7 +30,7 @@ export default function Step (props : StepProperties) : JSX.Element | null {
 
   let redex : AST | null  = null
   // const normal : Evaluator = new NormalEvaluator(tree)
-  const normal : Evaluator = new (strategyToEvaluator(strategy) as any)(tree)
+  const normal : _Evaluator = new (strategyToEvaluator(strategy) as any)(tree)
   
   if (normal.nextReduction instanceof Beta) {
     redex = normal.nextReduction.redex

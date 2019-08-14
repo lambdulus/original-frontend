@@ -48,11 +48,14 @@ export default function Editor (props : EditorProperties) : JSX.Element {
     onContent(content, caretPosition)
   }
 
+  // TODO: Editor should not decide that - it should only implement onEnter onShiftEnter onCtrlEnter
   const onKeyDown = (event : KeyboardEvent<HTMLTextAreaElement>) => {
-    if (! event.shiftKey && ! event.ctrlKey && event.key === 'Enter') {
+    if ( ! event.shiftKey && ! event.ctrlKey && event.key === 'Enter') {
+      
       if (isMarkDown) {
         return
       }
+
       event.preventDefault()
       onEnter()
     }

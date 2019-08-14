@@ -13,6 +13,8 @@ import {
   Token,
   tokenize,
   parse,
+  ApplicativeEvaluator,
+  OptimizeEvaluator,
 } from "lambdulus-core"
 
 // import './EvaluatorStyle.css'
@@ -23,7 +25,23 @@ import { mapLeftFromTo } from '../misc'
 import { BoxType } from './Box'
 import { EvaluationStrategy, PromptPlaceholder } from '../App'
 import Editor, { ActionType } from './Editor'
+import { TreeComparator } from './TreeComparator'
 
+
+export type _Evaluator = NormalEvaluator | ApplicativeEvaluator | OptimizeEvaluator
+
+export function strategyToEvaluator (strategy : EvaluationStrategy) : _Evaluator {
+  switch (strategy) {
+    case EvaluationStrategy.NORMAL:
+      return NormalEvaluator as any
+ 
+    case EvaluationStrategy.APPLICATIVE:
+      return ApplicativeEvaluator as any
+
+    case EvaluationStrategy.OPTIMISATION:
+      return OptimizeEvaluator as any
+  }
+}
 
 export type Breakpoint = {
   type : ASTReduction,
@@ -77,6 +95,9 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     this.onContent = this.onContent.bind(this)
     this.onSubmitExpression = this.onSubmitExpression.bind(this)
     this.parseExpression = this.parseExpression.bind(this)
+    this.onEnter = this.onEnter.bind(this)
+    this.onExerciseStep = this.onExerciseStep.bind(this)
+    this.onStep = this.onStep.bind(this)
   }
 
   render () : JSX.Element {
@@ -115,7 +136,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
                   isMarkDown={ false } // data
 
                   onContent={ this.onContent } // fn
-                  onEnter={ this.onSubmitExpression } // fn // tohle asi bude potreba
+                  onEnter={ this.onEnter } // fn // tohle asi bude potreba
                   onExecute={ () => {} } // fn // tohle asi bude potreba
                 />
               )
@@ -227,7 +248,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
           isMarkDown={ false } // data
 
           onContent={ this.onContent } // fn
-          onEnter={ this.onSubmitExpression } // fn // tohle asi bude potreba
+          onEnter={ this.onEnter } // fn // tohle asi bude potreba
           onExecute={ () => {} } // fn // tohle asi bude potreba
         />
 
@@ -257,6 +278,25 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
       }
     } )
     // this.updateURL(expression) // tohle musim nejak vyresit - mozna ta metoda setBoxState v APP bude checkovat propisovat do URL
+  }
+
+  onEnter () : void {
+    const { expression, isExercise, editor : { content } } = this.props.state
+
+    if (expression === '') {
+      this.onSubmitExpression()
+    }
+    else if (content === '') {
+      if (isExercise) {
+        this.onExerciseStep()
+      }
+      else {
+        this.onStep()
+      }
+    }
+    else {
+      console.log('TODO: deje se neco co si neosetril')
+    }
   }
 
   onSubmitExpression () : void {
@@ -305,6 +345,114 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
         }
       })
     }
+  }
+
+  onExerciseStep () {
+    const { state, setBoxState } = this.props
+    const { strategy, history, editor : { content } } = state
+    try {
+      const userAst : AST = this.parseExpression(content)
+      const stepRecord : StepRecord = history[history.length - 1]
+      const { isNormalForm, step } = stepRecord
+      let { ast, lastReduction } = stepRecord
+      ast = ast.clone()
+
+      if (isNormalForm) {
+        // TODO: do something about it
+        // say user - there are no more steps and it is in normal form        
+        // TODO: consider immutability
+        stepRecord.message = 'No more steps available. Expression is in normal form.'
+
+        setBoxState({
+          ...state,
+        })
+
+        return
+      }
+    
+      const normal : _Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
+      lastReduction = normal.nextReduction
+    
+      if (normal.nextReduction instanceof None) {
+        // TODO: refactor PLS - update history
+        // TODO: say user it is in normal form and they are mistaken
+        stepRecord.isNormalForm = true
+        stepRecord.message = 'Expression is already in normal form.'
+        
+        setBoxState({
+          ...state,
+        })
+        
+        return
+      }
+    
+      ast = normal.perform()
+    
+      let message : string = ''
+      const comparator : TreeComparator = new TreeComparator([ userAst, ast ])
+      if (comparator.equals) {
+        ast = userAst
+        message = 'Correct.'
+      }
+      else {
+        // TODO: say user it was incorrect
+        // TODO: na to se pouzije uvnitr EvaluatorState prop messages nebo tak neco
+        console.log('Incorrect step')
+        message = `Incorrect step. ${content}`
+      }
+
+      setBoxState({
+        ...state,
+        history : [ ...history, { ast, lastReduction, step : step + 1, message, isNormalForm : false } ],
+        editor : {
+          ...state.editor,
+          content : '',
+          caretPosition : 0,
+          placeholder : PromptPlaceholder.VALIDATE_MODE,
+          syntaxError : null,
+        }
+      })
+    } catch (exception) {
+      // TODO: print syntax error
+      // TODO: do it localy - no missuse of onSubmit
+
+      // TODO: print syntax error
+    }
+  }
+
+  onStep () : void {
+    const { state, setBoxState } = this.props
+    const { strategy, history, editor : { content } } = state
+    const stepRecord = history[history.length - 1]
+    const { isNormalForm, step } = stepRecord
+    let { ast, lastReduction } = stepRecord
+    ast = ast.clone()
+  
+    if (isNormalForm) {
+      return
+    }
+
+    const normal : _Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
+    lastReduction = normal.nextReduction
+  
+    if (normal.nextReduction instanceof None) {
+      stepRecord.isNormalForm = true
+      stepRecord.message = 'Expression is in normal form.'
+      
+      setBoxState({
+        ...state,
+      })
+      
+      return
+    }
+  
+    ast = normal.perform()
+  
+    setBoxState({
+      ...state,
+      history : [ ...history, { ast, lastReduction, step : step + 1, message : '', isNormalForm : false } ],
+
+    })
   }
 
   // THROWS Exceptions

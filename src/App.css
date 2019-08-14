@@ -1,0 +1,151 @@
+body {
+  height: 100%;
+  /* background-color: darkorange; */
+}
+
+.app * {
+  /* don't allow the children of the scrollable element to be selected as an anchor node */
+  overflow-anchor: none;
+  /* width: 100%; */
+}
+
+#anchor {
+  /* allow the final child to be selected as an anchor node */
+  overflow-anchor: auto;
+
+  /* anchor nodes are required to have non-zero area */
+  height: 1px;
+}
+
+i {
+  font-style: normal;
+}
+
+.UL {
+  padding: 0;
+  margin: 0;
+}
+
+.LI {
+  list-style: none;
+  margin-bottom: 20px;
+}
+
+.evaluatorList > li {
+  margin-bottom: 40px;
+}
+
+.evaluatorSpace, .macroSpace {
+  padding-top: 10px;
+  width: 93vw;
+  margin-left: 6vw;
+  /* margin-bottom: 5em; */
+  height: 86vh;
+  /* overflow-y: scroll */
+}
+
+/* .evaluationHeader, .macroHeader, .noteHeader {
+  height: 1em;
+  background-color: #0091ea;
+  color: white;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+
+  font-size: 1.5em;
+
+  /* font-size: 1.5em;
+} */
+
+.evaluationHeader i {
+  color: white;
+}
+
+.headerTitle {
+  margin-left: 10px;
+}
+
+.macroSpace .box {
+  font-size: 1.1em;
+}
+
+.editorSettings {
+  /* border: 2px solid red; */
+  width: 93vw;
+  margin-left: 6vw;
+  padding-top: 0px;
+  padding-bottom: 20px;
+  /* border: 0.1em solid grey; */
+  /* border-radius: 0.25rem; */
+}
+
+.strategies {
+  margin-top: 0px;
+  /* border: 0.1em solid gray; */
+  /* border-left: 5px solid cadetblue; */
+  padding: 3px;
+  /* border-radius: 0.5em; */
+}
+
+.stratsLabel {
+  margin-right: 10px;
+}
+
+.bigEmpty {
+  width: 100%;
+  position: relative;
+}
+.emptyC {
+  margin: 0;
+  /* margin: auto; */
+  position: absolute;
+  right: 20px;
+  border-radius: 0.25rem;
+  text-align: center;
+  /* height: 10%; */
+  /* width: 5%; */
+  padding: 5px;
+  background-color: rgb(243, 243, 243);
+}
+
+.emptyC p {
+  border-radius: 0.25rem;
+  padding-right: 10px;
+  margin: 0;
+}
+
+.emptyC p:hover {
+  background-color: rgb(194, 194, 194);
+  
+}
+
+.bigEmpty .plusBtn {
+  font-size: 1em;
+  color: rgb(143, 143, 143);
+  vertical-align: center;
+  position: relative;
+  top: 30%;
+  /* padding-bottom: 50%; */
+  cursor: pointer;
+}
+
+.smallEmpty {
+  width: 100%;
+
+  /* margin: 0;
+  padding: 0;
+  border-radius: 0.25rem;
+  text-align: center;
+  background-color: rgb(243, 243, 243);
+  height: 10%; */
+}
+.smallEmpty .plusBtn {
+  font-size: 1em;
+  color: rgb(143, 143, 143);
+  vertical-align: center;
+  position: relative;
+  top: 30%;
+  /* padding-bottom: 50%; */
+  cursor: pointer;
+}

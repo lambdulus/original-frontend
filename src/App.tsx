@@ -10,6 +10,7 @@ import {
 } from 'lambdulus-core'
 
 import './App.css'
+
 import { HANDY_MACROS, getSavedMacros } from './misc'
 import MenuBar from './components/MenuBar'
 import BoxSpace from './components/BoxSpace'
@@ -52,21 +53,6 @@ export interface AppState {
   submittedBoxes : Array<BoxState>
   screen : Screen
   activeBoxIndex : number
-}
-
-export type Evaluator = NormalEvaluator | ApplicativeEvaluator | OptimizeEvaluator
-
-export function strategyToEvaluator (strategy : EvaluationStrategy) : Evaluator {
-  switch (strategy) {
-    case EvaluationStrategy.NORMAL:
-      return NormalEvaluator as any
- 
-    case EvaluationStrategy.APPLICATIVE:
-      return ApplicativeEvaluator as any
-
-    case EvaluationStrategy.OPTIMISATION:
-      return OptimizeEvaluator as any
-  }
 }
 
 export default class App extends Component<{}, AppState> {
