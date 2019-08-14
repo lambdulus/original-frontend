@@ -60,6 +60,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
           isActive={ isActive }
 
           setBoxState={ setBoxState }
+          makeActive={ props.makeActive }
         />
       </div>
     )
