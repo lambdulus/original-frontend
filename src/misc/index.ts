@@ -1,6 +1,24 @@
 import { MacroMap } from "lambdulus-core"
 
 
+export function debounce (fn : Function, treshold : number)
+ : [ (...args : Array<any>) => void, () => void ] {
+  let timer : number
+  
+  return [
+    function debounced (...args : Array<any>) : void {
+      window.clearTimeout(timer)
+
+      timer = window.setTimeout(() => {
+        fn(...args)
+      }, treshold)
+    },
+    function cancel () : void {
+      window.clearTimeout(timer)
+    }
+  ]
+}
+
 export function getSavedMacros () : MacroMap {
   return JSON.parse(window.localStorage.getItem('macrotable') || '{}')
 }
