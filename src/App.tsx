@@ -194,6 +194,8 @@ export default class App extends Component<{}, AppState> {
   }
 
   setBoxState (index : number, boxState : BoxState) : void {
+    // TODO: tahle metoda musi osetrit updatovani MacroTable
+    // taky bude asi osetrovat update URL
     const { submittedBoxes } = this.state
 
     // TODO: consider immutability

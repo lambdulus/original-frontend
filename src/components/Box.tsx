@@ -47,7 +47,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
   if (type === BoxType.macro) {
     return (
       <div className=''>
-        <MacroDefinition state={ state as MacroDefinitionState } />
+        <MacroDefinition state={ state as MacroDefinitionState } setBoxState={ setBoxState } />
       </div>
     )
   }

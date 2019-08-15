@@ -5,6 +5,10 @@ export function getSavedMacros () : MacroMap {
   return JSON.parse(window.localStorage.getItem('macrotable') || '{}')
 }
 
+export function trimStr (str : string) : string {
+  return str.trim()
+}
+
 export function mapLeftFromTo(
   from : number,
   to : number,
