@@ -10,6 +10,7 @@ import { AppState, Screen } from '../App'
 import { EvaluationState } from './Evaluator'
 import { BoxState, BoxType } from './Box'
 
+import '../styles/MenuBar.css'
 
 interface MenuBarProperties {
   state : AppState

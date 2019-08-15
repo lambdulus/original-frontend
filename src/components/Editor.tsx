@@ -1,7 +1,8 @@
 import React, { ChangeEvent, useState, SetStateAction, Dispatch, KeyboardEvent } from 'react'
 
-// import './EditorStyle.css'
-import { EvaluationStrategy } from '../App'
+import '../styles/Editor.css'
+
+// import { EvaluationStrategy } from '../App'
 
 
 export enum ActionType {

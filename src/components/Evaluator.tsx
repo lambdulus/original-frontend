@@ -15,9 +15,10 @@ import {
   parse,
   ApplicativeEvaluator,
   OptimizeEvaluator,
+  MacroMap,
 } from "lambdulus-core"
 
-// import './EvaluatorStyle.css'
+import '../styles/Evaluator.css'
 
 import Controls from './Controls'
 import Step from './Step'
@@ -82,6 +83,7 @@ interface EvaluationProperties {
   state : EvaluationState
   globalStrategy : EvaluationStrategy
   isActive : boolean
+  macroTable : MacroMap
 
   setBoxState (state : EvaluationState) : void
   makeActive () : void
@@ -105,7 +107,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
   }
 
   render () : JSX.Element {
-    const { state, isActive, setBoxState } : EvaluationProperties = this.props
+    const { state, isActive } : EvaluationProperties = this.props
     const {
       __key,
       history,
@@ -624,11 +626,11 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
 
   // THROWS Exceptions
   parseExpression (expression : string) : AST {
-    // const { macroTable } : AppState = this.state
+    const { macroTable } = this.props
     const { singleLetterNames : singleLetterVars } = this.props.state
 
     const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars })
-    const ast : AST = parse(tokens, {}) // TODO: fix macros - Context API
+    const ast : AST = parse(tokens, macroTable) // TODO: fix macros - Context API
 
     return ast
   }

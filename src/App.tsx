@@ -102,6 +102,7 @@ export default class App extends Component<{}, AppState> {
       activeBoxIndex={ activeBoxIndex }
       globalStrategy={ strategy }
       singleLetterNames={ singleLetterNames }
+      macroTable={ macroTable }
 
       makeActive={ this.changeActiveBox }
       setBoxState={ this.setBoxState }

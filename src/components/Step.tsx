@@ -1,7 +1,7 @@
 import React from 'react'
 import { AST, Beta, Expansion, NormalEvaluator, ASTReduction } from 'lambdulus-core'
 
-// import './StepStyle.css'
+import '../styles/Step.css'
 
 import { Breakpoint, StepRecord, _Evaluator, strategyToEvaluator } from './Evaluator'
 import ReactPrinter from './ReactPrinter'

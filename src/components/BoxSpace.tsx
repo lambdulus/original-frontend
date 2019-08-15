@@ -5,6 +5,7 @@ import { EvaluationState } from './Evaluator'
 import { EvaluationStrategy } from '../App'
 import { MacroDefinitionState } from './MacroDefinition'
 import { NoteState } from './Note'
+import { MacroMap } from 'lambdulus-core'
 
 
 export interface BoxSpaceProperties {
@@ -12,6 +13,7 @@ export interface BoxSpaceProperties {
   activeBoxIndex : number
   globalStrategy : EvaluationStrategy
   singleLetterNames : boolean
+  macroTable : MacroMap
   
   makeActive (index : number) : void
   setBoxState (index : number, state : BoxState) : void
@@ -25,6 +27,7 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
     singleLetterNames,
     submittedBoxes,
     activeBoxIndex,
+    macroTable,
     setBoxState,
     makeActive
   } = props
@@ -71,6 +74,7 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
               state={ boxState }
               globalStrategy={ props.globalStrategy }
               isActive={ i === activeBoxIndex }
+              macroTable={ macroTable }
               
               setBoxState={ (state : EvaluationState) => setBoxState(i, state) }
               makeActive={ () => makeActive(i) }

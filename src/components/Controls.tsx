@@ -2,7 +2,9 @@ import React, { ChangeEvent } from 'react'
 const { Switch, Radio } = require('pretty-checkbox-react')
 
 
-// import './ControlsStyle.css'
+import 'pretty-checkbox'
+import '../styles/Controls.css'
+
 
 export interface ControlsProps {
   isExercise : boolean
