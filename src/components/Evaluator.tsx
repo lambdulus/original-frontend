@@ -98,6 +98,10 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     this.onEnter = this.onEnter.bind(this)
     this.onExerciseStep = this.onExerciseStep.bind(this)
     this.onStep = this.onStep.bind(this)
+    this.onExecute = this.onExecute.bind(this)
+    this.onRun = this.onRun.bind(this)
+    this.onStop = this.onStop.bind(this)
+    this.shouldBreak = this.shouldBreak.bind(this)
   }
 
   render () : JSX.Element {
@@ -137,7 +141,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
 
                   onContent={ this.onContent } // fn
                   onEnter={ this.onEnter } // fn // tohle asi bude potreba
-                  onExecute={ () => {} } // fn // tohle asi bude potreba
+                  onExecute={ this.onExecute } // fn // tohle asi bude potreba
                 />
               )
               :
@@ -249,7 +253,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
 
           onContent={ this.onContent } // fn
           onEnter={ this.onEnter } // fn // tohle asi bude potreba
-          onExecute={ () => {} } // fn // tohle asi bude potreba
+          onExecute={ this.onExecute } // fn // tohle asi bude potreba
         />
 
       </div>
@@ -453,6 +457,169 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
       history : [ ...history, { ast, lastReduction, step : step + 1, message : '', isNormalForm : false } ],
 
     })
+  }
+
+  onExecute () : void {
+    const { state, setBoxState } = this.props
+    const { isRunning, isExercise } = state
+
+    if (isExercise) {
+      // TODO: exercises can not be run - some message to user???
+      return
+    }
+
+    if (isRunning) {
+      this.onStop()
+    }
+    else {
+      const { timeout, history } = state
+      const stepRecord = history[history.length - 1]
+  
+      if (stepRecord.isNormalForm) {
+        return
+      }
+      
+      const { ast, step, lastReduction, isNormalForm, message } = stepRecord
+      history.push(history[history.length - 1])
+      history[history.length - 2] = { ast : ast.clone(), step, lastReduction, message : 'Skipping some steps...', isNormalForm }
+
+      setBoxState({
+        ...state,
+        isRunning : true,
+        timeoutID : window.setTimeout(this.onRun, timeout),
+      })
+    }
+  }
+
+  onRun () : void {
+    const { state, setBoxState } = this.props
+    const { strategy } = state
+    let { history, isRunning, breakpoints, timeoutID, timeout } = state
+    const stepRecord : StepRecord = history[history.length - 1]
+    const { isNormalForm, step } = stepRecord
+    let { lastReduction } = stepRecord
+
+    if ( ! isRunning) {
+      return
+    }
+    
+    if (isNormalForm) {
+      setBoxState({
+        ...state,
+        isRunning : false,
+        timeoutID : undefined,
+      })
+  
+      return
+    }
+  
+    let { ast } = stepRecord
+    const normal : _Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
+    lastReduction = normal.nextReduction
+    
+    if (normal.nextReduction instanceof None) {
+      // TODO: consider immutability
+      history.pop()
+      history.push({
+        ast,
+        lastReduction : stepRecord.lastReduction,
+        step,
+        message : 'Expression is in normal form.',
+        isNormalForm : true
+      })
+  
+      setBoxState({
+        ...state,
+        isRunning : false,
+        timeoutID : undefined,
+      })
+  
+      return
+    }
+  
+    // TODO: maybe refactor a little
+    const breakpoint : Breakpoint | undefined = breakpoints.find(
+      (breakpoint : Breakpoint) =>
+        this.shouldBreak(breakpoint, normal.nextReduction)
+    )
+
+    if (breakpoint !== undefined) {
+      // TODO: consider immutability
+      if (normal.nextReduction instanceof Expansion) {
+        breakpoint.broken.add(normal.nextReduction.target)
+      }
+      if (normal.nextReduction instanceof Beta && normal.nextReduction.redex.left instanceof Lambda) {
+        breakpoint.broken.add(normal.nextReduction.redex.left.argument)
+      }
+
+      window.clearTimeout(timeoutID)
+
+      setBoxState({
+        ...state,
+        isRunning : false,
+        timeoutID,
+      })
+
+      return
+    }
+  
+    ast = normal.perform()
+    // steps++
+
+    history[history.length - 1] = { ast, lastReduction, step : step + 1, message : '', isNormalForm }
+    
+    setBoxState({
+      ...state,
+      timeoutID : window.setTimeout(this.onRun, timeout)
+    })
+  }
+
+  onStop () : void {
+    const { state, setBoxState } = this.props
+    const { timeoutID } = state
+  
+    window.clearTimeout(timeoutID)
+  
+    setBoxState({
+      ...state,
+      isRunning : false,
+      timeoutID : undefined
+    })
+  }
+
+  // TODO: breakpointy se pak jeste musi predelat
+  shouldBreak (breakpoint : Breakpoint, reduction : ASTReduction) : boolean {
+    // if (reduction instanceof (breakpoint.type as any)
+    //     && reduction instanceof Beta && breakpoint.context instanceof Lambda
+    //     && reduction.target.identifier === breakpoint.context.body.identifier
+    //   ) {
+    //     return true
+    // }
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Beta && breakpoint.context instanceof Variable
+        && reduction.redex.left instanceof Lambda
+        && reduction.redex.left.argument.identifier === breakpoint.context.identifier
+        && ! breakpoint.broken.has(reduction.redex.left.argument)
+    ) {
+      return true
+    }
+
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Expansion && breakpoint.context instanceof ChurchNumeral
+        && reduction.target.identifier === breakpoint.context.identifier
+        && ! breakpoint.broken.has(reduction.target)
+    ) {
+      return true
+    }
+    if (reduction instanceof (breakpoint.type as any)
+        && reduction instanceof Expansion && breakpoint.context instanceof Macro
+        && reduction.target.identifier === breakpoint.context.identifier
+        && ! breakpoint.broken.has(reduction.target)
+    ) {
+      return true
+    }
+  
+    return false
   }
 
   // THROWS Exceptions
