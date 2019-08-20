@@ -35,7 +35,9 @@ export default function Note (props : NoteProperties) : JSX.Element {
       editor : { placeholder, content, caretPosition, syntaxError },
       isEditing,
     },
+    isActive,
     setBoxState,
+    makeActive,
   } = props
 
   const onContent = (content : string, caretPosition : number) => {
@@ -60,7 +62,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
   }
 
 
-  if (isEditing) {
+  if (isEditing && isActive) {
     return (
       <div className='box boxNoteEditor'>
         
@@ -92,10 +94,16 @@ export default function Note (props : NoteProperties) : JSX.Element {
     <div className='box boxNote markdown-body'>
       <ReactMarkdown source={ note } />
       <div id="controls">
-          <button onClick={ () => setBoxState({
-            ...props.state,
-            isEditing : true,
-          }) }>
+          <button onClick={ () => {
+            setBoxState({
+              ...props.state,
+              isEditing : true,
+            })
+            makeActive()            
+          }
+          }
+            
+          >
             Edit
           </button>
         </div>
