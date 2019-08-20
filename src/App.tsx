@@ -206,7 +206,7 @@ export default class App extends Component<{}, AppState> {
     this.setState({
       ...this.state,
       submittedBoxes : [ ...submittedBoxes, boxState ],
-      activeBoxIndex : Math.max(0, submittedBoxes.length - 1),
+      activeBoxIndex : Math.max(0, submittedBoxes.length),
     })
   }
 

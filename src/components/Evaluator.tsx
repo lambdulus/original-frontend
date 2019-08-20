@@ -151,7 +151,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
               :
               (
                 <p className='inactiveMessage'>
-                  Collapsing { history.length - 1 } steps. Double click to activate this box.
+                  Collapsing { Math.max(0, history.length - 1) } steps. Double click to activate this box.
                 </p>
               )
           }
