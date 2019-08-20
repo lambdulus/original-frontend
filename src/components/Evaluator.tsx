@@ -23,7 +23,7 @@ import '../styles/Evaluator.css'
 import Controls from './Controls'
 import Step from './Step'
 import { mapLeftFromTo } from '../misc'
-import { BoxType } from './Box'
+import { BoxType, BoxState } from './Box'
 import { EvaluationStrategy, PromptPlaceholder } from '../App'
 import Editor, { ActionType } from './Editor'
 import { TreeComparator } from './TreeComparator'
@@ -87,6 +87,7 @@ interface EvaluationProperties {
 
   setBoxState (state : EvaluationState) : void
   makeActive () : void
+  addBox (boxState : BoxState) : void
 }
 
 export default class Evaluator extends PureComponent<EvaluationProperties> {
@@ -104,10 +105,11 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     this.onRun = this.onRun.bind(this)
     this.onStop = this.onStop.bind(this)
     this.shouldBreak = this.shouldBreak.bind(this)
+    this.createBoxFrom = this.createBoxFrom.bind(this)
   }
 
   render () : JSX.Element {
-    const { state, isActive } : EvaluationProperties = this.props
+    const { state, isActive, addBox } : EvaluationProperties = this.props
     const {
       __key,
       history,
@@ -176,10 +178,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
               >
                 <i
                   className="hiddenIcon fas fa-pencil-alt"
-                  onClick={ () => {}
-                    // TODO: na tohle chci pridat zpet handler - copyExpToNewBox nebo tak neco
-                    // this.props.editExpression(history[0].ast, state.strategy, singleLetterNames)
-                  }
+                  onClick={ () => addBox(this.createBoxFrom(history[0])) }
                 />
               </Step>
             </li>
@@ -220,10 +219,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
                 >
                   <i
                     className="hiddenIcon fas fa-pencil-alt"
-                    onClick={ () => {}
-                      // TODO: na tohle chci pridat zpet handler - copyExpToNewBox nebo tak neco
-                      // this.props.editExpression(stepRecord.ast, state.strategy, singleLetterNames)
-                    }
+                    onClick={ () => addBox(this.createBoxFrom(stepRecord)) }
                   />
                 </Step>
               </li>)
@@ -237,10 +233,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
             >
                 <i
                   className="hiddenIcon fas fa-pencil-alt"
-                  onClick={ () => {}
-                    // TODO: na tohle chci pridat zpet handler - copyExpToNewBox nebo tak neco                    
-                    // this.props.editExpression(history[history.length - 1].ast, state.strategy, singleLetterNames)
-                  }
+                  onClick={ () => addBox(this.createBoxFrom(history[history.length - 1])) }
                 />
             </Step>
           </li>
@@ -260,6 +253,42 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
 
       </div>
     )
+  }
+
+  createBoxFrom (stepRecord : StepRecord) : EvaluationState {
+    const { state } : EvaluationProperties = this.props
+    const {
+      strategy,
+      singleLetterNames,
+    } : EvaluationState = state
+    const { ast } = stepRecord
+
+    return {
+      type : BoxType.expression,
+      __key : Date.now().toString(),
+      expression : ast.toString(),
+      ast : ast.clone(),
+      history : [ {
+        ast : ast.clone(),
+        lastReduction : null,
+        step : 0,
+        message : '',
+        isNormalForm : false,
+      } ],
+      isRunning : false,
+      breakpoints : [],
+      timeoutID : undefined,
+      timeout : 10,
+      isExercise : false,
+      strategy,
+      singleLetterNames,
+      editor : {
+        placeholder : 'Hit enter for next step.', // TODO: tohle bude chtit fixnout - je nekde nejakej enum na placeholdery???
+        content : '',
+        caretPosition : 0,
+        syntaxError : null,
+      }
+    }
   }
 
   addBreakpoint (breakpoint : Breakpoint) : void {
@@ -630,7 +659,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     const { singleLetterNames : singleLetterVars } = this.props.state
 
     const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars })
-    const ast : AST = parse(tokens, macroTable) // TODO: fix macros - Context API
+    const ast : AST = parse(tokens, macroTable)
 
     return ast
   }

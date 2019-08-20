@@ -18,6 +18,7 @@ export interface BoxSpaceProperties {
   makeActive (index : number) : void
   setBoxState (index : number, state : BoxState) : void
   addEmptyBox (boxState : BoxState) : void
+  addBox (boxState : BoxState) : void
   // removeExpression (index : number) : void // not yet
 }
 
@@ -29,7 +30,8 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
     activeBoxIndex,
     macroTable,
     setBoxState,
-    makeActive
+    makeActive,
+    addBox,
   } = props
 
   const addBoxControls : JSX.Element = (
@@ -78,6 +80,7 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
               
               setBoxState={ (state : EvaluationState) => setBoxState(i, state) }
               makeActive={ () => makeActive(i) }
+              addBox={ addBox }
               // removeExpression={ () => removeExpression(i) }
             />
           </li>
@@ -119,6 +122,7 @@ function createEmptyMacro (singleLetterNames : boolean) : MacroDefinitionState {
     __key : Date.now().toString(),
     macroName : '',
     macroExpression : '',
+    singleLetterNames : true,
     editor : {
       placeholder : 'Type macro definition i.e. NAME := [λ expression] and hit enter',
       content : '',

@@ -9,6 +9,7 @@ export interface MacroDefinitionState {
   type : BoxType
   macroName : string
   macroExpression : string
+  singleLetterNames : boolean
   editor : {
     placeholder : string
     content : string
@@ -20,6 +21,7 @@ export interface MacroDefinitionState {
 export interface MacroDefinitionProperties {
   state : MacroDefinitionState
   setBoxState (boxState : BoxState) : void
+  addBox (boxState : BoxState) : void
 }
 
 export default function MacroDefinition (props : MacroDefinitionProperties) : JSX.Element {
