@@ -1,7 +1,6 @@
 {
-  "name": "lambdulus-frontend",
+  "name": "@lambdulus/frontend",
   "version": "0.1.0",
-  "private": true,
   "homepage": "https://lambdulus.github.io/",
   "dependencies": {
     "@types/jest": "24.0.9",
@@ -12,7 +11,7 @@
     "@types/react-dom": "16.8.2",
     "@types/react-sidebar": "^3.0.0",
     "github-markdown-css": "^3.0.1",
-    "lambdulus-core": "git+ssh://git@github.com/Taskkill/lambdulus-core.git",
+    "lambdulus-core": "git+https://github.com/lambdulus/core.git",
     "pretty-checkbox": "^3.0.3",
     "pretty-checkbox-react": "^1.1.0",
     "react": "^16.8.3",
