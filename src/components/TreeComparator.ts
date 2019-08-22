@@ -1,24 +1,4 @@
-import { ASTVisitor, AST, Application, Lambda, ChurchNumber, Macro, Variable } from "lambdulus-core"
-import { Answer, expert } from "./expert";
-
-
-export function debounce (fn : Function, treshold : number) {
-  let timer : number
-  
-  return function debounced (...args : Array<any>) {
-  	window.clearTimeout(timer)
-
-  	timer = window.setTimeout(() => {
-    	fn(...args)
-    }, treshold)
-  }
-}
-
-// intentionaly not handling `this` - I don't want debounced callback to (ab)use `this`
-
-export function trimStr (str : string) {
-  return str.trim()
-}
+import { AST, Lambda, Application, Macro, ChurchNumeral, Variable } from "lambdulus-core";
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,30 +14,11 @@ export class TreeComparator {
   private translator : Map<string, string> = new Map
   public equals : boolean = true
   private context : Pair<AST>
-  public answers : Array<Answer> = []
 
-  constructor (readonly roots : Triple<AST> ) {
-    let _
-    [ _, ...this.context ] = roots
-    // TODO: I need to compare roots themself
+  constructor (readonly roots : Pair<AST> ) {
+    [ ...this.context ] = roots
+    // TODO: I need to compare roots first
     this.compare()
-
-    if ( ! this.equals) {
-      // console.log('________________________________________________')
-      // console.log('________________________________________________')
-      // console.log('________________________________________________')
-
-      // console.log(_)
-      // console.log('________________________________________________')
-      // console.log('________________________________________________')
-      // console.log('________________________________________________')
-
-      console.log("EXPEEEEERT")
-
-      this.answers = expert(...roots)
-      console.log("EXPEEEEERT")
-
-    }
   }
 
   compare () : void {
@@ -104,7 +65,7 @@ export class TreeComparator {
     else if (left instanceof Macro && right instanceof Macro) {
       this.equals = left.name() === right.name()
     }
-    else if (left instanceof ChurchNumber && right instanceof ChurchNumber) {
+    else if (left instanceof ChurchNumeral && right instanceof ChurchNumeral) {
       this.equals = left.name() === right.name()
     }
     else if (left instanceof Variable && right instanceof Variable) {
