@@ -25,11 +25,12 @@ interface BoxProperties {
   setBoxState (state : BoxState) : void
   makeActive () : void
   addBox (boxState : BoxState) : void
+  defineMacro (name : string, definition : string) : void
   // removeExpression () : void // not yet
 }
 
 export default function Box (props : BoxProperties) : JSX.Element {
-  const { state, isActive, macroTable, setBoxState, makeActive, addBox } : BoxProperties = props
+  const { state, isActive, macroTable, setBoxState, makeActive, addBox, defineMacro } : BoxProperties = props
   const { type } = state
 
   if (type === BoxType.expression) {
@@ -57,6 +58,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
           setBoxState={ setBoxState }
 
           addBox={ addBox }
+          defineMacro={ defineMacro }
         />
       </div>
     )

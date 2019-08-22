@@ -69,6 +69,9 @@ export default class App extends Component<{}, AppState> {
     this.getActiveStrategy = this.getActiveStrategy.bind(this)
     this.getActiveSingleLetterNames = this.getActiveSingleLetterNames.bind(this)
     this.addBox = this.addBox.bind(this)
+    this.removeMacro = this.removeMacro.bind(this)
+    this.updateMacros = this.updateMacros.bind(this)
+    this.defineMacro = this.defineMacro.bind(this)
 
     this.state = {
       // settings : { // TODO: mel bych se tohohle uplne zbavit
@@ -105,6 +108,7 @@ export default class App extends Component<{}, AppState> {
       setBoxState={ this.setBoxState }
       addEmptyBox={ this.addEmptyBox }
       addBox={ this.addBox }
+      defineMacro={ this.defineMacro }
       // removeExpression={ this.onRemoveExpression } // to bude asi potreba az zbytek bude hotovej 
       
       
@@ -187,8 +191,7 @@ export default class App extends Component<{}, AppState> {
   }
 
   setBoxState (index : number, boxState : BoxState) : void {
-    // TODO: tahle metoda musi osetrit updatovani MacroTable
-    // taky bude asi osetrovat update URL
+    // TODO: bude asi osetrovat update URL
     const { submittedBoxes } = this.state
 
     // TODO: consider immutability
@@ -198,6 +201,7 @@ export default class App extends Component<{}, AppState> {
       ...this.state,
       submittedBoxes,
     })
+
   }
 
   addEmptyBox (boxState : BoxState) : void {
@@ -309,6 +313,17 @@ export default class App extends Component<{}, AppState> {
 
   updateMacros (macroTable : MacroMap) : void {
     window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
+  }
+
+  defineMacro (name : string, definition : string) : void {
+    const { macroTable } = this.state
+
+    this.setState({
+      ...this.state,
+      macroTable : { ...macroTable, [name] : definition }
+    })
+
+    this.updateMacros({ ...macroTable, [name] : definition })
   }
   
 }

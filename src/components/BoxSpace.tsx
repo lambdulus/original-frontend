@@ -19,6 +19,7 @@ export interface BoxSpaceProperties {
   setBoxState (index : number, state : BoxState) : void
   addEmptyBox (boxState : BoxState) : void
   addBox (boxState : BoxState) : void
+  defineMacro (name : string, definition : string) : void
   // removeExpression (index : number) : void // not yet
 }
 
@@ -32,6 +33,7 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
     setBoxState,
     makeActive,
     addBox,
+    defineMacro,
   } = props
 
   const addBoxControls : JSX.Element = (
@@ -81,6 +83,7 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
               setBoxState={ (state : EvaluationState) => setBoxState(i, state) }
               makeActive={ () => makeActive(i) }
               addBox={ addBox }
+              defineMacro={ defineMacro }
               // removeExpression={ () => removeExpression(i) }
             />
           </li>
