@@ -66,7 +66,7 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
   if (macroName === '' && macroExpression === '') {
     return (
       <div className='box boxMacro inactiveBox'>
-          <p className='emptyStep'>Empty macro box. Write [macro name] := and [λ expression] and hit enter.</p>
+          <p className='emptyStep'>Empty macro box.</p>
           <Editor
             placeholder={ placeholder } // data
             content={ content } // data

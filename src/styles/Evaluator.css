@@ -85,6 +85,6 @@ li:hover .hiddenMacroIcon {
 
 .emptyStep {
   margin-top: 0;
-  margin-bottom: 5px;
-
+  margin-bottom: 10px;
+  font-size: 0.7em;
 }

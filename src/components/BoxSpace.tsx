@@ -2,7 +2,7 @@ import React from 'react'
 
 import Box, { BoxState, BoxType } from './Box'
 import { EvaluationState } from './Evaluator'
-import { EvaluationStrategy } from '../App'
+import { EvaluationStrategy, PromptPlaceholder } from '../App'
 import { MacroDefinitionState } from './MacroDefinition'
 import { NoteState } from './Note'
 import { MacroMap } from 'lambdulus-core'
@@ -98,7 +98,7 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
 
 function createEmptyExp (strategy : EvaluationStrategy, singleLetterNames : boolean) : EvaluationState {
   return {
-    type : BoxType.expression,
+    type : BoxType.EXPRESSION,
     __key : Date.now().toString(),
     expression : '',
     ast : null,
@@ -111,7 +111,7 @@ function createEmptyExp (strategy : EvaluationStrategy, singleLetterNames : bool
     strategy,
     singleLetterNames,
     editor : {
-      placeholder : 'Type λ expression and hit enter', // TODO: tohle bude chtit fixnout - je nekde nejakej enum na placeholdery???
+      placeholder : PromptPlaceholder.INIT,
       content : '',
       caretPosition : 0,
       syntaxError : null,
@@ -121,13 +121,13 @@ function createEmptyExp (strategy : EvaluationStrategy, singleLetterNames : bool
 
 function createEmptyMacro (singleLetterNames : boolean) : MacroDefinitionState {
   return {
-    type : BoxType.macro,
+    type : BoxType.MACRO,
     __key : Date.now().toString(),
     macroName : '',
     macroExpression : '',
     singleLetterNames : true,
     editor : {
-      placeholder : 'Type macro definition i.e. NAME := [λ expression] and hit enter',
+      placeholder : PromptPlaceholder.MACRO,
       content : '',
       caretPosition : 0,
       syntaxError : null
@@ -137,12 +137,12 @@ function createEmptyMacro (singleLetterNames : boolean) : MacroDefinitionState {
 
 function createEmptyNote () : NoteState {
   return {
-    type : BoxType.note,
+    type : BoxType.NOTE,
     __key : Date.now().toString(),
     note : '',
     isEditing : true,
     editor : {
-      placeholder : 'Type note and hit shift enter',
+      placeholder : PromptPlaceholder.NOTE,
       content : '',
       caretPosition : 0,
       syntaxError : null,

@@ -132,7 +132,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     if (expression === '') {
       return (
         <div className={ className + ' inactiveBox' } onDoubleClick={ this.props.makeActive } >
-          <p className='emptyStep'>Empty expression box. Write λ expression and hit enter.</p>
+          <p className='emptyStep'>Empty expression box.</p>
           {
             isActive ?
               (
@@ -264,7 +264,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     const { ast } = stepRecord
 
     return {
-      type : BoxType.expression,
+      type : BoxType.EXPRESSION,
       __key : Date.now().toString(),
       expression : ast.toString(),
       ast : ast.clone(),
@@ -283,7 +283,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
       strategy,
       singleLetterNames,
       editor : {
-        placeholder : 'Hit enter for next step.', // TODO: tohle bude chtit fixnout - je nekde nejakej enum na placeholdery???
+        placeholder : PromptPlaceholder.EVAL_MODE,
         content : '',
         caretPosition : 0,
         syntaxError : null,
@@ -371,7 +371,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
 
     } catch (exception) {
       // this.updateURL(expression) // TODO: later
-
+      // console.log(exception)
       setBoxState({
         ...state,
         editor : {

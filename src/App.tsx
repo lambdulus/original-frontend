@@ -34,9 +34,11 @@ export enum Screen {
 }
 
 export enum PromptPlaceholder {
-  INIT = 'Type λ expression',
+  INIT = 'Type λ expression and hit enter',
   EVAL_MODE = 'Hit enter for next step',
   VALIDATE_MODE = 'Write next step and hit enter for validation',
+  MACRO = 'Define Macro like: `NAME := [λ expression]` and hit enter',
+  NOTE = 'Type note and hit shift enter'
 }
 
 // zvazit jestli nechci vytvorit record type pro ruzne stavy settings
@@ -74,12 +76,6 @@ export default class App extends Component<{}, AppState> {
     this.defineMacro = this.defineMacro.bind(this)
 
     this.state = {
-      // settings : { // TODO: mel bych se tohohle uplne zbavit
-      //   strategy : EvaluationStrategy.NORMAL,
-      //   singleLetterNames : true,
-      //   isExercise : false,
-      //   isMarkDown : false,
-      // },
       macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
       submittedBoxes : [],
       screen : Screen.main,
@@ -240,7 +236,7 @@ export default class App extends Component<{}, AppState> {
 
     const activeBoxState : BoxState = submittedBoxes[activeBoxIndex]
 
-    if (activeBoxState.type !== BoxType.expression) {
+    if (activeBoxState.type !== BoxType.EXPRESSION) {
       return EvaluationStrategy.NORMAL
     }
 
@@ -256,15 +252,15 @@ export default class App extends Component<{}, AppState> {
 
     const activeBoxState : BoxState = submittedBoxes[activeBoxIndex]
 
-    if (activeBoxState.type === BoxType.note) {
+    if (activeBoxState.type === BoxType.NOTE) {
       return true
     }
 
-    if (activeBoxState.type === BoxType.expression) {
+    if (activeBoxState.type === BoxType.EXPRESSION) {
       return (activeBoxState as EvaluationState).singleLetterNames
     }
 
-    if (activeBoxState.type === BoxType.macro) {
+    if (activeBoxState.type === BoxType.MACRO) {
       return (activeBoxState as MacroDefinitionState).singleLetterNames
     }
 

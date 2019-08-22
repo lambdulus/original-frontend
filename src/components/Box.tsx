@@ -9,9 +9,9 @@ import { MacroMap } from 'lambdulus-core'
 
 // TODO: rename EXPRESSION, MACRO, NOTE
 export enum BoxType {
-  expression,
-  macro,
-  note
+  EXPRESSION,
+  MACRO,
+  NOTE
 }
 
 export type BoxState = EvaluationState | MacroDefinitionState | NoteState
@@ -33,7 +33,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
   const { state, isActive, macroTable, setBoxState, makeActive, addBox, defineMacro } : BoxProperties = props
   const { type } = state
 
-  if (type === BoxType.expression) {
+  if (type === BoxType.EXPRESSION) {
     return (
       <div className=''>
         <Evaluator
@@ -50,7 +50,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
     )
   }
 
-  if (type === BoxType.macro) {
+  if (type === BoxType.MACRO) {
     return (
       <div className=''>
         <MacroDefinition
@@ -64,7 +64,7 @@ export default function Box (props : BoxProperties) : JSX.Element {
     )
   }
 
-  if (type === BoxType.note) {
+  if (type === BoxType.NOTE) {
     return (
       <div className=''>
         <Note

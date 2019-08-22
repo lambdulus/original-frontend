@@ -68,7 +68,7 @@ export default function MenuBar (props : MenuBarProperties) : JSX.Element {
 function dehydrateBox (box : BoxState) : BoxState {
   const { type } : BoxState = box
 
-  if (type === BoxType.expression) {
+  if (type === BoxType.EXPRESSION) {
 
     return {
       ...box,
@@ -93,7 +93,7 @@ function dehydrate (state : AppState) : AppState {
 function hydrateBox (box : BoxState, macroTable : MacroMap) : BoxState {
   const { type } : BoxState = box
   
-  if (type === BoxType.expression) {
+  if (type === BoxType.EXPRESSION) {
     const { singleLetterNames } = box as EvaluationState
     const ast : AST = parseExpression((box as EvaluationState).expression, { macroTable, singleLetterNames })
 
