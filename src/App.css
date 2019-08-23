@@ -67,7 +67,15 @@ i {
 }
 
 .macroSpace .box {
-  font-size: 1.1em;
+  font-size: 1.3em;
+}
+
+.macroSpace {
+  display: flex;
+}
+
+.builtinMacros, .userMacros {
+  flex: 50%;
 }
 
 .editorSettings {
