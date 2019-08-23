@@ -384,7 +384,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
         ...state,
         editor : {
           ...state.editor,
-          syntaxError : null,
+          syntaxError : exception.toString(),
         }
       })
     }

@@ -2,7 +2,8 @@ import React from 'react'
 
 import { BoxType, BoxState } from './Box'
 import { trimStr } from '../misc'
-import Editor from './Editor';
+import Editor from './Editor'
+import { tokenize, parse, AST, Token, Variable, builtinMacros } from 'lambdulus-core'
 
 
 export interface MacroDefinitionState {
@@ -28,7 +29,7 @@ export interface MacroDefinitionProperties {
 
 export default function MacroDefinition (props : MacroDefinitionProperties) : JSX.Element {
   const { state, setBoxState, defineMacro } = props
-  const { macroName, macroExpression } = state
+  const { macroName, macroExpression, singleLetterNames } = state
   const { editor : { content, caretPosition, placeholder, syntaxError } } = state
 
   const onContent = (content : string, caretPosition : number) => {
@@ -45,7 +46,46 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
 
   const onSubmit = () => {
     const [ macroName, macroExpression ] : Array<string> = content.split(':=').map(trimStr)
-    // TODO: parse name part and expression part !!!
+
+    // TODO: refactor later - this is just dirty little quick fix
+    if ( ! isMacroUnambigous(macroName)) {
+      setBoxState({
+        ...state,
+        editor : {
+          ...state.editor,
+          syntaxError : new Error(`Macro name is not valid. It redefines built-in Macro.`),
+        }
+      })
+
+      return
+    }
+
+    if ( ! isValidName(macroName, singleLetterNames)) {
+      setBoxState({
+        ...state,
+        editor : {
+          ...state.editor,
+          syntaxError :
+          // TODO: please fix this - only dirty quick impl
+            new Error(`Macro name is not valid.
+            ${singleLetterNames && macroName.length !== 1 ? 'Name should be single letter.' : '' }`),
+        }
+      })
+
+      return
+    }
+
+    if ( ! isValidExpression(macroExpression, singleLetterNames)) {
+      setBoxState({
+        ...state,
+        editor : {
+          ...state.editor,
+          syntaxError : new Error(`Macro expression is not valid.`)
+        }
+      })
+
+      return
+    }
 
     setBoxState({
       ...state,
@@ -87,4 +127,42 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
       { macroName } := { macroExpression }
     </div>
   )
+}
+
+// TODO: in the future there should be more then boolean to indicate validity
+function isValidName (name : string, singleLetterNames : boolean) : boolean {
+  try {
+    const root : AST = parseExpression(name, singleLetterNames)
+
+    return root instanceof Variable
+  }
+  catch (exception) {
+    return false
+  }
+}
+
+// THROWS Exceptions
+function parseExpression (expression : string, singleLetterNames : boolean) : AST {
+  const macroTable = {}
+  const singleLetterVars : boolean = singleLetterNames
+
+  const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars })
+  const ast : AST = parse(tokens, macroTable)
+
+  return ast
+}
+
+function isMacroUnambigous (name : string) : boolean {
+  return ! (name in builtinMacros)
+}
+
+function isValidExpression (expression : string, singleLetterNames : boolean) : boolean {
+  try {
+    parseExpression(expression, singleLetterNames)
+
+    return true
+  }
+  catch (exception) {
+    return false
+  }
 }
