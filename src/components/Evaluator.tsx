@@ -197,13 +197,21 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
           makeExercise={ () =>
             this.props.setBoxState({
               ...state,
-              isExercise : true
+              isExercise : true,
+              editor: {
+                ...state.editor,
+                placeholder : PromptPlaceholder.VALIDATE_MODE,
+              },
             })
           }
           endExercise={ () =>
             this.props.setBoxState({
               ...state,
-              isExercise : false
+              isExercise : false,
+              editor: {
+                ...state.editor,
+                placeholder : PromptPlaceholder.EVAL_MODE,
+              },
             })
           }
         />
