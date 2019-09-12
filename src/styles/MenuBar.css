@@ -80,9 +80,9 @@
   
   .editorSettings {
     position: fixed;
-    top: 8vw;
+    top: 80px;
     left: 0;
-    margin-left: 20px;
+    margin-left: 10px;
     margin-top: 0vh;
   }
 }

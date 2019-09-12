@@ -65,7 +65,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
   if (isEditing && isActive) {
     return (
       <div className='box boxNoteEditor'>
-        <p className='emptyStep'>Empty note box.</p>        
+        {/* <p className='emptyStep'>Empty note box.</p>         */}
         <Editor
           placeholder={ placeholder } // data
           content={ content } // data
@@ -81,7 +81,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
 
 
         <div id="controls">
-          <button onClick={ () => onSubmitNote }>
+          <button onClick={ () => onSubmitNote() }>
             Save
           </button>
         </div>
@@ -92,12 +92,12 @@ export default function Note (props : NoteProperties) : JSX.Element {
 
   return (
     <div className='box boxNote markdown-body'>
-      {
+      {/* {
         note === '' ? 
           <p className='emptyStep'>Empty note box.</p>
         :
           null
-      }
+      } */}
       <ReactMarkdown source={ note } />
       <div id="controls">
           <button onClick={ () => {

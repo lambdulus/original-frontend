@@ -37,8 +37,8 @@ i {
 
 .evaluatorSpace, .macroSpace {
   padding-top: 10px;
-  width: 93vw;
-  margin-left: 6vw;
+  /* width: 93vw; */
+  margin-left: 100px;
   /* margin-bottom: 5em; */
   height: 86vh;
   /* overflow-y: scroll */
@@ -80,8 +80,8 @@ i {
 
 .editorSettings {
   /* border: 2px solid red; */
-  width: 93vw;
-  margin-left: 6vw;
+  /* width: 93vw; */
+  margin-left: 100px;
   padding-top: 0px;
   padding-bottom: 20px;
   /* border: 0.1em solid grey; */

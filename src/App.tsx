@@ -6,7 +6,10 @@ import {
   MacroMap,
   NormalEvaluator,
   ApplicativeEvaluator,
-  OptimizeEvaluator
+  OptimizeEvaluator,
+  Token,
+  tokenize,
+  parse
 } from 'lambdulus-core'
 
 import './App.css'
@@ -74,6 +77,7 @@ export default class App extends Component<{}, AppState> {
     this.removeMacro = this.removeMacro.bind(this)
     this.updateMacros = this.updateMacros.bind(this)
     this.defineMacro = this.defineMacro.bind(this)
+    this.createBoxFromURL = this.createBoxFromURL.bind(this)
 
     this.state = {
       macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
@@ -81,6 +85,9 @@ export default class App extends Component<{}, AppState> {
       screen : Screen.main,
       activeBoxIndex : -1,
     }
+
+    setTimeout(this.createBoxFromURL, 1)
+    window.addEventListener('hashchange', this.createBoxFromURL)
   }
 
   render () : JSX.Element {
@@ -186,9 +193,55 @@ export default class App extends Component<{}, AppState> {
     )
   }
 
+  createBoxFromURL () {
+    const hash : string = decodeURI(window.location.hash.substring(1))
+    const isExercise : boolean = hash.indexOf('exercise') !== -1
+
+    const expression : string = isExercise ? hash.substring(8) : hash
+
+    if (expression === '') {
+      return
+    }
+
+    const box : BoxState = {
+      type : BoxType.EXPRESSION,
+      __key : Date.now().toString(),
+      expression : '',
+      ast : null,
+      history : [],
+      isRunning : false,
+      breakpoints : [],
+      timeoutID : undefined,
+      timeout : 10,
+      isExercise : isExercise,
+      strategy : EvaluationStrategy.NORMAL, // TODO: hardcoded Strategy = Normal
+      singleLetterNames : true, // TODO: hardcoded SLI = true
+      editor : {
+        placeholder : PromptPlaceholder.INIT,
+        content : expression,
+        caretPosition : expression.length,
+        syntaxError : null,
+      }
+    }
+
+    this.setState({
+      ...this.state,
+      submittedBoxes : [ box ],
+      activeBoxIndex : 0,
+    })
+  }
+
   setBoxState (index : number, boxState : BoxState) : void {
     // TODO: bude asi osetrovat update URL
-    const { submittedBoxes } = this.state
+    const { submittedBoxes, activeBoxIndex } = this.state
+    
+    // const activeBox : BoxState = submittedBoxes[activeBoxIndex]
+    const expression : string = boxState.editor.content || (boxState as EvaluationState).expression // TODO: DIRTY DIRTY BIG TIME
+    const expPrefix : string = boxState.type === BoxType.EXPRESSION && (boxState as EvaluationState).isExercise ? 'exercise' : '' 
+    
+    history.pushState({}, "page title?", "#" + expPrefix + encodeURI(expression))
+
+    // TODO: doresit update URL
 
     // TODO: consider immutability
     submittedBoxes[index] = boxState

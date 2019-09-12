@@ -72,10 +72,10 @@ function dehydrateBox (box : BoxState) : BoxState {
 
     return {
       ...box,
-      ast : null as any,
-      history : [],
+      ast : null as any, // TODO: don't
+      history : [], // TODO: don't
       isRunning : false,
-      breakpoints : [],
+      breakpoints : [], // TODO: solve how to don't
       timeoutID : undefined,
     }
   }
