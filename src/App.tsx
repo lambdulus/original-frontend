@@ -284,13 +284,13 @@ export default class App extends Component<{}, AppState> {
     const { submittedBoxes, activeBoxIndex } = this.state
 
     if (activeBoxIndex === -1) {
-      return EvaluationStrategy.NORMAL
+      return JSON.parse(window.localStorage.getItem('strategy') || JSON.stringify(EvaluationStrategy.NORMAL)) as EvaluationStrategy
     }
 
     const activeBoxState : BoxState = submittedBoxes[activeBoxIndex]
 
     if (activeBoxState.type !== BoxType.EXPRESSION) {
-      return EvaluationStrategy.NORMAL
+      return JSON.parse(window.localStorage.getItem('strategy') || JSON.stringify(EvaluationStrategy.NORMAL)) as EvaluationStrategy
     }
 
     return (activeBoxState as EvaluationState).strategy
@@ -300,13 +300,13 @@ export default class App extends Component<{}, AppState> {
     const { submittedBoxes, activeBoxIndex } = this.state
 
     if (activeBoxIndex === -1) {
-      return true
+      return JSON.parse(window.localStorage.getItem('SLI') || 'true')
     }
 
     const activeBoxState : BoxState = submittedBoxes[activeBoxIndex]
 
     if (activeBoxState.type === BoxType.NOTE) {
-      return true
+      return JSON.parse(window.localStorage.getItem('SLI') || 'true')
     }
 
     if (activeBoxState.type === BoxType.EXPRESSION) {
@@ -317,7 +317,7 @@ export default class App extends Component<{}, AppState> {
       return (activeBoxState as MacroDefinitionState).singleLetterNames
     }
 
-    return true // to nikdy nenastane doufam
+    return JSON.parse(window.localStorage.getItem('SLI') || 'true') // to nikdy nenastane doufam
   }
 
   changeActiveStrategy (strategy : EvaluationStrategy) : void {
@@ -331,6 +331,8 @@ export default class App extends Component<{}, AppState> {
     this.setState({
       ...this.state,
     })
+
+    window.localStorage.setItem('strategy', JSON.stringify(strategy))
   }
 
   changeActiveSingleLetterNames (enabled : boolean) : void {
@@ -344,6 +346,8 @@ export default class App extends Component<{}, AppState> {
     this.setState({
       ...this.state
     })
+
+    window.localStorage.setItem('SLI', JSON.stringify(enabled))
   }
 
   removeMacro (name : string) : void {
