@@ -125,7 +125,7 @@ function createEmptyMacro (singleLetterNames : boolean) : MacroDefinitionState {
     __key : Date.now().toString(),
     macroName : '',
     macroExpression : '',
-    singleLetterNames : true,
+    singleLetterNames,
     editor : {
       placeholder : PromptPlaceholder.MACRO,
       content : '',
