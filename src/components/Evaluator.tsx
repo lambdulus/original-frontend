@@ -131,7 +131,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
 
     if (expression === '') {
       return (
-        <div className={ className + ' inactiveBox' } onDoubleClick={ this.props.makeActive } >
+        <div className={ `${className} ${isActive ? '' : ' inactiveBox'}` } onDoubleClick={ this.props.makeActive } >
           {/* <p className='emptyStep'>Empty expression box.</p> */}
           {
             isActive ?

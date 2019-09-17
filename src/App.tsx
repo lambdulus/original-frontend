@@ -214,8 +214,8 @@ export default class App extends Component<{}, AppState> {
       timeoutID : undefined,
       timeout : 10,
       isExercise : isExercise,
-      strategy : EvaluationStrategy.NORMAL, // TODO: hardcoded Strategy = Normal
-      singleLetterNames : true, // TODO: hardcoded SLI = true
+      strategy : this.getActiveStrategy(),
+      singleLetterNames : this.getActiveSingleLetterNames(),
       editor : {
         placeholder : PromptPlaceholder.INIT,
         content : expression,
