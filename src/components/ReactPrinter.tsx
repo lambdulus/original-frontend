@@ -30,6 +30,16 @@ export default class ReactPrinter extends ASTVisitor {
               set = true
       }
 
+      // TO JE KVULI FIXU MULTILAMBDA FACCT 3 beta redukce nad shadowingem
+      let argument : Variable | null = this.argument
+      if (this.argument !== lambda.body.argument
+          &&
+          this.argument !== null
+          &&
+          this.argument.name() === lambda.body.argument.name()) {
+        this.argument = null
+      } // TO JE KVULI FIXU MULTILAMBDA FACCT 3 beta redukce nad shadowingem
+
       // TODO: same here
       if (this.argument
           &&
@@ -56,6 +66,7 @@ export default class ReactPrinter extends ASTVisitor {
       if (set === true) {
         this.argument = null
       }
+      this.argument = argument // TO JE KVULI FIXU MULTILAMBDA FACCT 3 beta redukce nad shadowingem
     }
     else {
       lambda.body.visit(this)
