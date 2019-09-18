@@ -128,6 +128,7 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
     } : EvaluationState = state
 
     let className : string = 'box boxEval'
+    const { isNormalForm } = history.length ? history[history.length - 1] : { isNormalForm : false }
 
     if (expression === '') {
       return (
@@ -247,17 +248,26 @@ export default class Evaluator extends PureComponent<EvaluationProperties> {
           </li>
         </ul>
 
-        <Editor
-          placeholder={ placeholder } // data
-          content={ content } // data
-          caretPosition={ caretPosition } // data
-          syntaxError={ syntaxError } // data
-          isMarkDown={ false } // data
+        {
+          isNormalForm ?
+            null
+            :
+            (
+              <Editor
+                placeholder={ placeholder } // data
+                content={ content } // data
+                caretPosition={ caretPosition } // data
+                syntaxError={ syntaxError } // data
+                isMarkDown={ false } // data
 
-          onContent={ this.onContent } // fn
-          onEnter={ this.onEnter } // fn // tohle asi bude potreba
-          onExecute={ this.onExecute } // fn // tohle asi bude potreba
-        />
+                onContent={ this.onContent } // fn
+                onEnter={ this.onEnter } // fn // tohle asi bude potreba
+                onExecute={ this.onExecute } // fn // tohle asi bude potreba
+              />
+            )
+        }
+
+        
 
       </div>
     )
