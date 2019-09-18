@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro } from "lambdulus-core";
+import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro, ASTReduction, None, Alpha } from "lambdulus-core";
 
 import { Breakpoint } from "./Evaluator";
 
@@ -16,6 +16,18 @@ export default class ReactPrinter extends ASTVisitor {
 
       if (this.isBreakpoint(lambda.body.argument)) {
         className += ' breakpoint'
+      }
+
+      // bug@highlight-alpha
+      let set = false
+      if (this.reduction instanceof Alpha
+            &&
+          Array.from(this.reduction.conversions).some((conversion : Lambda) => {
+            return conversion.identifier === lambda.body.identifier
+          })
+          ) {
+              this.argument = context
+              set = true
       }
 
       // TODO: same here
@@ -41,6 +53,9 @@ export default class ReactPrinter extends ASTVisitor {
       )
       
       this.printMultiLambda(lambda.body, args)
+      if (set === true) {
+        this.argument = null
+      }
     }
     else {
       lambda.body.visit(this)
@@ -74,7 +89,7 @@ export default class ReactPrinter extends ASTVisitor {
   constructor (
     public readonly tree : AST,
     private readonly onClick : (breakpoint : Breakpoint) => void,
-    private readonly redex : AST | null,
+    private readonly reduction : ASTReduction,
     private readonly breakpoints : Array<Breakpoint>,
   ) {
     super()
@@ -90,12 +105,20 @@ export default class ReactPrinter extends ASTVisitor {
     let leftClassName : string = 'left'
     let rightClassName : string = 'right'
     let set : boolean = false
+    let redex : AST | null = null
 
-    if (this.redex !== null
+    if (this.reduction instanceof Beta) {
+      redex = this.reduction.redex
+    }
+    // else if (this.reduction instanceof Expansion) {
+    //   redex = this.reduction.target
+    // } // to asi neni uplne potreba tady
+
+    if (redex !== null
           &&
-        this.redex.identifier === application.identifier // tohle je asi trosku useles
+        redex.identifier === application.identifier // tohle je asi trosku useles
           &&
-        this.redex === application
+        redex === application
       ) {
         leftClassName += ' redex'
         rightClassName += ' redex'
@@ -113,7 +136,7 @@ export default class ReactPrinter extends ASTVisitor {
       const left : JSX.Element | null = <span className={ leftClassName }>{this.rendered}</span>
 
       // tohle delam proto, ze se nesmi vypnout this.argument u libovolne aplikace, jenom u te ktera ho setnula
-      // priklad + 2 3a krokuj - zakomentuj a krokuj znovu Y se bude chovat spatne hned v prvnich krocich
+      // priklad + 2 3 a krokuj - zakomentuj a krokuj znovu Y se bude chovat spatne hned v prvnich krocich
       if (set) {
         this.argument = null
       }
@@ -235,12 +258,13 @@ export default class ReactPrinter extends ASTVisitor {
   // TODO: little bit refactored, maybe keep going
   onChurchNumeral (churchNumber: ChurchNumeral) : void {
     let className : string = 'churchnumeral'
+    const redex : AST | null = this.reduction instanceof Expansion ? this.reduction.target : null
 
-    if (this.redex !== null
+    if (redex !== null
           &&
-        this.redex.identifier === churchNumber.identifier
+        redex.identifier === churchNumber.identifier
           &&
-        this.redex === churchNumber
+        redex === churchNumber
       ) {
         className += ' redex'
     }
@@ -265,8 +289,14 @@ export default class ReactPrinter extends ASTVisitor {
   // TODO: little bit refactored, maybe keep going  
   onMacro (macro: Macro) : void {
     let className = 'macro'
+    const redex : AST | null = this.reduction instanceof Expansion ? this.reduction.target : null
 
-    if (this.redex !== null && this.redex.identifier === macro.identifier && this.redex === macro) {
+    if (redex !== null
+          &&
+        redex.identifier === macro.identifier
+          &&
+        redex === macro
+        ) {
       className += ' redex'
     }
 

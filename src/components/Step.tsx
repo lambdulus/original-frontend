@@ -1,5 +1,5 @@
 import React from 'react'
-import { AST, Beta, Expansion, NormalEvaluator, ASTReduction } from 'lambdulus-core'
+import { AST, Beta, Expansion, NormalEvaluator, ASTReduction, Alpha } from 'lambdulus-core'
 
 import '../styles/Step.css'
 
@@ -28,19 +28,22 @@ export default function Step (props : StepProperties) : JSX.Element | null {
   // TODO: tohle se musi fixnout
   // validni redex se musi dostat ze statu a ne si ho tedka vymyslet sam
 
-  let redex : AST | null  = null
-  // const normal : Evaluator = new NormalEvaluator(tree)
-  const normal : _Evaluator = new (strategyToEvaluator(strategy) as any)(tree)
+  // let redex : AST | null  = null
+  const evaluator : _Evaluator = new (strategyToEvaluator(strategy) as any)(tree)
+  const reduction : ASTReduction = evaluator.nextReduction
+  // if (normal.nextReduction instanceof Beta) {
+  //   redex = normal.nextReduction.redex
+  // }
   
-  if (normal.nextReduction instanceof Beta) {
-    redex = normal.nextReduction.redex
-  }
-  
-  if (normal.nextReduction instanceof Expansion) {
-    redex = normal.nextReduction.target
-  }
+  // if (normal.nextReduction instanceof Expansion) {
+  //   redex = normal.nextReduction.target
+  // }
 
-  const printer : ReactPrinter = new ReactPrinter(tree, addBreakpoint, redex, breakpoints)
+  // if (normal.nextReduction instanceof Alpha) {
+    
+  // }
+
+  const printer : ReactPrinter = new ReactPrinter(tree, addBreakpoint, reduction, breakpoints)
 
   return (
     <span className='step'>

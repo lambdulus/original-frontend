@@ -122,7 +122,6 @@ function InputField (props : InputProps) : JSX.Element {
       value={ content }
       placeholder={ placeholder }
       wrap='hard'
-      autoFocus
       autoComplete="off"
       autoCorrect="off"
       autoCapitalize="off"
