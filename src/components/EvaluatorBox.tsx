@@ -169,7 +169,6 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
         addBox={ this.props.addBox }
         createBoxFrom={ this.createBoxFrom }
         setBoxState={ this.props.setBoxState }
-        // addBreakpoint={ this.addBreakpoint }
         onContent={ this.onContent }
         onEnter={ this.onEnter }
         onExecute={ this.onExecute }

@@ -27,7 +27,6 @@ interface EvaluatorProps {
   addBox (boxState : BoxState) : void
   createBoxFrom (stepRecord : StepRecord) : EvaluationState
   setBoxState (state : EvaluationState) : void
-  // addBreakpoint (breakpoint : Breakpoint) : void
   onContent (content : string, caretPosition : number) : void
   onEnter () : void
   onExecute () : void
@@ -44,8 +43,6 @@ export default class Evaluator extends PureComponent<EvaluatorProps> {
       caretPosition,
       syntaxError,
     } = editor
-
-    // console.log({ history : this.props.history })
 
     return (
       <div className={ className }>
