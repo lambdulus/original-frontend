@@ -1,40 +1,35 @@
-import React from 'react'
+import React, { useContext } from 'react'
 
-import Box, { BoxState, BoxType } from './Box'
-import { EvaluationState } from './EvaluatorBox'
-import { EvaluationStrategy, PromptPlaceholder } from '../App'
-import { MacroDefinitionState } from './MacroDefinition'
-import { NoteState } from './Note'
-import { MacroMap } from 'lambdulus-core'
+import Box, { BoxState, BoxType } from '../Box'
+import { EvaluationState } from '../EvaluatorBox'
+import { EvaluationStrategy, PromptPlaceholder, StrategyContext } from '../../App'
+import { MacroDefinitionState } from '../MacroDefinition'
+import { NoteState } from '../Note'
 
 
 export interface BoxSpaceProperties {
   submittedBoxes : Array<BoxState>
   activeBoxIndex : number
-  globalStrategy : EvaluationStrategy
   singleLetterNames : boolean
-  macroTable : MacroMap
   
   makeActive (index : number) : void
   setBoxState (index : number, state : BoxState) : void
   addEmptyBox (boxState : BoxState) : void
-  addBox (boxState : BoxState) : void
   defineMacro (name : string, definition : string) : void
   // removeExpression (index : number) : void // not yet
 }
 
 export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
   const {
-    globalStrategy : strategy,
     singleLetterNames,
     submittedBoxes,
     activeBoxIndex,
-    macroTable,
     setBoxState,
     makeActive,
-    addBox,
     defineMacro,
   } = props
+
+  const strategy : EvaluationStrategy = useContext(StrategyContext)
 
   const addBoxControls : JSX.Element = (
     <div className='emptyC'>
@@ -76,13 +71,10 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
           <li className='LI' key={ boxState.__key }>
             <Box
               state={ boxState }
-              globalStrategy={ props.globalStrategy }
               isActive={ i === activeBoxIndex }
-              macroTable={ macroTable }
               
-              setBoxState={ (state : EvaluationState) => setBoxState(i, state) }
-              makeActive={ () => makeActive(i) }
-              addBox={ addBox }
+              setBoxState={ (state : EvaluationState) => setBoxState(i, state) } // ADEPT for CONTEXT
+              makeActive={ () => makeActive(i) } // ADEPT for CONTEXT
               defineMacro={ defineMacro }
               // removeExpression={ () => removeExpression(i) }
             />

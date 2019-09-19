@@ -25,7 +25,7 @@ export interface NoteProperties {
 
   setBoxState (state : BoxState) : void
   makeActive () : void
-  addBox (boxState : BoxState) : void
+  // addBox (boxState : BoxState) : void
 }
 
 export default function Note (props : NoteProperties) : JSX.Element {

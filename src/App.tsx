@@ -1,27 +1,18 @@
-import React, { Component, ChangeEvent } from 'react'
-const { Switch, Radio } = require('pretty-checkbox-react')
+import React, { Component, createContext } from 'react'
 
-import {
-  AST,
-  MacroMap,
-  NormalEvaluator,
-  ApplicativeEvaluator,
-  OptimizeEvaluator,
-  Token,
-  tokenize,
-  parse
-} from 'lambdulus-core'
+import { MacroMap } from 'lambdulus-core'
+
 
 import './App.css'
 
 import { HANDY_MACROS, getSavedMacros } from './misc'
 import MenuBar from './components/MenuBar'
-import BoxSpace from './components/BoxSpace'
-import Editor, { ActionType } from './components/Editor'
+import BoxSpace from './components/BoxSpace/BoxSpace'
 import { BoxState, BoxType } from './components/Box'
 import MacroSpace from './components/MacroSpace'
 import { EvaluationState } from './components/EvaluatorBox'
-import { MacroDefinitionState } from './components/MacroDefinition';
+import { MacroDefinitionState } from './components/MacroDefinition'
+import Settings from './components/Settings'
 
 
 export enum EvaluationStrategy {
@@ -44,23 +35,17 @@ export enum PromptPlaceholder {
   NOTE = 'Type note and hit shift enter'
 }
 
-// zvazit jestli nechci vytvorit record type pro ruzne stavy settings
-// v pripade ze je to markdown tak nedava smysl mit strategy a podobne
-// na druhou stranu, melo by si to pamatovat po prepnuti z MD znova do expr strategy a podobne
-export interface AppState {
-  // settings : {
-  //   strategy : EvaluationStrategy // podle me to tu nema co delat - je to specific pro aktivni Box
-  //   singleLetterNames : boolean // podle me to tu nema co delat - je to specific pro aktivni Box
-  //   isExercise : boolean // podle me to tu nema co delat - je to specific pro aktivni Box
-  //   isMarkDown : boolean // podle me to tu nema co delat - je to specific pro aktivni Box
-  // }
-  
+export interface AppState {  
   macroTable : MacroMap
 
   submittedBoxes : Array<BoxState>
   screen : Screen
   activeBoxIndex : number
 }
+
+export const StrategyContext = createContext(EvaluationStrategy.NORMAL)
+export const MacroTableContext = createContext({ ...HANDY_MACROS, ...getSavedMacros() })
+export const AddBoxContext = createContext((boxState : BoxState) => {})
 
 export default class App extends Component<{}, AppState> {
   constructor (props : object) {
@@ -86,13 +71,15 @@ export default class App extends Component<{}, AppState> {
       activeBoxIndex : -1,
     }
 
-    setTimeout(this.createBoxFromURL, 1)
     window.addEventListener('hashchange', this.createBoxFromURL)
+  }
+
+  componentDidMount () : void {
+    this.createBoxFromURL()
   }
 
   render () : JSX.Element {
     const {
-      // settings : { strategy, singleLetterNames },
       macroTable,
       submittedBoxes,
       screen,
@@ -100,25 +87,25 @@ export default class App extends Component<{}, AppState> {
     } : AppState = this.state
 
     const getEvaluatorSpace = () =>
-    <BoxSpace
-      submittedBoxes={ submittedBoxes }
-      activeBoxIndex={ activeBoxIndex }
-      globalStrategy={ this.getActiveStrategy() }
-      singleLetterNames={ this.getActiveSingleLetterNames() }
-      macroTable={ macroTable }
+    <StrategyContext.Provider value={ this.getActiveStrategy() }>
+      <MacroTableContext.Provider value={ macroTable }>
+        <AddBoxContext.Provider value={ this.addBox }>
+          <BoxSpace
+            submittedBoxes={ submittedBoxes } // 1 LEVEL
+            activeBoxIndex={ activeBoxIndex } // 1 LEVE
+            singleLetterNames={ this.getActiveSingleLetterNames() } // 1 LEVEL
 
-      makeActive={ this.changeActiveBox }
-      setBoxState={ this.setBoxState }
-      addEmptyBox={ this.addEmptyBox }
-      addBox={ this.addBox }
-      defineMacro={ this.defineMacro }
-      // removeExpression={ this.onRemoveExpression } // to bude asi potreba az zbytek bude hotovej 
-      
-      
-      // onEnter={ this.onEnter } // ten se presune dolu do Boxu
-      // onEditNote={ this.onEditNote } // zmeni se na onChangeActiveBox a isEditing se udela v Boxu
-
-    />
+            makeActive={ this.changeActiveBox }
+            setBoxState={ this.setBoxState }
+            addEmptyBox={ this.addEmptyBox } // 1 LEVEL
+            defineMacro={ this.defineMacro } // ADEPT for CONTEXT
+            // removeExpression={ this.onRemoveExpression } // to bude asi potreba az zbytek bude hotovej 
+            // onEnter={ this.onEnter } // ten se presune dolu do Boxu
+            // onEditNote={ this.onEditNote } // zmeni se na onChangeActiveBox a isEditing se udela v Boxu
+          />
+        </AddBoxContext.Provider>
+      </MacroTableContext.Provider>
+    </StrategyContext.Provider>
 
     const getMacroSpace = () =>
     <MacroSpace
@@ -129,9 +116,8 @@ export default class App extends Component<{}, AppState> {
 
     return (
       <div className='app'>
-
         <MenuBar
-          state={this.state} // to je nutny
+          state={ this.state } // to je nutny
           
           onImport={ (state : AppState) => this.setState(state) } // to je docela kratky OK
           
@@ -143,45 +129,12 @@ export default class App extends Component<{}, AppState> {
           }
          />
 
-        {/* celou tuhle componentu bych klidne mohl wrapnout v nejaky custom comp */}
-        {/* taky je dulezity odkud bude tahle kompontnta brat stav - z aktivniho Boxu */}
-        {/* kdyz neni zadnej box - tedy neni zadnej aktivni - tak nejakej default */}
-        <div className='editorSettings'>
-          <Switch
-            checked={ this.getActiveSingleLetterNames() }
-            disabled={ false } // TODO: tohle bude rozhodne chtit prepsat
-            shape="fill"
-            
-            onChange={ (e : ChangeEvent<HTMLInputElement>) => // taky nejakej pattern
-              this.changeActiveSingleLetterNames(e.target.checked)
-            }
-          >
-            Single Letter Names
-          </Switch>
-
-          <div className='strategies inlineblock'>
-            <p className='stratsLabel inlineblock'>Evaluation Strategies:</p>
-            <Radio
-              name="strategy"
-              style="fill"
-              checked={ this.getActiveStrategy() === EvaluationStrategy.NORMAL }
-              
-              onChange={ () => this.changeActiveStrategy(EvaluationStrategy.NORMAL) }
-            >
-              Normal
-            </Radio>
-            <Radio
-              style="fill"
-              name="strategy"
-              checked={ this.getActiveStrategy() === EvaluationStrategy.APPLICATIVE }
-              
-              onChange={ () => this.changeActiveStrategy(EvaluationStrategy.APPLICATIVE) }
-            >
-              Applicative
-            </Radio>
-          </div>
-          
-        </div>
+        <Settings
+          getActiveSingleLetterNames={ this.getActiveSingleLetterNames }
+          getActiveStrategy={ this.getActiveStrategy }
+          changeActiveSingleLetterNames={ this.changeActiveSingleLetterNames }
+          changeActiveStrategy={ this.changeActiveStrategy }
+        />
 
         {
           screen === Screen.main ? getEvaluatorSpace()
@@ -232,10 +185,8 @@ export default class App extends Component<{}, AppState> {
   }
 
   setBoxState (index : number, boxState : BoxState) : void {
-    // TODO: bude asi osetrovat update URL
-    const { submittedBoxes, activeBoxIndex } = this.state
+    const { submittedBoxes } = this.state
     
-    // const activeBox : BoxState = submittedBoxes[activeBoxIndex]
     const expression : string = boxState.editor.content || (boxState as EvaluationState).expression // TODO: DIRTY DIRTY BIG TIME
     const expPrefix : string = boxState.type === BoxType.EXPRESSION && (boxState as EvaluationState).isExercise ? 'exercise' : '' 
     
@@ -378,5 +329,5 @@ export default class App extends Component<{}, AppState> {
 
     this.updateMacros({ ...macroTable, [name] : definition })
   }
-  
+
 }

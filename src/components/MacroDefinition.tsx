@@ -23,7 +23,7 @@ export interface MacroDefinitionState {
 export interface MacroDefinitionProperties {
   state : MacroDefinitionState
   setBoxState (boxState : BoxState) : void
-  addBox (boxState : BoxState) : void
+  // addBox (boxState : BoxState) : void
   defineMacro (name : string, definition : string) : void
 }
 

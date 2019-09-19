@@ -80,13 +80,11 @@ export interface EvaluationState {
 
 export interface EvaluationProperties {
   state : EvaluationState
-  globalStrategy : EvaluationStrategy
   isActive : boolean
   macroTable : MacroMap
 
   setBoxState (state : EvaluationState) : void
   makeActive () : void
-  addBox (boxState : BoxState) : void
 }
 
 export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
@@ -146,10 +144,8 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
           className={ className }
           breakpoints={ breakpoints }
           history={ history }
-          globalStrategy={ this.props.globalStrategy } // TODO: nemel bych pouzit strategy?
           
           makeActive={ this.props.makeActive }
-          addBox={ this.props.addBox }
           createBoxFrom={ this.createBoxFrom }
         />
       )
@@ -162,11 +158,9 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
         state={ state }
         breakpoints={ breakpoints }
         history={ history }
-        globalStrategy={ this.props.globalStrategy } // TODO: nemel bych pouzit strategy?
         editor={ editor }
         isNormalForm={ isNormalForm }
 
-        addBox={ this.props.addBox }
         createBoxFrom={ this.createBoxFrom }
         setBoxState={ this.props.setBoxState }
         onContent={ this.onContent }
@@ -555,6 +549,7 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
   // THROWS Exceptions
   parseExpression (expression : string) : AST {
     const { macroTable } = this.props
+
     const { singleLetterNames : singleLetterVars } = this.props.state
 
     const tokens : Array<Token> = tokenize(expression, { lambdaLetters : ['λ'], singleLetterVars })

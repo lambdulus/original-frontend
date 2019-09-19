@@ -3,7 +3,7 @@ import React, { PureComponent } from 'react'
 import Controls from './Controls'
 import Step from './Step'
 import { EvaluationState, StepRecord, Breakpoint } from './EvaluatorBox'
-import { PromptPlaceholder, EvaluationStrategy } from '../App'
+import { PromptPlaceholder, EvaluationStrategy, AddBoxContext } from '../App'
 import { mapLeftFromTo } from '../misc'
 import { BoxState } from './Box'
 import Editor from './Editor'
@@ -15,7 +15,6 @@ interface EvaluatorProps {
   state : EvaluationState
   breakpoints : Array<Breakpoint>
   history : Array<StepRecord>
-  globalStrategy : EvaluationStrategy
   editor : {
     placeholder : string
     content : string
@@ -24,7 +23,6 @@ interface EvaluatorProps {
   }
   isNormalForm : boolean
 
-  addBox (boxState : BoxState) : void
   createBoxFrom (stepRecord : StepRecord) : EvaluationState
   setBoxState (state : EvaluationState) : void
   onContent (content : string, caretPosition : number) : void
@@ -33,7 +31,6 @@ interface EvaluatorProps {
 }
 
 export default class Evaluator extends PureComponent<EvaluatorProps> {
-
   render () : JSX.Element {
     const { className, isExercise, state, editor } = this.props
 
@@ -69,39 +66,42 @@ export default class Evaluator extends PureComponent<EvaluatorProps> {
             })
           }
         />
-        <ul className='UL'>
+        <AddBoxContext.Consumer>
           {
-            mapLeftFromTo(0, this.props.history.length - 2, this.props.history, (stepRecord : StepRecord, i : Number) =>
-              <li key={ i.toString() } className='inactiveStep LI' >
+            (addBox : (boxState : BoxState) => void) =>
+            <ul className='UL'>
+              {
+                mapLeftFromTo(0, this.props.history.length - 2, this.props.history, (stepRecord : StepRecord, i : Number) =>
+                  <li key={ i.toString() } className='inactiveStep LI' >
+                    <Step
+                      breakpoints={ this.props.breakpoints }
+                      addBreakpoint={ () => {} }
+                      stepRecord={ stepRecord }
+                      lastStep={ false }
+                    >
+                      <i
+                        className="hiddenIcon fas fa-pencil-alt"
+                        onClick={ () => addBox(this.props.createBoxFrom(stepRecord)) }
+                      />
+                    </Step>
+                  </li>)
+              }
+              <li key={this.props.history.length - 1} className='activeStep LI'>
                 <Step
                   breakpoints={ this.props.breakpoints }
-                  addBreakpoint={ () => {} }
-                  stepRecord={ stepRecord }
-                  strategy={ this.props.globalStrategy }
-                  lastStep={ false }
+                  addBreakpoint={ this.addBreakpoint }
+                  stepRecord={ this.props.history[this.props.history.length - 1] }
+                  lastStep={ true }
                 >
-                  <i
-                    className="hiddenIcon fas fa-pencil-alt"
-                    onClick={ () => this.props.addBox(this.props.createBoxFrom(stepRecord)) }
-                  />
+                    <i
+                      className="hiddenIcon fas fa-pencil-alt"
+                      onClick={ () => addBox(this.props.createBoxFrom(this.props.history[this.props.history.length - 1])) }
+                    />
                 </Step>
-              </li>)
+              </li>
+            </ul>
           }
-          <li key={this.props.history.length - 1} className='activeStep LI'>
-            <Step
-              breakpoints={ this.props.breakpoints }
-              addBreakpoint={ this.addBreakpoint }
-              stepRecord={ this.props.history[this.props.history.length - 1] }
-              strategy={ this.props.globalStrategy }
-              lastStep={ true }
-            >
-                <i
-                  className="hiddenIcon fas fa-pencil-alt"
-                  onClick={ () => this.props.addBox(this.props.createBoxFrom(this.props.history[this.props.history.length - 1])) }
-                />
-            </Step>
-          </li>
-        </ul>
+        </AddBoxContext.Consumer>
 
         {
           this.props.isNormalForm ?

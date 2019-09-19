@@ -3,16 +3,14 @@ import React, { PureComponent } from 'react'
 import Step from './Step'
 import { EvaluationState, StepRecord, Breakpoint } from './EvaluatorBox'
 import { BoxState } from './Box'
-import { EvaluationStrategy } from '../App'
+import { EvaluationStrategy, AddBoxContext } from '../App'
 
 interface InactiveEvaluatorProps {
   className : string
   breakpoints : Array<Breakpoint>
   history : Array<StepRecord>
-  globalStrategy : EvaluationStrategy
 
   makeActive () : void
-  addBox (boxState : BoxState) : void
   createBoxFrom (stepRecord : StepRecord) : EvaluationState
 }
 
@@ -29,13 +27,18 @@ export default class InactiveEvaluator extends PureComponent<InactiveEvaluatorPr
                 breakpoints={ this.props.breakpoints }
                 addBreakpoint={ () => {} } // blank function - NOOP
                 stepRecord={ this.props.history[0] }
-                strategy={ this.props.globalStrategy }
                 lastStep={ false }
               >
-                <i
-                  className="hiddenIcon fas fa-pencil-alt"
-                  onClick={ () => this.props.addBox(this.props.createBoxFrom(this.props.history[0])) }
-                />
+                
+                <AddBoxContext.Consumer>
+                  {
+                    (addBox : (boxState : BoxState) => void) => <i
+                      className="hiddenIcon fas fa-pencil-alt"
+                      onClick={ () => addBox(this.props.createBoxFrom(this.props.history[0])) }
+                    />
+                  }
+                </AddBoxContext.Consumer>
+                
               </Step>
             </li>
           </ul>
