@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { AST, Beta, Expansion, NormalEvaluator, ASTReduction, Alpha } from 'lambdulus-core'
 
 import '../styles/Step.css'
@@ -15,9 +15,14 @@ interface StepProperties {
   addBreakpoint (breakpoint : Breakpoint) : void
   children : JSX.Element
   strategy : EvaluationStrategy
+  lastStep : boolean
 }
 
-export default function Step (props : StepProperties) : JSX.Element | null {
+// This is done because of highlighting - if Strategy is changed ->
+// old steps should not be re-highlighted with changed Strategy - but stay same
+export default memo(Step, (props : StepProperties) => !props.lastStep)
+
+function Step (props : StepProperties) : JSX.Element | null {
   const { stepRecord, addBreakpoint, breakpoints, children, strategy } = props
 
   const { ast : tree, lastReduction, step, message } = stepRecord

@@ -30,6 +30,7 @@ export default class InactiveEvaluator extends PureComponent<InactiveEvaluatorPr
                 addBreakpoint={ () => {} } // blank function - NOOP
                 stepRecord={ this.props.history[0] }
                 strategy={ this.props.globalStrategy }
+                lastStep={ false }
               >
                 <i
                   className="hiddenIcon fas fa-pencil-alt"
