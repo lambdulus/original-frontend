@@ -7,7 +7,7 @@ import React, { ChangeEvent } from 'react'
 import { AST, tokenize, parse, Token, MacroMap, None } from 'lambdulus-core'
 
 import { AppState, Screen } from '../App'
-import { EvaluationState } from './Evaluator'
+import { EvaluationState } from './EvaluatorBox'
 import { BoxState, BoxType } from './Box'
 
 import '../styles/MenuBar.css'

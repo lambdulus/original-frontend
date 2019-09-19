@@ -3,7 +3,7 @@ import { AST, Beta, Expansion, NormalEvaluator, ASTReduction, Alpha } from 'lamb
 
 import '../styles/Step.css'
 
-import { Breakpoint, StepRecord, _Evaluator, strategyToEvaluator } from './Evaluator'
+import { Breakpoint, StepRecord, _Evaluator, strategyToEvaluator } from './EvaluatorBox'
 import ReactPrinter from './ReactPrinter'
 import ReductionMessage from './ReductionMessage'
 import { EvaluationStrategy, } from '../App';

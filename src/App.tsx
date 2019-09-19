@@ -20,7 +20,7 @@ import BoxSpace from './components/BoxSpace'
 import Editor, { ActionType } from './components/Editor'
 import { BoxState, BoxType } from './components/Box'
 import MacroSpace from './components/MacroSpace'
-import { EvaluationState } from './components/Evaluator'
+import { EvaluationState } from './components/EvaluatorBox'
 import { MacroDefinitionState } from './components/MacroDefinition';
 
 

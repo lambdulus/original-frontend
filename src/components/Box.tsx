@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Evaluator, { EvaluationState } from './Evaluator'
+import Evaluator, { EvaluationState } from './EvaluatorBox'
 import MacroDefinition, { MacroDefinitionState } from './MacroDefinition'
 import Note, { NoteState } from './Note'
 import { EvaluationStrategy } from '../App'

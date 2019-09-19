@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Box, { BoxState, BoxType } from './Box'
-import { EvaluationState } from './Evaluator'
+import { EvaluationState } from './EvaluatorBox'
 import { EvaluationStrategy, PromptPlaceholder } from '../App'
 import { MacroDefinitionState } from './MacroDefinition'
 import { NoteState } from './Note'
