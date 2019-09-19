@@ -19,6 +19,7 @@ interface StepProperties {
 
 export default function Step (props : StepProperties) : JSX.Element | null {
   const { stepRecord, addBreakpoint, breakpoints, children, strategy } = props
+
   const { ast : tree, lastReduction, step, message } = stepRecord
 
   if (tree === null) {

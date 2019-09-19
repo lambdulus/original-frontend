@@ -25,7 +25,7 @@ import { EvaluationStrategy, PromptPlaceholder } from '../App'
 import { TreeComparator } from './TreeComparator'
 import EmptyEvaluator from './EmptyEvaluator'
 import InactiveEvaluator from './InactiveEvaluator'
-import Evaluator from './Evaluator';
+import Evaluator from './Evaluator'
 
 
 export type _Evaluator = NormalEvaluator | ApplicativeEvaluator | OptimizeEvaluator
@@ -78,7 +78,7 @@ export interface EvaluationState {
   }
 }
 
-interface EvaluationProperties {
+export interface EvaluationProperties {
   state : EvaluationState
   globalStrategy : EvaluationStrategy
   isActive : boolean
@@ -93,7 +93,6 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
   constructor (props : EvaluationProperties) {
     super(props)
 
-    this.addBreakpoint = this.addBreakpoint.bind(this)
     this.onContent = this.onContent.bind(this)
     this.onSubmitExpression = this.onSubmitExpression.bind(this)
     this.parseExpression = this.parseExpression.bind(this)
@@ -108,23 +107,14 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
   }
 
   render () : JSX.Element {
-    const { state, isActive, addBox } : EvaluationProperties = this.props
+    const { state, isActive } : EvaluationProperties = this.props
     const {
-      __key,
       history,
-      isRunning,
       breakpoints,
       isExercise,
       strategy,
-      singleLetterNames,
       expression,
       editor,
-      editor : {
-        caretPosition,
-        content,
-        placeholder,
-        syntaxError,
-      },
     } : EvaluationState = state
 
     let className : string = 'box boxEval'
@@ -136,6 +126,8 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
           className={ className }
           isActive={ this.props.isActive }
           editor={ editor }
+          history={ history }
+
           makeActive={ this.props.makeActive }
           onContent={ this.onContent }
           onEnter={ this.onEnter }
@@ -154,7 +146,7 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
           className={ className }
           breakpoints={ breakpoints }
           history={ history }
-          globalStrategy={ this.props.globalStrategy }
+          globalStrategy={ this.props.globalStrategy } // TODO: nemel bych pouzit strategy?
           
           makeActive={ this.props.makeActive }
           addBox={ this.props.addBox }
@@ -170,14 +162,14 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
         state={ state }
         breakpoints={ breakpoints }
         history={ history }
-        globalStrategy={ this.props.globalStrategy }
+        globalStrategy={ this.props.globalStrategy } // TODO: nemel bych pouzit strategy?
         editor={ editor }
         isNormalForm={ isNormalForm }
 
         addBox={ this.props.addBox }
         createBoxFrom={ this.createBoxFrom }
         setBoxState={ this.props.setBoxState }
-        addBreakpoint={ this.addBreakpoint }
+        // addBreakpoint={ this.addBreakpoint }
         onContent={ this.onContent }
         onEnter={ this.onEnter }
         onExecute={ this.onExecute }
@@ -219,15 +211,6 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
         syntaxError : null,
       }
     }
-  }
-
-  addBreakpoint (breakpoint : Breakpoint) : void {
-    let { state, setBoxState } : EvaluationProperties = this.props
-  
-    setBoxState({
-      ...state,
-      breakpoints : [ ...state.breakpoints, breakpoint ],
-    })
   }
 
   onContent (content : string, caretPosition : number) : void {

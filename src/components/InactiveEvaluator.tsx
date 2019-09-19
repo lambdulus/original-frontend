@@ -39,7 +39,7 @@ export default class InactiveEvaluator extends PureComponent<InactiveEvaluatorPr
             </li>
           </ul>
           <p className='inactiveMessage'>
-            Collapsing { history.length - 1 } { history.length === 2 ? 'step' : 'steps' }. Double click to activate this box.
+            Collapsing { this.props.history.length - 1 } { this.props.history.length === 2 ? 'step' : 'steps' }. Double click to activate this box.
           </p>
         </div>
     )

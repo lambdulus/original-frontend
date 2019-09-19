@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 
 import Editor from './Editor'
+import { StepRecord } from './EvaluatorBox'
 
 interface EmptyEvaluatorProps {
   className : string
@@ -11,6 +12,7 @@ interface EmptyEvaluatorProps {
     caretPosition : number
     syntaxError : Error | null
   }
+  history : Array<StepRecord>
 
   makeActive () : void
   onContent (content : string, caretPosition : number) : void
@@ -52,7 +54,7 @@ export default class EmptyEvaluator extends PureComponent<EmptyEvaluatorProps> {
               :
               (
                 <p className='inactiveMessage'>
-                  Collapsing { Math.max(0, history.length - 1) } { history.length === 2 ? 'step' : 'steps' }. Double click to activate this box.
+                  Collapsing { Math.max(0, this.props.history.length - 1) } { this.props.history.length === 2 ? 'step' : 'steps' }. Double click to activate this box.
                 </p>
               )
           }

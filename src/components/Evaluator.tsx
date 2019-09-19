@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
 
 import Controls from './Controls'
+import Step from './Step'
 import { EvaluationState, StepRecord, Breakpoint } from './EvaluatorBox'
 import { PromptPlaceholder, EvaluationStrategy } from '../App'
 import { mapLeftFromTo } from '../misc'
-import Step from './Step'
 import { BoxState } from './Box'
 import Editor from './Editor'
 
@@ -27,7 +27,7 @@ interface EvaluatorProps {
   addBox (boxState : BoxState) : void
   createBoxFrom (stepRecord : StepRecord) : EvaluationState
   setBoxState (state : EvaluationState) : void
-  addBreakpoint (breakpoint : Breakpoint) : void
+  // addBreakpoint (breakpoint : Breakpoint) : void
   onContent (content : string, caretPosition : number) : void
   onEnter () : void
   onExecute () : void
@@ -44,6 +44,8 @@ export default class Evaluator extends PureComponent<EvaluatorProps> {
       caretPosition,
       syntaxError,
     } = editor
+
+    // console.log({ history : this.props.history })
 
     return (
       <div className={ className }>
@@ -72,7 +74,7 @@ export default class Evaluator extends PureComponent<EvaluatorProps> {
         />
         <ul className='UL'>
           {
-            mapLeftFromTo(0, history.length - 2, this.props.history, (stepRecord : StepRecord, i : Number) =>
+            mapLeftFromTo(0, this.props.history.length - 2, this.props.history, (stepRecord : StepRecord, i : Number) =>
               <li key={ i.toString() } className='inactiveStep LI' >
                 <Step
                   breakpoints={ this.props.breakpoints }
@@ -90,8 +92,8 @@ export default class Evaluator extends PureComponent<EvaluatorProps> {
           <li key={this.props.history.length - 1} className='activeStep LI'>
             <Step
               breakpoints={ this.props.breakpoints }
-              addBreakpoint={ this.props.addBreakpoint }
-              stepRecord={ this.props.history[history.length - 1] }
+              addBreakpoint={ this.addBreakpoint }
+              stepRecord={ this.props.history[this.props.history.length - 1] }
               strategy={ this.props.globalStrategy }
             >
                 <i
@@ -122,5 +124,14 @@ export default class Evaluator extends PureComponent<EvaluatorProps> {
         }
       </div>
     )
+  }
+
+  addBreakpoint (breakpoint : Breakpoint) : void {
+    let { state, setBoxState } = this.props
+  
+    setBoxState({
+      ...state,
+      breakpoints : [ ...state.breakpoints, breakpoint ],
+    })
   }
 }
