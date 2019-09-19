@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
 const ReactMarkdown = require('react-markdown')
 import 'github-markdown-css'
 
-import { BoxType, BoxState } from './Box'
+import { BoxType } from './Box'
 import Editor from './Editor'
+import { MakeActiveContext, SetBoxContext } from './BoxSpace'
 
 
 export interface NoteState {
@@ -23,8 +24,6 @@ export interface NoteProperties {
   state : NoteState
   isActive : boolean
 
-  setBoxState (state : BoxState) : void
-  makeActive () : void
   // addBox (boxState : BoxState) : void
 }
 
@@ -36,9 +35,10 @@ export default function Note (props : NoteProperties) : JSX.Element {
       isEditing,
     },
     isActive,
-    setBoxState,
-    makeActive,
   } = props
+  
+  const makeActive = useContext(MakeActiveContext)
+  const setBoxState = useContext(SetBoxContext)
 
   const onContent = (content : string, caretPosition : number) => {
     setBoxState({

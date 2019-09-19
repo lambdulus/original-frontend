@@ -21,11 +21,12 @@ import {
 import '../styles/EvaluatorBox.css'
 
 import { BoxType, BoxState } from './Box'
-import { EvaluationStrategy, PromptPlaceholder } from '../App'
+import { EvaluationStrategy, PromptPlaceholder, ChangeActiveBoxContext } from '../App'
 import { TreeComparator } from './TreeComparator'
 import EmptyEvaluator from './EmptyEvaluator'
 import InactiveEvaluator from './InactiveEvaluator'
 import Evaluator from './Evaluator'
+import { MakeActiveContext } from './BoxSpace';
 
 
 export type _Evaluator = NormalEvaluator | ApplicativeEvaluator | OptimizeEvaluator
@@ -84,7 +85,6 @@ export interface EvaluationProperties {
   macroTable : MacroMap
 
   setBoxState (state : EvaluationState) : void
-  makeActive () : void
 }
 
 export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
@@ -126,7 +126,6 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
           editor={ editor }
           history={ history }
 
-          makeActive={ this.props.makeActive }
           onContent={ this.onContent }
           onEnter={ this.onEnter }
           onExecute={ this.onExecute }
@@ -140,14 +139,19 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
 
     if ( ! isActive) {
       return (
-        <InactiveEvaluator
-          className={ className }
-          breakpoints={ breakpoints }
-          history={ history }
-          
-          makeActive={ this.props.makeActive }
-          createBoxFrom={ this.createBoxFrom }
-        />
+        <MakeActiveContext.Consumer>
+          {
+            (makeActive : () => void) =>
+              <InactiveEvaluator
+                className={ className }
+                breakpoints={ breakpoints }
+                history={ history }
+                
+                makeActive={ makeActive }
+                createBoxFrom={ this.createBoxFrom }
+              />
+          }
+        </MakeActiveContext.Consumer>
       )
     }
 

@@ -2,17 +2,16 @@ import React, { Component, createContext } from 'react'
 
 import { MacroMap } from 'lambdulus-core'
 
-
 import './App.css'
 
 import { HANDY_MACROS, getSavedMacros } from './misc'
 import MenuBar from './components/MenuBar'
-import BoxSpace from './components/BoxSpace/BoxSpace'
 import { BoxState, BoxType } from './components/Box'
 import MacroSpace from './components/MacroSpace'
 import { EvaluationState } from './components/EvaluatorBox'
 import { MacroDefinitionState } from './components/MacroDefinition'
 import Settings from './components/Settings'
+import { EvaluatorSpace } from './components/EvaluatorSpace'
 
 
 export enum EvaluationStrategy {
@@ -43,9 +42,21 @@ export interface AppState {
   activeBoxIndex : number
 }
 
+const DEFAULT_STATE : AppState = {
+  macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
+  submittedBoxes : [],
+  screen : Screen.main,
+  activeBoxIndex : -1,
+}
+
+export const StateContext = createContext(DEFAULT_STATE)
 export const StrategyContext = createContext(EvaluationStrategy.NORMAL)
-export const MacroTableContext = createContext({ ...HANDY_MACROS, ...getSavedMacros() })
 export const AddBoxContext = createContext((boxState : BoxState) => {})
+export const SLIContext = createContext(true)
+export const AddEmptyBoxContext = createContext((boxState : BoxState) => {})
+export const ChangeActiveBoxContext = createContext((activeBoxIndex : number) => {} )
+export const SetBoxStateContext = createContext((index : number, boxState : BoxState) => {})
+export const DefineMacroContext = createContext((name : string, definition : string) => {})
 
 export default class App extends Component<{}, AppState> {
   constructor (props : object) {
@@ -64,12 +75,7 @@ export default class App extends Component<{}, AppState> {
     this.defineMacro = this.defineMacro.bind(this)
     this.createBoxFromURL = this.createBoxFromURL.bind(this)
 
-    this.state = {
-      macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
-      submittedBoxes : [],
-      screen : Screen.main,
-      activeBoxIndex : -1,
-    }
+    this.state = DEFAULT_STATE
 
     window.addEventListener('hashchange', this.createBoxFromURL)
   }
@@ -85,27 +91,6 @@ export default class App extends Component<{}, AppState> {
       screen,
       activeBoxIndex,
     } : AppState = this.state
-
-    const getEvaluatorSpace = () =>
-    <StrategyContext.Provider value={ this.getActiveStrategy() }>
-      <MacroTableContext.Provider value={ macroTable }>
-        <AddBoxContext.Provider value={ this.addBox }>
-          <BoxSpace
-            submittedBoxes={ submittedBoxes } // 1 LEVEL
-            activeBoxIndex={ activeBoxIndex } // 1 LEVE
-            singleLetterNames={ this.getActiveSingleLetterNames() } // 1 LEVEL
-
-            makeActive={ this.changeActiveBox }
-            setBoxState={ this.setBoxState }
-            addEmptyBox={ this.addEmptyBox } // 1 LEVEL
-            defineMacro={ this.defineMacro } // ADEPT for CONTEXT
-            // removeExpression={ this.onRemoveExpression } // to bude asi potreba az zbytek bude hotovej 
-            // onEnter={ this.onEnter } // ten se presune dolu do Boxu
-            // onEditNote={ this.onEditNote } // zmeni se na onChangeActiveBox a isEditing se udela v Boxu
-          />
-        </AddBoxContext.Provider>
-      </MacroTableContext.Provider>
-    </StrategyContext.Provider>
 
     const getMacroSpace = () =>
     <MacroSpace
@@ -137,9 +122,26 @@ export default class App extends Component<{}, AppState> {
         />
 
         {
-          screen === Screen.main ? getEvaluatorSpace()
+          screen === Screen.main ?
+            <StateContext.Provider value={ this.state }>
+              <StrategyContext.Provider value={ this.getActiveStrategy() }>
+                <SLIContext.Provider value={ this.getActiveSingleLetterNames() }>
+                  <AddBoxContext.Provider value={ this.addBox }>
+                    <AddEmptyBoxContext.Provider value={ this.addEmptyBox }>
+                      <ChangeActiveBoxContext.Provider value={ this.changeActiveBox }>
+                        <SetBoxStateContext.Provider value={ this.setBoxState }>
+                          <DefineMacroContext.Provider value={ this.defineMacro }>
+                            <EvaluatorSpace />
+                          </DefineMacroContext.Provider>
+                        </SetBoxStateContext.Provider>
+                      </ChangeActiveBoxContext.Provider>
+                    </AddEmptyBoxContext.Provider>
+                  </AddBoxContext.Provider>
+                </SLIContext.Provider>
+              </StrategyContext.Provider>
+            </StateContext.Provider>
             :
-          getMacroSpace()
+            getMacroSpace()
         }
 
       </div>
