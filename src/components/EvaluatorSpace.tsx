@@ -2,7 +2,8 @@ import React, { createContext, useContext } from 'react'
 
 import BoxSpace from './BoxSpace'
 import { HANDY_MACROS, getSavedMacros } from '../misc'
-import { StateContext, AppState } from '../App'
+import { AppState } from '../AppTypes'
+import { StateContext } from './DataInjector'
 
 
 export const MacroTableContext = createContext({ ...HANDY_MACROS, ...getSavedMacros() })

@@ -1,25 +1,11 @@
 import React, { useContext } from 'react'
 
-import { BoxType, BoxState } from './Box'
 import { trimStr } from '../misc'
 import Editor from './Editor'
 import { tokenize, parse, AST, Token, Variable, builtinMacros } from 'lambdulus-core'
-import { DefineMacroContext } from '../App';
+import { DefineMacroContext } from './MethodInjector'
+import { MacroDefinitionState, BoxState } from '../AppTypes'
 
-
-export interface MacroDefinitionState {
-  __key : string
-  type : BoxType
-  macroName : string
-  macroExpression : string
-  singleLetterNames : boolean
-  editor : {
-    placeholder : string
-    content : string
-    caretPosition : number
-    syntaxError : Error | null
-  }
-}
 
 export interface MacroDefinitionProperties {
   state : MacroDefinitionState

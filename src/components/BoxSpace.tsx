@@ -1,12 +1,10 @@
 import React, { useContext, createContext } from 'react'
 
-import Box, { BoxState, BoxType } from './Box'
-import { EvaluationState } from './EvaluatorBox'
+import Box from './Box'
 
 import { CreateBox } from './CreateBox'
-import { NoteState } from './Note'
-import { PromptPlaceholder, EvaluationStrategy, ChangeActiveBoxContext, SetBoxStateContext } from '../App'
-import { MacroDefinitionState } from './MacroDefinition'
+import { PromptPlaceholder, EvaluationStrategy, BoxState, BoxType, EvaluationState, MacroDefinitionState, NoteState } from '../AppTypes'
+import { ChangeActiveBoxContext, SetBoxStateContext } from './MethodInjector'
 
 
 export interface BoxSpaceProperties {

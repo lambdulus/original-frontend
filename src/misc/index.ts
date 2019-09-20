@@ -66,3 +66,7 @@ export const HANDY_MACROS : MacroMap = {
   MOD : '(λ n m . (n (λ n . (= n (- m 1)) (0) (+ n 1)) (0)) )',
   INFIX : 'APPLY (λ l op r . op l r)',
 }
+
+export function updateMacros (macroTable : MacroMap) : void {
+  window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
+}

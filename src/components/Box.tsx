@@ -1,21 +1,14 @@
 import React from 'react'
 
-import Evaluator, { EvaluationState } from './EvaluatorBox'
-import MacroDefinition, { MacroDefinitionState } from './MacroDefinition'
-import Note, { NoteState } from './Note'
-import { MacroTableContext } from './EvaluatorSpace'
 import { MacroMap } from 'lambdulus-core'
-import { SetBoxContext } from './BoxSpace';
 
+import Evaluator from './EvaluatorBox'
+import MacroDefinition from './MacroDefinition'
+import Note from './Note'
+import { MacroTableContext } from './EvaluatorSpace'
+import { SetBoxContext } from './BoxSpace'
+import { BoxState, BoxType, EvaluationState, MacroDefinitionState, NoteState } from '../AppTypes'
 
-// TODO: rename EXPRESSION, MACRO, NOTE
-export enum BoxType {
-  EXPRESSION,
-  MACRO,
-  NOTE
-}
-
-export type BoxState = EvaluationState | MacroDefinitionState | NoteState
 
 interface BoxProperties {
   state : BoxState

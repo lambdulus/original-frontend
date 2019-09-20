@@ -1,6 +1,7 @@
-import React, { PureComponent, ChangeEvent } from 'react'
-import { EvaluationStrategy } from '../App';
+import React, { ChangeEvent } from 'react'
 const { Switch, Radio } = require('pretty-checkbox-react')
+
+import { EvaluationStrategy } from '../AppTypes'
 
 
 interface SettingsProperties {

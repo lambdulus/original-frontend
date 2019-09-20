@@ -2,23 +2,10 @@ import React, { useContext } from 'react'
 const ReactMarkdown = require('react-markdown')
 import 'github-markdown-css'
 
-import { BoxType } from './Box'
 import Editor from './Editor'
 import { MakeActiveContext, SetBoxContext } from './BoxSpace'
+import { NoteState } from '../AppTypes'
 
-
-export interface NoteState {
-  __key : string
-  type : BoxType
-  note : string
-  isEditing : boolean
-  editor : {
-    placeholder : string
-    content : string
-    caretPosition : number
-    syntaxError : Error | null
-  }
-}
 
 export interface NoteProperties {
   state : NoteState

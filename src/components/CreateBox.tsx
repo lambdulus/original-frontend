@@ -1,6 +1,10 @@
 import React, { useContext } from 'react'
+
 import { createEmptyExp, createEmptyMacro, createEmptyNote } from './BoxSpace'
-import { EvaluationStrategy, StrategyContext, SLIContext, AddEmptyBoxContext } from '../App'
+import { EvaluationStrategy } from '../AppTypes'
+import { AddEmptyBoxContext } from './MethodInjector'
+import { StrategyContext, SLIContext } from './DataInjector'
+
 
 export function CreateBox () : JSX.Element {
   const strategy : EvaluationStrategy = useContext(StrategyContext)

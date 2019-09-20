@@ -1,12 +1,13 @@
-import React, { memo, useContext, MemoExoticComponent } from 'react'
-import { AST, Beta, Expansion, NormalEvaluator, ASTReduction, Alpha } from 'lambdulus-core'
+import React, { memo } from 'react'
+import { ASTReduction } from 'lambdulus-core'
 
 import '../styles/Step.css'
 
-import { Breakpoint, StepRecord, _Evaluator, strategyToEvaluator } from './EvaluatorBox'
+import { strategyToEvaluator } from './EvaluatorBox'
 import ReactPrinter from './ReactPrinter'
 import ReductionMessage from './ReductionMessage'
-import { EvaluationStrategy, StrategyContext, } from '../App'
+import { EvaluationStrategy, StepRecord, Breakpoint, _Evaluator } from '../AppTypes'
+import { StrategyContext } from './DataInjector'
 
 
 interface StepWrapperProperties {

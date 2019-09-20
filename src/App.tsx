@@ -1,62 +1,16 @@
-import React, { Component, createContext } from 'react'
-
-import { MacroMap } from 'lambdulus-core'
+import React, { Component } from 'react'
 
 import './App.css'
 
-import { HANDY_MACROS, getSavedMacros } from './misc'
 import MenuBar from './components/MenuBar'
-import { BoxState, BoxType } from './components/Box'
 import MacroSpace from './components/MacroSpace'
-import { EvaluationState } from './components/EvaluatorBox'
-import { MacroDefinitionState } from './components/MacroDefinition'
 import Settings from './components/Settings'
 import { EvaluatorSpace } from './components/EvaluatorSpace'
+import { MethodInjector } from './components/MethodInjector'
+import { DataInjector } from './components/DataInjector'
+import { DEFAULT_STATE, AppState, Screen, PromptPlaceholder, EvaluationStrategy, BoxState, BoxType, EvaluationState, MacroDefinitionState } from './AppTypes'
+import { updateMacros } from './misc'
 
-
-export enum EvaluationStrategy {
-  NORMAL = 'Normal Evaluation',
-  APPLICATIVE = 'Applicative Evaluation',
-  OPTIMISATION = 'Optimisation - η Conversion',
-}
-
-export enum Screen {
-  main,
-  macrolist,
-  // notebooks,
-}
-
-export enum PromptPlaceholder {
-  INIT = 'Type λ expression and hit enter',
-  EVAL_MODE = 'Hit enter for next step',
-  VALIDATE_MODE = 'Write next step and hit enter for validation',
-  MACRO = 'Define Macro like: `NAME := [λ expression]` and hit enter',
-  NOTE = 'Type note and hit shift enter'
-}
-
-export interface AppState {  
-  macroTable : MacroMap
-
-  submittedBoxes : Array<BoxState>
-  screen : Screen
-  activeBoxIndex : number
-}
-
-const DEFAULT_STATE : AppState = {
-  macroTable : { ...HANDY_MACROS, ...getSavedMacros() },
-  submittedBoxes : [],
-  screen : Screen.main,
-  activeBoxIndex : -1,
-}
-
-export const StateContext = createContext(DEFAULT_STATE)
-export const StrategyContext = createContext(EvaluationStrategy.NORMAL)
-export const AddBoxContext = createContext((boxState : BoxState) => {})
-export const SLIContext = createContext(true)
-export const AddEmptyBoxContext = createContext((boxState : BoxState) => {})
-export const ChangeActiveBoxContext = createContext((activeBoxIndex : number) => {} )
-export const SetBoxStateContext = createContext((index : number, boxState : BoxState) => {})
-export const DefineMacroContext = createContext((name : string, definition : string) => {})
 
 export default class App extends Component<{}, AppState> {
   constructor (props : object) {
@@ -71,7 +25,6 @@ export default class App extends Component<{}, AppState> {
     this.getActiveSingleLetterNames = this.getActiveSingleLetterNames.bind(this)
     this.addBox = this.addBox.bind(this)
     this.removeMacro = this.removeMacro.bind(this)
-    this.updateMacros = this.updateMacros.bind(this)
     this.defineMacro = this.defineMacro.bind(this)
     this.createBoxFromURL = this.createBoxFromURL.bind(this)
 
@@ -87,24 +40,15 @@ export default class App extends Component<{}, AppState> {
   render () : JSX.Element {
     const {
       macroTable,
-      submittedBoxes,
       screen,
-      activeBoxIndex,
     } : AppState = this.state
-
-    const getMacroSpace = () =>
-    <MacroSpace
-      macroTable={ macroTable }
-
-      removeMacro={ this.removeMacro }
-    />
 
     return (
       <div className='app'>
         <MenuBar
-          state={ this.state } // to je nutny
+          state={ this.state }
           
-          onImport={ (state : AppState) => this.setState(state) } // to je docela kratky OK
+          onImport={ (state : AppState) => this.setState(state) }
           
           onScreenChange={(screen : Screen) => // mozna tohle zmenit nejakym patternem
             this.setState({
@@ -123,25 +67,23 @@ export default class App extends Component<{}, AppState> {
 
         {
           screen === Screen.main ?
-            <StateContext.Provider value={ this.state }>
-              <StrategyContext.Provider value={ this.getActiveStrategy() }>
-                <SLIContext.Provider value={ this.getActiveSingleLetterNames() }>
-                  <AddBoxContext.Provider value={ this.addBox }>
-                    <AddEmptyBoxContext.Provider value={ this.addEmptyBox }>
-                      <ChangeActiveBoxContext.Provider value={ this.changeActiveBox }>
-                        <SetBoxStateContext.Provider value={ this.setBoxState }>
-                          <DefineMacroContext.Provider value={ this.defineMacro }>
-                            <EvaluatorSpace />
-                          </DefineMacroContext.Provider>
-                        </SetBoxStateContext.Provider>
-                      </ChangeActiveBoxContext.Provider>
-                    </AddEmptyBoxContext.Provider>
-                  </AddBoxContext.Provider>
-                </SLIContext.Provider>
-              </StrategyContext.Provider>
-            </StateContext.Provider>
-            :
-            getMacroSpace()
+          <DataInjector
+            SLI={ this.getActiveSingleLetterNames() }
+            strategy={ this.getActiveStrategy() }
+            state={ this.state }
+          >
+            <MethodInjector
+              addBox={ this.addBox }
+              addEmptyBox={ this.addEmptyBox }
+              changeActiveBox={ this.changeActiveBox }
+              defineMacro={ this.defineMacro }
+              setBoxState={ this.setBoxState }
+            >
+              <EvaluatorSpace />
+            </MethodInjector>
+          </DataInjector>
+          :
+          <MacroSpace macroTable={ macroTable } removeMacro={ this.removeMacro } />
         }
 
       </div>
@@ -217,7 +159,7 @@ export default class App extends Component<{}, AppState> {
   }
 
   addBox (boxState : BoxState) : void {
-    const { submittedBoxes, activeBoxIndex } = this.state
+    const { submittedBoxes } = this.state
 
     this.setState({
       ...this.state,
@@ -314,11 +256,7 @@ export default class App extends Component<{}, AppState> {
       macroTable : newMacroTable
     })
 
-    this.updateMacros(newMacroTable)
-  }
-
-  updateMacros (macroTable : MacroMap) : void {
-    window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
+    updateMacros(newMacroTable)
   }
 
   defineMacro (name : string, definition : string) : void {
@@ -329,7 +267,7 @@ export default class App extends Component<{}, AppState> {
       macroTable : { ...macroTable, [name] : definition }
     })
 
-    this.updateMacros({ ...macroTable, [name] : definition })
+    updateMacros({ ...macroTable, [name] : definition })
   }
 
 }

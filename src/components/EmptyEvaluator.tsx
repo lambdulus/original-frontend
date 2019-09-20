@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
 
 import Editor from './Editor'
-import { StepRecord } from './EvaluatorBox'
 import { MakeActiveContext } from './BoxSpace'
+import { StepRecord } from '../AppTypes'
 
 interface EmptyEvaluatorProps {
   className : string

@@ -1,9 +1,8 @@
 import React, { PureComponent } from 'react'
 
 import Step from './Step'
-import { EvaluationState, StepRecord, Breakpoint } from './EvaluatorBox'
-import { BoxState } from './Box'
-import { EvaluationStrategy, AddBoxContext } from '../App'
+import { AddBoxContext } from './MethodInjector'
+import { Breakpoint, StepRecord, EvaluationState, BoxState } from '../AppTypes'
 
 interface InactiveEvaluatorProps {
   className : string

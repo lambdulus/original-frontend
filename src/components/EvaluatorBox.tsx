@@ -20,16 +20,15 @@ import {
 
 import '../styles/EvaluatorBox.css'
 
-import { BoxType, BoxState } from './Box'
-import { EvaluationStrategy, PromptPlaceholder, ChangeActiveBoxContext } from '../App'
 import { TreeComparator } from './TreeComparator'
 import EmptyEvaluator from './EmptyEvaluator'
 import InactiveEvaluator from './InactiveEvaluator'
 import Evaluator from './Evaluator'
-import { MakeActiveContext } from './BoxSpace';
+import { MakeActiveContext } from './BoxSpace'
+import { EvaluationStrategy, PromptPlaceholder, EvaluationState, _Evaluator, StepRecord, BoxType, Breakpoint } from '../AppTypes'
 
 
-export type _Evaluator = NormalEvaluator | ApplicativeEvaluator | OptimizeEvaluator
+
 
 export function strategyToEvaluator (strategy : EvaluationStrategy) : _Evaluator {
   switch (strategy) {
@@ -44,40 +43,7 @@ export function strategyToEvaluator (strategy : EvaluationStrategy) : _Evaluator
   }
 }
 
-export type Breakpoint = {
-  type : ASTReduction,
-  context : AST,
-  broken : Set<AST>,
-}
 
-export interface StepRecord {
-  ast : AST
-  lastReduction : ASTReduction | null
-  step : number
-  message : string
-  isNormalForm : boolean
-}
-
-export interface EvaluationState {
-  __key : string
-  type : BoxType
-  expression : string
-  ast : AST | null
-  history : Array<StepRecord>
-  isRunning : boolean
-  breakpoints : Array<Breakpoint>
-  timeoutID : number | undefined
-  timeout : number
-  isExercise : boolean
-  strategy : EvaluationStrategy
-  singleLetterNames : boolean
-  editor : {
-    placeholder : string
-    content : string
-    caretPosition : number
-    syntaxError : Error | null
-  }
-}
 
 export interface EvaluationProperties {
   state : EvaluationState

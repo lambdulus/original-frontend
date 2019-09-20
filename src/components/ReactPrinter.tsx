@@ -1,8 +1,7 @@
 import React from 'react'
 
-import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro, ASTReduction, None, Alpha } from "lambdulus-core";
-
-import { Breakpoint } from "./EvaluatorBox";
+import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro, ASTReduction, None, Alpha } from "lambdulus-core"
+import { Breakpoint } from '../AppTypes';
 
 
 export default class ReactPrinter extends ASTVisitor {

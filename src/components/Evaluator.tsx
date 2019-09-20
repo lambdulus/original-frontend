@@ -2,11 +2,10 @@ import React, { PureComponent } from 'react'
 
 import Controls from './Controls'
 import Step from './Step'
-import { EvaluationState, StepRecord, Breakpoint } from './EvaluatorBox'
-import { PromptPlaceholder, EvaluationStrategy, AddBoxContext } from '../App'
+import { PromptPlaceholder, EvaluationState, Breakpoint, StepRecord, BoxState } from '../AppTypes'
 import { mapLeftFromTo } from '../misc'
-import { BoxState } from './Box'
 import Editor from './Editor'
+import { AddBoxContext } from './MethodInjector'
 
 
 interface EvaluatorProps {
@@ -105,21 +104,19 @@ export default class Evaluator extends PureComponent<EvaluatorProps> {
 
         {
           this.props.isNormalForm ?
-            null
+          null
             :
-            (
-              <Editor
-                placeholder={ placeholder } // data
-                content={ content } // data
-                caretPosition={ caretPosition } // data
-                syntaxError={ syntaxError } // data
-                isMarkDown={ false } // data
+          <Editor
+            placeholder={ placeholder } // data
+            content={ content } // data
+            caretPosition={ caretPosition } // data
+            syntaxError={ syntaxError } // data
+            isMarkDown={ false } // data
 
-                onContent={ this.props.onContent } // fn
-                onEnter={ this.props.onEnter } // fn // tohle asi bude potreba
-                onExecute={ this.props.onExecute } // fn // tohle asi bude potreba
-              />
-            )
+            onContent={ this.props.onContent } // fn
+            onEnter={ this.props.onEnter } // fn // tohle asi bude potreba
+            onExecute={ this.props.onExecute } // fn // tohle asi bude potreba
+          />
         }
       </div>
     )
