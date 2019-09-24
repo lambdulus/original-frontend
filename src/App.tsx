@@ -47,9 +47,7 @@ export default class App extends Component<{}, AppState> {
       <div className='app'>
         <MenuBar
           state={ this.state }
-          
           onImport={ (state : AppState) => this.setState(state) }
-          
           onScreenChange={(screen : Screen) => // mozna tohle zmenit nejakym patternem
             this.setState({
               ...this.state,
@@ -85,16 +83,15 @@ export default class App extends Component<{}, AppState> {
           :
           <MacroSpace macroTable={ macroTable } removeMacro={ this.removeMacro } />
         }
-
       </div>
     )
   }
 
   createBoxFromURL () {
     const hash : string = decodeURI(window.location.hash.substring(1))
-    const isExercise : boolean = hash.indexOf('exercise') !== -1
+    const isExercise : boolean = hash.indexOf('exercise:') !== -1
 
-    const expression : string = isExercise ? hash.substring(8) : hash
+    const expression : string = isExercise ? hash.substring(9) : hash
 
     if (expression === '') {
       return
@@ -132,7 +129,7 @@ export default class App extends Component<{}, AppState> {
     const { submittedBoxes } = this.state
     
     const expression : string = boxState.editor.content || (boxState as EvaluationState).expression // TODO: DIRTY DIRTY BIG TIME
-    const expPrefix : string = boxState.type === BoxType.EXPRESSION && (boxState as EvaluationState).isExercise ? 'exercise' : '' 
+    const expPrefix : string = boxState.type === BoxType.EXPRESSION && (boxState as EvaluationState).isExercise ? 'exercise:' : '' 
     
     history.pushState({}, "page title?", "#" + expPrefix + encodeURI(expression))
 
@@ -149,7 +146,7 @@ export default class App extends Component<{}, AppState> {
   }
 
   addEmptyBox (boxState : BoxState) : void {
-    const { submittedBoxes, activeBoxIndex } = this.state
+    const { submittedBoxes } = this.state
 
     this.setState({
       ...this.state,
@@ -269,5 +266,4 @@ export default class App extends Component<{}, AppState> {
 
     updateMacros({ ...macroTable, [name] : definition })
   }
-
 }

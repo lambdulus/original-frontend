@@ -1,4 +1,4 @@
-import { AST, Lambda, Application, Macro, ChurchNumeral, Variable } from "lambdulus-core";
+import { AST, Lambda, Application, Macro, ChurchNumeral, Variable } from "@lambdulus/core";
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

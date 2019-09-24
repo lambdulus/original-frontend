@@ -1,4 +1,4 @@
-import { MacroMap } from "lambdulus-core"
+import { MacroMap } from "@lambdulus/core"
 
 
 export function debounce (fn : Function, treshold : number)
@@ -69,4 +69,18 @@ export const HANDY_MACROS : MacroMap = {
 
 export function updateMacros (macroTable : MacroMap) : void {
   window.localStorage.setItem('macrotable', JSON.stringify(macroTable))
+}
+
+export function reportEvent (category : string, action : string, label : string) : void {
+  try {
+    const tracker = (window as any).ga.getAll()[0]
+    
+    tracker.send('event', category, action, label )
+  }
+  catch (exception) {
+    console.log("")
+    console.log('PLEASE DISABLE YOUR ADBLOCKER OR ALLOW GOOGLE ANALYTICS FOR THIS SITE')
+    console.log("")
+    console.error(exception)
+  }
 }

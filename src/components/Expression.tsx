@@ -29,7 +29,7 @@ interface EvaluatorProps {
   onExecute () : void
 }
 
-export default class Evaluator extends PureComponent<EvaluatorProps> {
+export default class Expression extends PureComponent<EvaluatorProps> {
   render () : JSX.Element {
     const { className, isExercise, state, editor } = this.props
 

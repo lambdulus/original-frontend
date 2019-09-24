@@ -16,21 +16,20 @@ import {
   ApplicativeEvaluator,
   OptimizeEvaluator,
   MacroMap,
-} from "lambdulus-core"
+} from "@lambdulus/core"
 
 import '../styles/EvaluatorBox.css'
 
 import { TreeComparator } from './TreeComparator'
-import EmptyEvaluator from './EmptyEvaluator'
-import InactiveEvaluator from './InactiveEvaluator'
-import Evaluator from './Evaluator'
+import EmptyEvaluator from './EmptyExpression'
+import InactiveEvaluator from './InactiveExpression'
+import Expression from './Expression'
 import { MakeActiveContext } from './BoxSpace'
-import { EvaluationStrategy, PromptPlaceholder, EvaluationState, _Evaluator, StepRecord, BoxType, Breakpoint } from '../AppTypes'
+import { EvaluationStrategy, PromptPlaceholder, EvaluationState, Evaluator, StepRecord, BoxType, Breakpoint } from '../AppTypes'
+import { reportEvent } from '../misc';
 
 
-
-
-export function strategyToEvaluator (strategy : EvaluationStrategy) : _Evaluator {
+export function strategyToEvaluator (strategy : EvaluationStrategy) : Evaluator {
   switch (strategy) {
     case EvaluationStrategy.NORMAL:
       return NormalEvaluator as any
@@ -43,8 +42,6 @@ export function strategyToEvaluator (strategy : EvaluationStrategy) : _Evaluator
   }
 }
 
-
-
 export interface EvaluationProperties {
   state : EvaluationState
   isActive : boolean
@@ -53,7 +50,7 @@ export interface EvaluationProperties {
   setBoxState (state : EvaluationState) : void
 }
 
-export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
+export default class ExpressionBox extends PureComponent<EvaluationProperties> {
   constructor (props : EvaluationProperties) {
     super(props)
 
@@ -122,7 +119,7 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
     }
 
     return (
-      <Evaluator
+      <Expression
         className={ className }
         isExercise={ isExercise }
         state={ state }
@@ -235,6 +232,7 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
         }
       })
 
+      reportEvent('Submit Expression', 'submit valid', content)
     } catch (exception) {
       setBoxState({
         ...state,
@@ -243,12 +241,15 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
           syntaxError : exception.toString(),
         }
       })
+
+      reportEvent('Submit Expression', 'submit invalid', content)
     }
   }
 
   onExerciseStep () {
     const { state, setBoxState } = this.props
     const { strategy, history, editor : { content } } = state
+    
     try {
       const userAst : AST = this.parseExpression(content)
       const stepRecord : StepRecord = history[history.length - 1]
@@ -266,10 +267,12 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
           ...state,
         })
 
+        reportEvent('Exercise Step', 'Step Already in normal form', content)
+
         return
       }
     
-      const normal : _Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
+      const normal : Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
       lastReduction = normal.nextReduction
     
       if (normal.nextReduction instanceof None) {
@@ -281,6 +284,8 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
         setBoxState({
           ...state,
         })
+
+        reportEvent('Exercise Step', 'Step Already in Normal Form', content)
         
         return
       }
@@ -292,12 +297,16 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
       if (comparator.equals) {
         ast = userAst
         message = 'Correct.'
+
+        reportEvent('Exercise Step', 'Valid Step', content)
       }
       else {
         // TODO: say user it was incorrect
         // TODO: na to se pouzije uvnitr EvaluatorState prop messages nebo tak neco
         console.log('Incorrect step')
         message = `Incorrect step. ${content}`
+
+        reportEvent('Exercise Step', 'Invalid Step', content)
       }
 
       setBoxState({
@@ -316,6 +325,8 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
       // TODO: do it localy - no missuse of onSubmit
 
       // TODO: print syntax error
+
+      reportEvent('Exercise Step', 'Syntax error in Step', content)
     }
   }
 
@@ -331,7 +342,7 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
       return
     }
 
-    const normal : _Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
+    const normal : Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
     lastReduction = normal.nextReduction
   
     if (normal.nextReduction instanceof None) {
@@ -342,6 +353,8 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
         ...state,
       })
       
+      reportEvent('Evaluation Step', 'Step Normal Form Reached', ast.toString())
+
       return
     }
   
@@ -352,6 +365,8 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
       history : [ ...history, { ast, lastReduction, step : step + 1, message : '', isNormalForm : false } ],
 
     })
+
+    reportEvent('Evaluation Step', 'Step', ast.toString())
   }
 
   onExecute () : void {
@@ -383,6 +398,8 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
         isRunning : true,
         timeoutID : window.setTimeout(this.onRun, timeout),
       })
+
+      reportEvent('Execution', 'Run Evaluation', ast.toString())
     }
   }
 
@@ -409,7 +426,7 @@ export default class EvaluatorBox extends PureComponent<EvaluationProperties> {
     }
   
     let { ast } = stepRecord
-    const normal : _Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
+    const normal : Evaluator = new (strategyToEvaluator(strategy) as any)(ast)
     lastReduction = normal.nextReduction
     
     if (normal.nextReduction instanceof None) {

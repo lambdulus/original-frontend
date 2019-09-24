@@ -4,7 +4,7 @@ import Editor from './Editor'
 import { MakeActiveContext } from './BoxSpace'
 import { StepRecord } from '../AppTypes'
 
-interface EmptyEvaluatorProps {
+interface EmptyExpressionProps {
   className : string
   isActive : boolean
   editor : {
@@ -21,7 +21,7 @@ interface EmptyEvaluatorProps {
 }
 
 
-export default class EmptyEvaluator extends PureComponent<EmptyEvaluatorProps> {
+export default class EmptyExpression extends PureComponent<EmptyExpressionProps> {
   render () : JSX.Element {
     const { className, isActive, editor } = this.props
     const {

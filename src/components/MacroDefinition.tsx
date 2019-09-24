@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 
 import { trimStr } from '../misc'
 import Editor from './Editor'
-import { tokenize, parse, AST, Token, Variable, builtinMacros } from 'lambdulus-core'
+import { tokenize, parse, AST, Token, Variable, builtinMacros } from '@lambdulus/core'
 import { DefineMacroContext } from './MethodInjector'
 import { MacroDefinitionState, BoxState } from '../AppTypes'
 

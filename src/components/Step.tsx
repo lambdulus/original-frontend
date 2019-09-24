@@ -1,12 +1,12 @@
 import React, { memo } from 'react'
-import { ASTReduction } from 'lambdulus-core'
+import { ASTReduction } from '@lambdulus/core'
 
 import '../styles/Step.css'
 
-import { strategyToEvaluator } from './EvaluatorBox'
+import { strategyToEvaluator } from './ExpressionBox'
 import ReactPrinter from './ReactPrinter'
 import ReductionMessage from './ReductionMessage'
-import { EvaluationStrategy, StepRecord, Breakpoint, _Evaluator } from '../AppTypes'
+import { EvaluationStrategy, StepRecord, Breakpoint, Evaluator } from '../AppTypes'
 import { StrategyContext } from './DataInjector'
 
 
@@ -49,7 +49,7 @@ function Step (props : StepProperties) : JSX.Element | null {
     return null
   }
 
-  const evaluator : _Evaluator = new (strategyToEvaluator(strategy) as any)(tree)
+  const evaluator : Evaluator = new (strategyToEvaluator(strategy) as any)(tree)
   const reduction : ASTReduction = evaluator.nextReduction
   const printer : ReactPrinter = new ReactPrinter(tree, addBreakpoint, reduction, breakpoints)
 

@@ -1,4 +1,4 @@
-import { MacroMap, AST, ASTReduction, NormalEvaluator, ApplicativeEvaluator, OptimizeEvaluator } from "lambdulus-core"
+import { MacroMap, AST, ASTReduction, NormalEvaluator, ApplicativeEvaluator, OptimizeEvaluator } from "@lambdulus/core"
 
 import { HANDY_MACROS, getSavedMacros } from "./misc"
 
@@ -27,7 +27,6 @@ export enum PromptPlaceholder {
 
 export interface AppState {  
   macroTable : MacroMap
-
   submittedBoxes : Array<BoxState>
   screen : Screen
   activeBoxIndex : number
@@ -42,7 +41,7 @@ export const DEFAULT_STATE : AppState = {
 
 //////////////////////////////////
 
-export type _Evaluator = NormalEvaluator | ApplicativeEvaluator | OptimizeEvaluator
+export type Evaluator = NormalEvaluator | ApplicativeEvaluator | OptimizeEvaluator
 
 export type Breakpoint = {
   type : ASTReduction,

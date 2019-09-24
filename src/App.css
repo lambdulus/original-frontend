@@ -37,10 +37,10 @@ i {
 
 .evaluatorSpace, .macroSpace {
   padding-top: 10px;
-  /* width: 93vw; */
   margin-left: 100px;
   /* margin-bottom: 5em; */
   height: 86vh;
+  width: 93.5vw;
   /* overflow-y: scroll */
 }
 

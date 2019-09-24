@@ -4,7 +4,7 @@ import Step from './Step'
 import { AddBoxContext } from './MethodInjector'
 import { Breakpoint, StepRecord, EvaluationState, BoxState } from '../AppTypes'
 
-interface InactiveEvaluatorProps {
+interface InactiveExpressionProps {
   className : string
   breakpoints : Array<Breakpoint>
   history : Array<StepRecord>
@@ -14,7 +14,7 @@ interface InactiveEvaluatorProps {
 }
 
 
-export default class InactiveEvaluator extends PureComponent<InactiveEvaluatorProps> {
+export default class InactiveExpression extends PureComponent<InactiveExpressionProps> {
   render () : JSX.Element {
     const { className } = this.props
 

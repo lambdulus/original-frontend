@@ -1,5 +1,5 @@
 import React from 'react'
-import { MacroMap, builtinMacros } from 'lambdulus-core'
+import { MacroMap, builtinMacros } from '@lambdulus/core'
 
 
 export interface MacroProperties {
