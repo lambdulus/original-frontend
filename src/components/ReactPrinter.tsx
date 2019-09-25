@@ -13,9 +13,11 @@ export default class ReactPrinter extends ASTVisitor {
     if (lambda.body instanceof Lambda) {
       const context : Variable = lambda.body.argument
       let className : string = 'argument'
+      let title : string = ''
 
       if (this.isBreakpoint(lambda.body.argument)) {
         className += ' breakpoint'
+        title = 'Will break on substitution'
       }
 
       // bug@highlight-alpha
@@ -52,6 +54,7 @@ export default class ReactPrinter extends ASTVisitor {
           { accumulator } {' '}
           <span
             className={ className }
+            title={ title }
             onClick={ () => {
               (context as any).identifier = Symbol()
               this.onClick({ type : Beta, context, broken : new Set }) }
@@ -183,6 +186,9 @@ export default class ReactPrinter extends ASTVisitor {
   // TODO: little bit refactored, maybe keep going
   onLambda (lambda: Lambda) : void {
     // TODO: this also seems not so elegant and clean
+
+    let title : string = ''
+
     let argument : Variable | null = this.argument
     if (this.argument !== lambda.argument
         &&
@@ -200,6 +206,7 @@ export default class ReactPrinter extends ASTVisitor {
 
       if (this.isBreakpoint(lambda.argument)) {
         className += ' breakpoint'
+        title = 'Will break on substitution'
       }
 
       // TODO: same here
@@ -212,6 +219,7 @@ export default class ReactPrinter extends ASTVisitor {
       const acc : JSX.Element = (
         <span
           className={ className }
+          title={ title }
           onClick={ () => {
             (context as any).identifier = Symbol()
             this.onClick({ type : Beta, context, broken : new Set }) }
@@ -226,16 +234,26 @@ export default class ReactPrinter extends ASTVisitor {
     else {
       const context : Variable = lambda.argument
 
-      lambda.argument.visit(this)
-      const args : JSX.Element | null = this.rendered
+      // lambda.argument.visit(this)
+      
+      // const args : JSX.Element | null = this.rendered
 
       lambda.body.visit(this)
       const body : JSX.Element | null = this.rendered
 
       let className : string = 'argument'
+      let title : string = ''
 
       if (this.isBreakpoint(lambda.argument)) {
         className += ' breakpoint'
+        title = 'Will break on substitution'
+      }
+
+      // TODO: same here
+      if (this.argument
+        &&
+        this.argument.name() === context.name()) {
+          className += ' substitutedArg'
       }
 
       this.rendered = (
@@ -247,13 +265,23 @@ export default class ReactPrinter extends ASTVisitor {
               λ { ' ' }
           </span>
           <span
-            className={ className }
+            className='arguments'
             onClick={ () => {
               (context as any).identifier = Symbol()              
               this.onClick({ type : Beta, context, broken : new Set }) }
             }
           >
-            { args } { ' ' }
+            <span
+                className={ className }
+                title={ title }
+                onClick={ () => {
+                  (context as any).identifier = Symbol()
+                  this.onClick({ type : Beta, context, broken : new Set }) }
+                }
+              >
+                { lambda.argument.name() }
+              </span>
+              { ' ' }
           </span>
           . { body } 
           )
@@ -271,6 +299,7 @@ export default class ReactPrinter extends ASTVisitor {
     let className : string = 'churchnumeral'
     let redex : AST | null = null
     let redexClass : string = ' redex'
+    let title : string = ''
 
     if (this.reduction instanceof Expansion) {
       redex = this.reduction.target
@@ -291,11 +320,13 @@ export default class ReactPrinter extends ASTVisitor {
 
     if (this.isBreakpoint(churchNumber)) {
       className += ' breakpoint'
+      title = 'Will break on Expansion'
     }
 
     this.rendered = (
       <span
         className={ className }
+        title={ title }
         onClick={ () => {
           (churchNumber as any).identifier = Symbol()
           this.onClick({ type: Expansion, context : churchNumber, broken : new Set }) }
@@ -311,6 +342,7 @@ export default class ReactPrinter extends ASTVisitor {
     let className = 'macro'
     let redex : AST | null = null
     let redexClass : string = ' redex'
+    let title : string = ''
 
     if (this.reduction instanceof Expansion) {
       redex = this.reduction.target
@@ -332,6 +364,7 @@ export default class ReactPrinter extends ASTVisitor {
 
     if (this.isBreakpoint(macro)) {
       className += ' breakpoint'
+      title = 'Will break on Expansion'
     }
 
     this.rendered = (

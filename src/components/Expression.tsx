@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 
 import Controls from './Controls'
 import Step from './Step'
-import { PromptPlaceholder, EvaluationState, Breakpoint, StepRecord, BoxState } from '../AppTypes'
+import { PromptPlaceholder, EvaluationState, Breakpoint, StepRecord, BoxState, Evaluator } from '../AppTypes'
 import { mapLeftFromTo } from '../misc'
 import Editor from './Editor'
 import { AddBoxContext } from './MethodInjector'
@@ -30,6 +30,12 @@ interface EvaluatorProps {
 }
 
 export default class Expression extends PureComponent<EvaluatorProps> {
+  constructor (props : EvaluatorProps) {
+    super(props)
+
+    this.addBreakpoint = this.addBreakpoint.bind(this)
+  }
+
   render () : JSX.Element {
     const { className, isExercise, state, editor } = this.props
 
