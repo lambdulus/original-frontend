@@ -1,7 +1,8 @@
 import React from 'react'
 
-import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro, ASTReduction, None, Alpha } from "@lambdulus/core"
+import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro, ASTReduction, None, Alpha, Gama } from "@lambdulus/core"
 import { Breakpoint } from '../AppTypes';
+import { GamaArg } from '@lambdulus/core/dist/reductions';
 
 
 export default class ReactPrinter extends ASTVisitor {
@@ -268,7 +269,16 @@ export default class ReactPrinter extends ASTVisitor {
   // TODO: little bit refactored, maybe keep going
   onChurchNumeral (churchNumber: ChurchNumeral) : void {
     let className : string = 'churchnumeral'
-    const redex : AST | null = this.reduction instanceof Expansion ? this.reduction.target : null
+    let redex : AST | null = null
+    let redexClass : string = ' redex'
+
+    if (this.reduction instanceof Expansion) {
+      redex = this.reduction.target
+    }
+
+    if (this.reduction instanceof Gama && this.reduction.args.find((arg : GamaArg) => churchNumber.identifier === arg.identifier)) {
+      className += ' redex abstraction argument'
+    }
 
     if (redex !== null
           &&
@@ -276,7 +286,7 @@ export default class ReactPrinter extends ASTVisitor {
           &&
         redex === churchNumber
       ) {
-        className += ' redex'
+        className += redexClass
     }
 
     if (this.isBreakpoint(churchNumber)) {
@@ -299,7 +309,17 @@ export default class ReactPrinter extends ASTVisitor {
   // TODO: little bit refactored, maybe keep going  
   onMacro (macro: Macro) : void {
     let className = 'macro'
-    const redex : AST | null = this.reduction instanceof Expansion ? this.reduction.target : null
+    let redex : AST | null = null
+    let redexClass : string = ' redex'
+
+    if (this.reduction instanceof Expansion) {
+      redex = this.reduction.target
+    } 
+
+    if (this.reduction instanceof Gama) {
+      [ redex ] = this.reduction.redexes
+      redexClass += ' abstraction'
+    }
 
     if (redex !== null
           &&
@@ -307,7 +327,7 @@ export default class ReactPrinter extends ASTVisitor {
           &&
         redex === macro
         ) {
-      className += ' redex'
+      className += redexClass
     }
 
     if (this.isBreakpoint(macro)) {

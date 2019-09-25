@@ -176,13 +176,13 @@ export default class App extends Component<{}, AppState> {
     const { submittedBoxes, activeBoxIndex } = this.state
 
     if (activeBoxIndex === -1) {
-      return JSON.parse(window.localStorage.getItem('strategy') || JSON.stringify(EvaluationStrategy.NORMAL)) as EvaluationStrategy
+      return JSON.parse(window.localStorage.getItem('strategy') || JSON.stringify(EvaluationStrategy.ABSTRACTION)) as EvaluationStrategy
     }
 
     const activeBoxState : BoxState = submittedBoxes[activeBoxIndex]
 
     if (activeBoxState.type !== BoxType.EXPRESSION) {
-      return JSON.parse(window.localStorage.getItem('strategy') || JSON.stringify(EvaluationStrategy.NORMAL)) as EvaluationStrategy
+      return JSON.parse(window.localStorage.getItem('strategy') || JSON.stringify(EvaluationStrategy.ABSTRACTION)) as EvaluationStrategy
     }
 
     return (activeBoxState as EvaluationState).strategy

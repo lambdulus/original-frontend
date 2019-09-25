@@ -39,8 +39,8 @@ i {
   padding-top: 10px;
   margin-left: 100px;
   /* margin-bottom: 5em; */
-  height: 86vh;
-  width: 93.5vw;
+  /* height: 86vh; */
+  width: 90.5vw;
   /* overflow-y: scroll */
 }
 
@@ -81,9 +81,12 @@ i {
 .editorSettings {
   /* border: 2px solid red; */
   /* width: 93vw; */
-  margin-left: 100px;
+  padding-left: 100px;
   padding-top: 0px;
-  padding-bottom: 20px;
+  /* padding-bottom: 20px; */
+  background-color: white;
+  z-index: 999;
+
   /* border: 0.1em solid grey; */
   /* border-radius: 0.25rem; */
 }

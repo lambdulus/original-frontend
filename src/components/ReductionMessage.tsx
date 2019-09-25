@@ -1,5 +1,5 @@
 import React from 'react'
-import { ASTReduction, Beta, Alpha, Expansion } from '@lambdulus/core';
+import { ASTReduction, Beta, Alpha, Expansion, Gama } from '@lambdulus/core';
 import { Eta } from '@lambdulus/core/dist/reductions/eta';
 
 
@@ -42,6 +42,14 @@ export default function ReductionMessage (props : ReductionMessageProperties) : 
     return (
       <p className='lastReduction'>
         η conversion
+      </p>
+    )
+  }
+
+  if (lastReduction instanceof Gama) {
+    return (
+      <p className='lastReduction'>
+        Simplified Application
       </p>
     )
   }

@@ -9,6 +9,7 @@ export enum EvaluationStrategy {
   NORMAL = 'Normal Evaluation',
   APPLICATIVE = 'Applicative Evaluation',
   OPTIMISATION = 'Optimisation - η Conversion',
+  ABSTRACTION = 'Abstraction / Simplified Evaluation'
 }
 
 export enum Screen {

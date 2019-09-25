@@ -16,6 +16,7 @@ import {
   ApplicativeEvaluator,
   OptimizeEvaluator,
   MacroMap,
+  NormalAbstractionEvaluator,
 } from "@lambdulus/core"
 
 import '../styles/EvaluatorBox.css'
@@ -39,6 +40,9 @@ export function strategyToEvaluator (strategy : EvaluationStrategy) : Evaluator 
 
     case EvaluationStrategy.OPTIMISATION:
       return OptimizeEvaluator as any
+
+    case EvaluationStrategy.ABSTRACTION:
+      return NormalAbstractionEvaluator as any
   }
 }
 

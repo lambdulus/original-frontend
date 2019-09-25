@@ -31,6 +31,15 @@ export default function Settings (props : SettingsProperties) {
         <Radio
           name="strategy"
           style="fill"
+          checked={ props.getActiveStrategy() === EvaluationStrategy.ABSTRACTION }
+          
+          onChange={ () => props.changeActiveStrategy(EvaluationStrategy.ABSTRACTION) }
+        >
+          Simplified Abstraction
+        </Radio>
+        {/* <Radio
+          name="strategy"
+          style="fill"
           checked={ props.getActiveStrategy() === EvaluationStrategy.NORMAL }
           
           onChange={ () => props.changeActiveStrategy(EvaluationStrategy.NORMAL) }
@@ -38,14 +47,14 @@ export default function Settings (props : SettingsProperties) {
           Normal
         </Radio>
         <Radio
-          style="fill"
           name="strategy"
+          style="fill"
           checked={ props.getActiveStrategy() === EvaluationStrategy.APPLICATIVE }
           
           onChange={ () => props.changeActiveStrategy(EvaluationStrategy.APPLICATIVE) }
         >
           Applicative
-        </Radio>
+        </Radio> */}
       </div>
     </div>
   )

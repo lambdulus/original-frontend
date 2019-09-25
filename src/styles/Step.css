@@ -39,11 +39,21 @@
   border-radius: 5px;
 }
 
+.macro.redex.abstraction {
+  background-color: #1decff;
+  border-radius: 5px;
+}
+
 .churchnumeral.redex {
   background-color: #82b1ff;
   border-radius: 5px;
   /* padding: 1px; */
+}
 
+.churchnumeral.redex.abstraction.argument {
+  background-color: #97fff1;
+  border-radius: 5px;
+  /* padding: 1px; */
 }
 
 .breakpoint {
