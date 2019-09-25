@@ -22,7 +22,7 @@ export default function Controls (props : ControlsProps) : JSX.Element {
 
   return (
     <div id="controls">
-      <div>
+      <div title='Write the next step yourself'>
         <Switch
           className='exerciseSwitch'
           checked={ isExercise }

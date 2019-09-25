@@ -80,6 +80,7 @@ export default class Expression extends PureComponent<EvaluatorProps> {
                     >
                       <i
                         className="hiddenIcon fas fa-pencil-alt"
+                        title='Copy this to new box'
                         onClick={ () => addBox(this.props.createBoxFrom(stepRecord)) }
                       />
                     </Step>
@@ -94,6 +95,7 @@ export default class Expression extends PureComponent<EvaluatorProps> {
                 >
                     <i
                       className="hiddenIcon fas fa-pencil-alt"
+                      title='Copy this to new box'
                       onClick={ () => addBox(this.props.createBoxFrom(this.props.history[this.props.history.length - 1])) }
                     />
                 </Step>

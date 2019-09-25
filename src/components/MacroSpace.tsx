@@ -35,7 +35,11 @@ export default function MacroSpace (props : MacroProperties) : JSX.Element {
                 <li className='LI'>
                   <div className='box boxMacro'>
                     { macroName } := { macroExpression }
-                    <i className="hiddenMacroIcon far fa-trash-alt" onClick={ () => removeMacro(macroName) } />
+                    <i
+                      className="hiddenMacroIcon far fa-trash-alt"
+                      onClick={ () => removeMacro(macroName) }
+                      title='Delete this macro'                      
+                      />
                   </div>
                 </li>
               </div>

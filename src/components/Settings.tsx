@@ -14,17 +14,19 @@ interface SettingsProperties {
 export default function Settings (props : SettingsProperties) {
   return (
     <div className='editorSettings'>
-      <Switch
-        checked={ props.getActiveSingleLetterNames() }
-        disabled={ false } // TODO: tohle bude rozhodne chtit prepsat
-        shape="fill"
-        
-        onChange={ (e : ChangeEvent<HTMLInputElement>) => // taky nejakej pattern
-          props.changeActiveSingleLetterNames(e.target.checked)
-        }
-      >
-        Single Letter Names
-      </Switch>
+      <span title='Enable names without spaces'>
+        <Switch
+          checked={ props.getActiveSingleLetterNames() }
+          disabled={ false } // TODO: tohle bude rozhodne chtit prepsat
+          shape="fill"
+          
+          onChange={ (e : ChangeEvent<HTMLInputElement>) => // taky nejakej pattern
+            props.changeActiveSingleLetterNames(e.target.checked)
+          }
+        >
+          Single Letter Names
+        </Switch>
+      </span>
 
       <div className='strategies inlineblock'>
         <p className='stratsLabel inlineblock'>Evaluation Strategies:</p>

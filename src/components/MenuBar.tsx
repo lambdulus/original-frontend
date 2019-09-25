@@ -32,7 +32,7 @@ export default function MenuBar (props : MenuBarProperties) : JSX.Element {
         <p className='iconLabel'>Notebooks</p>
       </div> */}
 
-      <div>
+      <div title='List all defined macros' >
         {
           screen === Screen.main ?
             <i className="icon fas fa-list-ul fa-2x" onClick={ () => onScreenChange(Screen.macrolist) } />
@@ -42,7 +42,7 @@ export default function MenuBar (props : MenuBarProperties) : JSX.Element {
         <p className='iconLabel'>Macros</p>
       </div>        
         
-      <div>
+      <div title='Download this notebook'>
         <a
           className='export'
           href={ link }
@@ -54,7 +54,7 @@ export default function MenuBar (props : MenuBarProperties) : JSX.Element {
         <p className='iconLabel'>Export</p>
       </div>
       
-      <div>
+      <div title='Open exported notebook'>
         <input type="file" accept="application/json" id="input" onChange={ (e) => onFiles(e, onImport) } />
         <label htmlFor="input"><i className="icon fas fa-cloud-upload-alt fa-2x"></i></label>
         <p className='iconLabel'>Import</p>

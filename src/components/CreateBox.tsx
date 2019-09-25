@@ -15,18 +15,21 @@ export function CreateBox () : JSX.Element {
     <div className='emptyC'>
       <p
         className='plusBtn inlineblock'
+        title='Create new λ expression'
         onClick={ () => addEmptyBox(createEmptyExp(strategy, singleLetterNames)) }
       >
         <i>+ λ</i>
       </p>
       <p
         className='plusBtn inlineblock'
+        title='Define new macro'
         onClick={ () => addEmptyBox(createEmptyMacro(singleLetterNames)) }
       >
         <i>+ Macro
         </i></p>
       <p
         className='plusBtn inlineblock'
+        title='Write new Markdown note'
         onClick={ () => addEmptyBox(createEmptyNote()) }
       >
         <i>+ MD</i>
