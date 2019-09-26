@@ -2,7 +2,6 @@ import React from 'react'
 
 import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro, ASTReduction, None, Alpha, Gama } from "@lambdulus/core"
 import { Breakpoint } from '../AppTypes';
-import { GamaArg } from '@lambdulus/core/dist/reductions';
 
 
 export default class ReactPrinter extends ASTVisitor {
@@ -305,7 +304,7 @@ export default class ReactPrinter extends ASTVisitor {
       redex = this.reduction.target
     }
 
-    if (this.reduction instanceof Gama && this.reduction.args.find((arg : GamaArg) => churchNumber.identifier === arg.identifier)) {
+    if (this.reduction instanceof Gama && this.reduction.args.includes(churchNumber)) {
       className += ' redex abstraction argument'
     }
 
