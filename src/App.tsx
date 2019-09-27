@@ -94,7 +94,7 @@ export default class App extends Component<{}, AppState> {
     const expression : string = isExercise ? hash.substring(9) : hash
 
     if (expression === '') {
-      return
+      // return
     }
 
     const box : BoxState = {
