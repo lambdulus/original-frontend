@@ -164,9 +164,13 @@ i {
   right: 25px;
   top: 10px;
   color: grey;
-  /* margin: 20px; */
+}
+
+.inactiveBox .removeBox {
+  display: none;
 }
 
 .box:hover .removeBox {
+  display: block;
   color: black;
 }
