@@ -1,7 +1,7 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, useContext } from 'react'
 
 import Editor from './Editor'
-import { MakeActiveContext } from './BoxSpace'
+import { MakeActiveContext, DeleteBox } from './BoxSpace'
 import { StepRecord } from '../AppTypes'
 
 interface EmptyExpressionProps {
@@ -21,50 +21,53 @@ interface EmptyExpressionProps {
 }
 
 
-export default class EmptyExpression extends PureComponent<EmptyExpressionProps> {
-  render () : JSX.Element {
-    const { className, isActive, editor } = this.props
-    const {
-      placeholder,
-      content,
-      caretPosition,
-      syntaxError,
-    } = editor
+export default function EmptyExpression(props : EmptyExpressionProps) : JSX.Element{
+  const { className, isActive, editor } = props
+  const {
+    placeholder,
+    content,
+    caretPosition,
+    syntaxError,
+  } = editor
 
-    return (
-      <MakeActiveContext.Consumer>
+  const makeActive = useContext(MakeActiveContext)
+  const deleteBox = useContext(DeleteBox)
+
+  return (
+    <div
+      className={ `${className} ${isActive ? '' : ' inactiveBox'}` }
+      onDoubleClick={ makeActive } >
         {
-          (makeActive : () => void) =>
-          <div
-            className={ `${className} ${isActive ? '' : ' inactiveBox'}` }
-            onDoubleClick={ makeActive } >
-              {/* <p className='emptyStep'>Empty expression box.</p> */}
-              {
-                isActive ?
-                  (
-                    <Editor
-                      placeholder={ placeholder } // data
-                      content={ content } // data
-                      caretPosition={ caretPosition } // data
-                      syntaxError={ syntaxError } // data
-                      isMarkDown={ false } // data
-
-                      onContent={ this.props.onContent } // fn
-                      onEnter={ this.props.onEnter } // fn // tohle asi bude potreba
-                      onExecute={ this.props.onExecute } // fn // tohle asi bude potreba
-                    />
-                  )
-                  :
-                  (
-                    <p className='inactiveMessage'>
-                      Collapsing { Math.max(0, this.props.history.length - 1) } { this.props.history.length === 2 ? 'step' : 'steps' }. Double click to activate this box.
-                    </p>
-                  )
-              }
-          </div>
+          isActive ? <p className='emptyStep'>Empty expression box.</p> : null
         }
-      </MakeActiveContext.Consumer>
-      
-    )
-  }
+        {
+          isActive ?
+            (
+              <div>
+                <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+                <Editor
+                  placeholder={ placeholder } // data
+                  content={ content } // data
+                  caretPosition={ caretPosition } // data
+                  syntaxError={ syntaxError } // data
+                  isMarkDown={ false } // data
+  
+                  onContent={ props.onContent } // fn
+                  onEnter={ props.onEnter } // fn // tohle asi bude potreba
+                  onExecute={ props.onExecute } // fn // tohle asi bude potreba
+                />
+              </div>
+            )
+            :
+            (
+              <div>
+                <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+                <p className='inactiveMessage'>
+                  Collapsing { Math.max(0, props.history.length - 1) } { props.history.length === 2 ? 'step' : 'steps' }. Double click to activate this box.
+                </p>
+                </div>
+            )
+        }
+    </div>
+  )
 }

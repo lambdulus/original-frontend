@@ -6,6 +6,7 @@ import { PromptPlaceholder, EvaluationState, Breakpoint, StepRecord, BoxState, E
 import { mapLeftFromTo } from '../misc'
 import Editor from './Editor'
 import { AddBoxContext } from './MethodInjector'
+import { DeleteBox } from './BoxSpace';
 
 
 interface EvaluatorProps {
@@ -71,6 +72,13 @@ export default class Expression extends PureComponent<EvaluatorProps> {
             })
           }
         />
+        <DeleteBox.Consumer>
+          {
+           (deleteBox : () => void) =>
+            <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+          }
+        </DeleteBox.Consumer>
+
         <AddBoxContext.Consumer>
           {
             (addBox : (boxState : BoxState) => void) =>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 
 import { MacroMap } from '@lambdulus/core'
 
@@ -21,26 +21,20 @@ export default function Box (props : BoxProperties) : JSX.Element {
   const { state, isActive } : BoxProperties = props
   const { type } = state
 
+  const macroTable = useContext(MacroTableContext)
+  const setBoxState = useContext(SetBoxContext)
+
+
   if (type === BoxType.EXPRESSION) {
     return (
       <div className=''>
-        <MacroTableContext.Consumer>
-          {
-            (macroTable : MacroMap) =>
-              <SetBoxContext.Consumer>
-                {
-                  (setBoxState : (boxState : BoxState) => void) =>
-                    <Evaluator
-                      state={ state as EvaluationState }
-                      isActive={ isActive }
-                      macroTable={ macroTable }
-                      
-                      setBoxState={ setBoxState }
-                    />
-                }
-              </SetBoxContext.Consumer>
-          }
-        </MacroTableContext.Consumer>
+        <Evaluator
+          state={ state as EvaluationState }
+          isActive={ isActive }
+          macroTable={ macroTable }
+          
+          setBoxState={ setBoxState }
+        />
       </div>
     )
   }
@@ -48,17 +42,12 @@ export default function Box (props : BoxProperties) : JSX.Element {
   if (type === BoxType.MACRO) {
     return (
       <div className=''>
-        <SetBoxContext.Consumer>
-          {
-            (setBoxState : (boxState : BoxState) => void) =>
-              <MacroDefinition
-                state={ state as MacroDefinitionState }
-                setBoxState={ setBoxState }
-      
-                // addBox={ addBox }
-              />
-          }
-        </SetBoxContext.Consumer>
+        <MacroDefinition
+          state={ state as MacroDefinitionState }
+          setBoxState={ setBoxState }
+
+          // addBox={ addBox }
+        />
       </div>
     )
   }

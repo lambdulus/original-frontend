@@ -5,6 +5,7 @@ import Editor from './Editor'
 import { tokenize, parse, AST, Token, Variable, builtinMacros } from '@lambdulus/core'
 import { DefineMacroContext } from './MethodInjector'
 import { MacroDefinitionState, BoxState } from '../AppTypes'
+import { DeleteBox } from './BoxSpace';
 
 
 export interface MacroDefinitionProperties {
@@ -17,6 +18,8 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
   const { state, setBoxState } = props
   const { macroName, macroExpression, singleLetterNames } = state
   const { editor : { content, caretPosition, placeholder, syntaxError } } = state
+
+  const deleteBox = useContext(DeleteBox)
 
   const onContent = (content : string, caretPosition : number) => {
     setBoxState({
@@ -94,7 +97,8 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
   if (macroName === '' && macroExpression === '') {
     return (
       <div className='box boxMacro inactiveBox'>
-          {/* <p className='emptyStep'>Empty macro box.</p> */}
+          <p className='emptyStep'>Empty macro box.</p>
+          <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
           <Editor
             placeholder={ placeholder } // data
             content={ content } // data
@@ -113,6 +117,7 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
   return (
     <div className='box boxMacro'>
       { macroName } := { macroExpression }
+      <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
     </div>
   )
 }

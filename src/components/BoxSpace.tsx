@@ -4,7 +4,7 @@ import Box from './Box'
 
 import { CreateBox } from './CreateBox'
 import { PromptPlaceholder, EvaluationStrategy, BoxState, BoxType, EvaluationState, MacroDefinitionState, NoteState } from '../AppTypes'
-import { ChangeActiveBoxContext, SetBoxStateContext } from './MethodInjector'
+import { ChangeActiveBoxContext, SetBoxStateContext, RemoveBoxContext } from './MethodInjector'
 
 
 export interface BoxSpaceProperties {
@@ -16,6 +16,7 @@ export interface BoxSpaceProperties {
 
 export const MakeActiveContext = createContext(() => {})
 export const SetBoxContext = createContext((boxState : BoxState) => {})
+export const DeleteBox = createContext(() => {})
 
 export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
   const {
@@ -24,6 +25,7 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
   } = props
   const makeActive = useContext(ChangeActiveBoxContext)
   const setBoxState = useContext(SetBoxStateContext)
+  const removeBox = useContext(RemoveBoxContext)
 
   if (submittedBoxes.length === 0) {
     return (
@@ -42,12 +44,14 @@ export default function BoxSpace (props: BoxSpaceProperties) : JSX.Element {
           <li className='LI' key={ boxState.__key }>
             <MakeActiveContext.Provider value={ () => makeActive(i) }>
               <SetBoxContext.Provider value={ (boxState : BoxState) => setBoxState(i, boxState) }>
-                <Box
-                  state={ boxState }
-                  isActive={ i === activeBoxIndex }
-                  
-                  // removeExpression={ () => removeExpression(i) }
-                />
+                <DeleteBox.Provider value={ () => removeBox(i) }>
+                  <Box
+                    state={ boxState }
+                    isActive={ i === activeBoxIndex }
+                    
+                    // removeExpression={ () => removeExpression(i) }
+                  />
+                </DeleteBox.Provider>
               </SetBoxContext.Provider>
             </MakeActiveContext.Provider>
           </li>

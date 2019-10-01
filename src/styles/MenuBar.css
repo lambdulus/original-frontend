@@ -68,7 +68,7 @@
   }
 
   .evaluatorSpace, .macroSpace {
-    padding-top: 10em;
+    padding-top: 12em;
     margin-left: 1vw;
     height: 70vh;
   }
@@ -91,5 +91,9 @@
 
   .evaluatorSpace, .macroSpace {
     width: 97vw;
+  }
+
+  .box {
+    padding-right: 10px;
   }
 }

@@ -37,7 +37,7 @@ export default function Settings (props : SettingsProperties) {
           
           onChange={ () => props.changeActiveStrategy(EvaluationStrategy.ABSTRACTION) }
         >
-          Simplified Abstraction
+          Simplified
         </Radio>
         <Radio
           name="strategy"

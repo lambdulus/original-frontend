@@ -1,8 +1,12 @@
 #controls {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 5px;
+  right: 70px;
   margin-bottom: 10px;
+}
+
+.boxNoteEditor  #controls {
+  right: 70px;
 }
 
 .enabled {

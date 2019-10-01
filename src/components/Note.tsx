@@ -3,7 +3,7 @@ const ReactMarkdown = require('react-markdown')
 import 'github-markdown-css'
 
 import Editor from './Editor'
-import { MakeActiveContext, SetBoxContext } from './BoxSpace'
+import { MakeActiveContext, SetBoxContext, DeleteBox } from './BoxSpace'
 import { NoteState } from '../AppTypes'
 
 
@@ -26,6 +26,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
   
   const makeActive = useContext(MakeActiveContext)
   const setBoxState = useContext(SetBoxContext)
+  const deleteBox = useContext(DeleteBox)
 
   const onContent = (content : string, caretPosition : number) => {
     setBoxState({
@@ -52,7 +53,18 @@ export default function Note (props : NoteProperties) : JSX.Element {
   if (isEditing && isActive) {
     return (
       <div className='box boxNoteEditor'>
-        {/* <p className='emptyStep'>Empty note box.</p>         */}
+        {
+          note === '' ? 
+            <p className='emptyStep'>Empty note box.</p>
+          :
+            null
+        }    
+        <div id="controls">
+          <button onClick={ () => onSubmitNote() }>
+            Save
+          </button>
+        </div>
+        <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
         <Editor
           placeholder={ placeholder } // data
           content={ content } // data
@@ -65,28 +77,14 @@ export default function Note (props : NoteProperties) : JSX.Element {
           onExecute={ () => {} } // fn
           // onReset={ this.onClear } // fn not yet
         />
-
-
-        <div id="controls">
-          <button onClick={ () => onSubmitNote() }>
-            Save
-          </button>
-        </div>
       </div>
     )
   }
 
 
   return (
-    <div className='box boxNote markdown-body'>
-      {/* {
-        note === '' ? 
-          <p className='emptyStep'>Empty note box.</p>
-        :
-          null
-      } */}
-      <ReactMarkdown source={ note } />
-      <div id="controls">
+    <div className='box boxNote'>
+        <div id="controls">
           <button onClick={ () => {
             setBoxState({
               ...props.state,
@@ -100,6 +98,8 @@ export default function Note (props : NoteProperties) : JSX.Element {
             Edit
           </button>
         </div>
+        <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+      <ReactMarkdown className='markdown-body' source={ note } />
     </div>
   )
 }

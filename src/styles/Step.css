@@ -112,7 +112,8 @@
 }
 
 .boxExercise .activeStep .substitutedArg,
-.boxExercise .activeStep .redex {
+.boxExercise .activeStep .redex,
+.boxExercise .churchnumeral.redex.argument.abstraction {
   border: none;
   background-color: white;
   padding: 0;

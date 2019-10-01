@@ -106,19 +106,13 @@ export default class ExpressionBox extends PureComponent<EvaluationProperties> {
 
     if ( ! isActive) {
       return (
-        <MakeActiveContext.Consumer>
-          {
-            (makeActive : () => void) =>
-              <InactiveEvaluator
-                className={ className }
-                breakpoints={ breakpoints }
-                history={ history }
-                
-                makeActive={ makeActive }
-                createBoxFrom={ this.createBoxFrom }
-              />
-          }
-        </MakeActiveContext.Consumer>
+        <InactiveEvaluator
+          className={ className }
+          breakpoints={ breakpoints }
+          history={ history }
+          
+          createBoxFrom={ this.createBoxFrom }
+        />
       )
     }
 

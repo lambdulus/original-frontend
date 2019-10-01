@@ -158,3 +158,15 @@ i {
   /* padding-bottom: 50%; */
   cursor: pointer;
 }
+
+.removeBox {
+  position: absolute;
+  right: 25px;
+  top: 10px;
+  color: grey;
+  /* margin: 20px; */
+}
+
+.box:hover .removeBox {
+  color: black;
+}

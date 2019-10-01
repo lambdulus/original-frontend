@@ -27,6 +27,7 @@ export default class App extends Component<{}, AppState> {
     this.removeMacro = this.removeMacro.bind(this)
     this.defineMacro = this.defineMacro.bind(this)
     this.createBoxFromURL = this.createBoxFromURL.bind(this)
+    this.removeBox = this.removeBox.bind(this)
 
     this.state = DEFAULT_STATE
 
@@ -72,6 +73,7 @@ export default class App extends Component<{}, AppState> {
           >
             <MethodInjector
               addBox={ this.addBox }
+              removeBox={ this.removeBox }
               addEmptyBox={ this.addEmptyBox }
               changeActiveBox={ this.changeActiveBox }
               defineMacro={ this.defineMacro }
@@ -128,12 +130,12 @@ export default class App extends Component<{}, AppState> {
   setBoxState (index : number, boxState : BoxState) : void {
     const { submittedBoxes } = this.state
     
-    const expression : string = boxState.editor.content || (boxState as EvaluationState).expression // TODO: DIRTY DIRTY BIG TIME
+    const expression : string = boxState.type === BoxType.EXPRESSION ? boxState.editor.content || (boxState as EvaluationState).expression : '' // TODO: DIRTY DIRTY BIG TIME
     const expPrefix : string = boxState.type === BoxType.EXPRESSION && (boxState as EvaluationState).isExercise ? 'exercise:' : '' 
     
     history.pushState({}, "page title?", "#" + expPrefix + encodeURI(expression))
 
-    // TODO: doresit update URL
+    // TODO: doresit update URL // ted uz to docela dobry je
 
     // TODO: consider immutability
     submittedBoxes[index] = boxState
@@ -165,7 +167,37 @@ export default class App extends Component<{}, AppState> {
     })
   }
 
+  removeBox (index : number) : void {
+    let { submittedBoxes, activeBoxIndex } = this.state
+
+    submittedBoxes.splice(index, 1)
+
+    activeBoxIndex = activeBoxIndex >= index ? activeBoxIndex - 1 : activeBoxIndex
+
+    if (activeBoxIndex === -1) {
+      history.pushState({}, "page title?", "#")
+    }
+    else {
+      this.changeActiveBox(activeBoxIndex)      
+    }
+    
+    this.setState({
+      ...this.state,
+      submittedBoxes,
+      activeBoxIndex
+    })
+  }
+
   changeActiveBox (activeBoxIndex : number) : void {
+    const { submittedBoxes } = this.state
+    
+    const boxState : BoxState = submittedBoxes[activeBoxIndex]
+      
+    const expression : string = boxState.editor.content || (boxState as EvaluationState).expression // TODO: DIRTY DIRTY BIG TIME
+    const expPrefix : string = boxState.type === BoxType.EXPRESSION && (boxState as EvaluationState).isExercise ? 'exercise:' : '' 
+  
+    history.pushState({}, "page title?", "#" + expPrefix + encodeURI(expression))
+
     this.setState({
       ...this.state,
       activeBoxIndex,
