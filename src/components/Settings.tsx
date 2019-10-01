@@ -29,10 +29,8 @@ export default function Settings (props : SettingsProperties) {
       </span>
 
       <div className='strategies inlineblock'>
-        <p>Evaluation Strategy: Simplified Abstraction</p>
-        {/* TODO: uncomment once students reach this part */}
-        {/* <p className='stratsLabel inlineblock'>Evaluation Strategies:</p> */}
-        {/* <Radio
+        <p className='stratsLabel inlineblock'>Evaluation Strategies:</p>
+        <Radio
           name="strategy"
           style="fill"
           checked={ props.getActiveStrategy() === EvaluationStrategy.ABSTRACTION }
@@ -40,8 +38,8 @@ export default function Settings (props : SettingsProperties) {
           onChange={ () => props.changeActiveStrategy(EvaluationStrategy.ABSTRACTION) }
         >
           Simplified Abstraction
-        </Radio> */}
-        {/* <Radio
+        </Radio>
+        <Radio
           name="strategy"
           style="fill"
           checked={ props.getActiveStrategy() === EvaluationStrategy.NORMAL }
@@ -58,7 +56,7 @@ export default function Settings (props : SettingsProperties) {
           onChange={ () => props.changeActiveStrategy(EvaluationStrategy.APPLICATIVE) }
         >
           Applicative
-        </Radio> */}
+        </Radio>
       </div>
     </div>
   )
