@@ -98,7 +98,7 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
     return (
       <div className='box boxMacro inactiveBox'>
           <p className='emptyStep'>Empty macro box.</p>
-          <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+          <i className='removeBox far fa-trash-alt' onClick={ deleteBox } title='Remove this Box' />
           <Editor
             placeholder={ placeholder } // data
             content={ content } // data
@@ -117,7 +117,7 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
   return (
     <div className='box boxMacro'>
       { macroName } := { macroExpression }
-      <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+      <i className='removeBox far fa-trash-alt' onClick={ deleteBox } title='Remove this Box' />
     </div>
   )
 }

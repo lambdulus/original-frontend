@@ -44,7 +44,7 @@ export default function EmptyExpression(props : EmptyExpressionProps) : JSX.Elem
           isActive ?
             (
               <div>
-                <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+                <i className='removeBox far fa-trash-alt' onClick={ deleteBox } title='Remove this Box' />
                 <Editor
                   placeholder={ placeholder } // data
                   content={ content } // data
@@ -61,7 +61,7 @@ export default function EmptyExpression(props : EmptyExpressionProps) : JSX.Elem
             :
             (
               <div>
-                <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+                <i className='removeBox far fa-trash-alt' onClick={ deleteBox } title='Remove this Box' />
                 <p className='inactiveMessage'>
                   Collapsing { Math.max(0, props.history.length - 1) } { props.history.length === 2 ? 'step' : 'steps' }. Double click to activate this box.
                 </p>

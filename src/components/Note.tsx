@@ -64,7 +64,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
             Save
           </button>
         </div>
-        <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+        <i className='removeBox far fa-trash-alt' onClick={ deleteBox } title='Remove this Box' />
         <Editor
           placeholder={ placeholder } // data
           content={ content } // data
@@ -98,7 +98,7 @@ export default function Note (props : NoteProperties) : JSX.Element {
             Edit
           </button>
         </div>
-        <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+        <i className='removeBox far fa-trash-alt' onClick={ deleteBox } title='Remove this Box' />
       <ReactMarkdown className='markdown-body' source={ note } />
     </div>
   )

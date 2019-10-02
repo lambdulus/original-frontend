@@ -75,7 +75,7 @@ export default class Expression extends PureComponent<EvaluatorProps> {
         <DeleteBox.Consumer>
           {
            (deleteBox : () => void) =>
-            <i className='removeBox far fa-trash-alt' onClick={ deleteBox } />
+            <i className='removeBox far fa-trash-alt' onClick={ deleteBox } title='Remove this Box' />
           }
         </DeleteBox.Consumer>
 
