@@ -349,7 +349,11 @@ export default class ReactPrinter extends ASTVisitor {
 
     if (this.reduction instanceof Gama) {
       [ redex ] = this.reduction.redexes
-      redexClass += ' abstraction'
+      className += redexClass + ' abstraction'
+
+      if (this.reduction.args.includes(macro)) {
+        className += ' argument'
+      }
     }
 
     if (redex !== null
@@ -369,6 +373,7 @@ export default class ReactPrinter extends ASTVisitor {
     this.rendered = (
       <span
         className={ className }
+        title={ title }
         onClick={ () => {
           (macro as any).identifier = Symbol()
           this.onClick({ type: Expansion, context : macro, broken : new Set }) }
