@@ -28,6 +28,8 @@ export default class App extends Component<{}, AppState> {
     this.defineMacro = this.defineMacro.bind(this)
     this.createBoxFromURL = this.createBoxFromURL.bind(this)
     this.removeBox = this.removeBox.bind(this)
+    this.getActiveStandalones = this.getActiveStandalones.bind(this)
+    this.changeActiveStandalones = this.changeActiveStandalones.bind(this)
 
     this.state = DEFAULT_STATE
 
@@ -62,6 +64,8 @@ export default class App extends Component<{}, AppState> {
           getActiveStrategy={ this.getActiveStrategy }
           changeActiveSingleLetterNames={ this.changeActiveSingleLetterNames }
           changeActiveStrategy={ this.changeActiveStrategy }
+          getActiveStandalones={ this.getActiveStandalones }
+          changeActiveStandalones={ this.changeActiveStandalones }
         />
 
         {
@@ -112,6 +116,7 @@ export default class App extends Component<{}, AppState> {
       isExercise : isExercise,
       strategy : this.getActiveStrategy(),
       singleLetterNames : this.getActiveSingleLetterNames(),
+      standalones : this.getActiveStandalones(),
       editor : {
         placeholder : PromptPlaceholder.INIT,
         content : expression,
@@ -244,6 +249,30 @@ export default class App extends Component<{}, AppState> {
     return JSON.parse(window.localStorage.getItem('SLI') || 'true') // to nikdy nenastane doufam
   }
 
+  getActiveStandalones () : boolean {
+    const { submittedBoxes, activeBoxIndex } = this.state
+
+    if (activeBoxIndex === -1) {
+      return JSON.parse(window.localStorage.getItem('standalones') || 'false')
+    }
+
+    const activeBoxState : BoxState = submittedBoxes[activeBoxIndex]
+
+    if (activeBoxState.type === BoxType.NOTE) {
+      return JSON.parse(window.localStorage.getItem('standalones') || 'false')
+    }
+
+    if (activeBoxState.type === BoxType.EXPRESSION) {
+      return (activeBoxState as EvaluationState).standalones
+    }
+
+    if (activeBoxState.type === BoxType.MACRO) {
+      return false
+    }
+
+    return JSON.parse(window.localStorage.getItem('standalones') || 'false') // to nikdy nenastane doufam
+  }
+
   changeActiveStrategy (strategy : EvaluationStrategy) : void {
     const { submittedBoxes, activeBoxIndex } = this.state
     // TODO: consider immutability
@@ -272,6 +301,21 @@ export default class App extends Component<{}, AppState> {
     })
 
     window.localStorage.setItem('SLI', JSON.stringify(enabled))
+  }
+
+  changeActiveStandalones (enabled : boolean) : void {
+    const { submittedBoxes, activeBoxIndex } = this.state
+    // TODO: consider immutability
+    submittedBoxes[activeBoxIndex] = {
+      ...submittedBoxes[activeBoxIndex],
+      standalones : enabled,
+    }
+
+    this.setState({
+      ...this.state
+    })
+
+    window.localStorage.setItem('standalones', JSON.stringify(enabled))
   }
 
   removeMacro (name : string) : void {

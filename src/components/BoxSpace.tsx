@@ -78,6 +78,7 @@ export function createEmptyExp (strategy : EvaluationStrategy, singleLetterNames
     isExercise : false,
     strategy,
     singleLetterNames,
+    standalones : false,
     editor : {
       placeholder : PromptPlaceholder.INIT,
       content : '',

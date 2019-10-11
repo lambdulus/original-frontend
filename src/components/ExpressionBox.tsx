@@ -139,6 +139,7 @@ export default class ExpressionBox extends PureComponent<EvaluationProperties> {
     const {
       strategy,
       singleLetterNames,
+      standalones,
     } : EvaluationState = state
     const { ast } = stepRecord
 
@@ -161,6 +162,7 @@ export default class ExpressionBox extends PureComponent<EvaluationProperties> {
       isExercise : false,
       strategy,
       singleLetterNames,
+      standalones,
       editor : {
         placeholder : PromptPlaceholder.EVAL_MODE,
         content : '',
@@ -329,7 +331,7 @@ export default class ExpressionBox extends PureComponent<EvaluationProperties> {
 
   onStep () : void {
     const { state, setBoxState } = this.props
-    const { strategy, history, editor : { content } } = state
+    const { strategy, standalones, history, editor : { content } } = state
     const stepRecord = history[history.length - 1]
     const { isNormalForm, step } = stepRecord
     let { ast, lastReduction } = stepRecord
@@ -356,6 +358,13 @@ export default class ExpressionBox extends PureComponent<EvaluationProperties> {
     }
   
     ast = normal.perform()
+
+    if (ast instanceof Macro || ast instanceof ChurchNumeral) {
+      stepRecord.isNormalForm = true
+      stepRecord.message = 'Expression is in normal form.'
+
+      reportEvent('Evaluation Step', 'Step Normal Form Reached with Number or Macro', ast.toString())
+    }
   
     setBoxState({
       ...state,
@@ -462,6 +471,8 @@ export default class ExpressionBox extends PureComponent<EvaluationProperties> {
       }
 
       window.clearTimeout(timeoutID)
+      reportEvent('Evaluation Run Ended', 'Breakpoint was reached', ast.toString())
+
 
       setBoxState({
         ...state,
@@ -475,6 +486,12 @@ export default class ExpressionBox extends PureComponent<EvaluationProperties> {
     ast = normal.perform()
 
     history[history.length - 1] = { ast, lastReduction, step : step + 1, message : '', isNormalForm }
+
+    if (ast instanceof Macro || ast instanceof ChurchNumeral) {
+      history[history.length - 1] = { ast, lastReduction, step : step + 1, message : 'Expression is in normal form.', isNormalForm : true }
+
+      reportEvent('Evaluation Run Ended', 'Step Normal Form Reached with Number or Macro', ast.toString())
+    }
     
     setBoxState({
       ...state,
