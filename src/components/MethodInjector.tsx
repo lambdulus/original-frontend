@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode } from "react"
-import { BoxState } from "../AppTypes";
+import { BoxState } from "../AppTypes"
 
 
 export const AddBoxContext = createContext((boxState : BoxState) => {})

@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react'
-const { Switch, Radio } = require('pretty-checkbox-react')
+const { Switch } = require('pretty-checkbox-react')
 
 
 import 'pretty-checkbox'

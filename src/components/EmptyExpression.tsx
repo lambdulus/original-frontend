@@ -1,4 +1,4 @@
-import React, { PureComponent, useContext } from 'react'
+import React, { useContext } from 'react'
 
 import Editor from './Editor'
 import { MakeActiveContext, DeleteBox } from './BoxSpace'

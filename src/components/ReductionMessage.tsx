@@ -1,6 +1,5 @@
 import React from 'react'
-import { ASTReduction, Beta, Alpha, Expansion, Gama } from '@lambdulus/core';
-import { Eta } from '@lambdulus/core/dist/reductions/eta';
+import { ASTReduction, Beta, Alpha, Expansion, Gama, Eta } from '@lambdulus/core'
 
 
 interface ReductionMessageProperties {

@@ -25,9 +25,8 @@ import { TreeComparator } from './TreeComparator'
 import EmptyEvaluator from './EmptyExpression'
 import InactiveEvaluator from './InactiveExpression'
 import Expression from './Expression'
-import { MakeActiveContext } from './BoxSpace'
 import { EvaluationStrategy, PromptPlaceholder, EvaluationState, Evaluator, StepRecord, BoxType, Breakpoint } from '../AppTypes'
-import { reportEvent } from '../misc';
+import { reportEvent } from '../misc'
 
 
 export function strategyToEvaluator (strategy : EvaluationStrategy) : Evaluator {

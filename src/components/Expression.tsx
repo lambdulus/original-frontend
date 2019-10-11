@@ -2,11 +2,11 @@ import React, { PureComponent } from 'react'
 
 import Controls from './Controls'
 import Step from './Step'
-import { PromptPlaceholder, EvaluationState, Breakpoint, StepRecord, BoxState, Evaluator } from '../AppTypes'
+import { PromptPlaceholder, EvaluationState, Breakpoint, StepRecord, BoxState } from '../AppTypes'
 import { mapLeftFromTo } from '../misc'
 import Editor from './Editor'
 import { AddBoxContext } from './MethodInjector'
-import { DeleteBox } from './BoxSpace';
+import { DeleteBox } from './BoxSpace'
 
 
 interface EvaluatorProps {

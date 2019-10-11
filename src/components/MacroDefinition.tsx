@@ -5,7 +5,7 @@ import Editor from './Editor'
 import { tokenize, parse, AST, Token, Variable, builtinMacros } from '@lambdulus/core'
 import { DefineMacroContext } from './MethodInjector'
 import { MacroDefinitionState, BoxState } from '../AppTypes'
-import { DeleteBox } from './BoxSpace';
+import { DeleteBox } from './BoxSpace'
 
 
 export interface MacroDefinitionProperties {

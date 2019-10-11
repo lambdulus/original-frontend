@@ -1,7 +1,5 @@
 import React, { useContext } from 'react'
 
-import { MacroMap } from '@lambdulus/core'
-
 import Evaluator from './ExpressionBox'
 import MacroDefinition from './MacroDefinition'
 import Note from './Note'

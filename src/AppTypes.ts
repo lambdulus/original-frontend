@@ -19,7 +19,7 @@ export enum Screen {
 }
 
 export enum PromptPlaceholder {
-  INIT = 'Type λ expression and hit enter',
+  INIT = 'Type λ (as \\) expression and hit enter',
   EVAL_MODE = 'Hit enter for next step',
   VALIDATE_MODE = 'Write next step and hit enter for validation',
   MACRO = 'Define Macro like: `NAME := [λ expression]` and hit enter',
