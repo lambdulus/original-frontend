@@ -51,15 +51,14 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
       return
     }
 
-    if ( ! isValidName(macroName, singleLetterNames)) {
+    if ( ! isValidName(macroName, false)) {
       setBoxState({
         ...state,
         editor : {
           ...state.editor,
           syntaxError :
           // TODO: please fix this - only dirty quick impl
-            new Error(`Macro name is not valid.
-            ${singleLetterNames && macroName.length !== 1 ? 'Name should be single letter.' : '' }`),
+            new Error(`Macro name is not valid.`),
         }
       })
 
@@ -156,6 +155,7 @@ function isValidExpression (expression : string, singleLetterNames : boolean) : 
     return true
   }
   catch (exception) {
+    console.log(exception)
     return false
   }
 }
