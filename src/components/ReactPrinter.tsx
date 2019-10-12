@@ -2,6 +2,7 @@ import React from 'react'
 
 import { ASTVisitor, Lambda, Variable, Beta, AST, Application, ChurchNumeral, Expansion, Macro, ASTReduction, Alpha, Gama } from "@lambdulus/core"
 import { Breakpoint } from '../AppTypes'
+import { reportEvent } from '../misc';
 
 
 export default class ReactPrinter extends ASTVisitor {
@@ -56,7 +57,9 @@ export default class ReactPrinter extends ASTVisitor {
             title={ title }
             onClick={ () => {
               (context as any).identifier = Symbol()
-              this.onClick({ type : Beta, context, broken : new Set }) }
+              this.onClick({ type : Beta, context, broken : new Set })
+              reportEvent('Breakpoint added to argument', 'Breakpoint was added', '')
+            }
             }
           >
             { context.name() }
@@ -221,7 +224,9 @@ export default class ReactPrinter extends ASTVisitor {
           title={ title }
           onClick={ () => {
             (context as any).identifier = Symbol()
-            this.onClick({ type : Beta, context, broken : new Set }) }
+            this.onClick({ type : Beta, context, broken : new Set })
+            reportEvent('Breakpoint added to argument', 'Breakpoint was added', '')
+          }
           }
         >
           { lambda.argument.name() }
@@ -266,8 +271,11 @@ export default class ReactPrinter extends ASTVisitor {
           <span
             className='arguments'
             onClick={ () => {
-              (context as any).identifier = Symbol()              
-              this.onClick({ type : Beta, context, broken : new Set }) }
+              (context as any).identifier = Symbol()
+              // TODO: for now it does nothing - maybe delete in the future            
+              // this.onClick({ type : Beta, context, broken : new Set })
+              // reportEvent('Breakpoint added to argument', 'Breakpoint was added', '')
+            }
             }
           >
             <span
@@ -275,12 +283,14 @@ export default class ReactPrinter extends ASTVisitor {
                 title={ title }
                 onClick={ () => {
                   (context as any).identifier = Symbol()
-                  this.onClick({ type : Beta, context, broken : new Set }) }
+                  this.onClick({ type : Beta, context, broken : new Set })
+                  reportEvent('Breakpoint added', 'Breakpoint was added', '')
                 }
-              >
-                { lambda.argument.name() }
-              </span>
-              { ' ' }
+                }
+            >
+              { lambda.argument.name() }
+            </span>
+            { ' ' }
           </span>
           . { body } 
           )
@@ -328,7 +338,9 @@ export default class ReactPrinter extends ASTVisitor {
         title={ title }
         onClick={ () => {
           (churchNumber as any).identifier = Symbol()
-          this.onClick({ type: Expansion, context : churchNumber, broken : new Set }) }
+          this.onClick({ type: Expansion, context : churchNumber, broken : new Set })
+          reportEvent('Breakpoint added to ChurchNumeral', 'Breakpoint was added', '')
+        }
         }
       >
         { churchNumber.name() }
@@ -376,7 +388,9 @@ export default class ReactPrinter extends ASTVisitor {
         title={ title }
         onClick={ () => {
           (macro as any).identifier = Symbol()
-          this.onClick({ type: Expansion, context : macro, broken : new Set }) }
+          this.onClick({ type: Expansion, context : macro, broken : new Set })
+          reportEvent('Breakpoint added to Macro', 'Breakpoint was added', '')
+        }
         }
       >
         { macro.name() }

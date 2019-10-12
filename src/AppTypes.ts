@@ -71,6 +71,7 @@ export interface EvaluationState {
   isExercise : boolean
   strategy : EvaluationStrategy
   singleLetterNames : boolean
+  standalones : boolean
   editor : {
     placeholder : string
     content : string

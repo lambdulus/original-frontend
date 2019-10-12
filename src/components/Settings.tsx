@@ -9,6 +9,8 @@ interface SettingsProperties {
   changeActiveSingleLetterNames (enabled : boolean) : void
   getActiveStrategy () : EvaluationStrategy
   changeActiveStrategy (strategy : EvaluationStrategy) : void
+  getActiveStandalones () : boolean
+  changeActiveStandalones (enabled : boolean) : void
 }
 
 export default function Settings (props : SettingsProperties) {
@@ -25,6 +27,20 @@ export default function Settings (props : SettingsProperties) {
           }
         >
           Single Letter Names
+        </Switch>
+      </span>
+
+      <span title='Expand stand-alones'>
+        <Switch
+          checked={ props.getActiveStandalones() }
+          disabled={ false } // TODO: tohle bude rozhodne chtit prepsat
+          shape="fill"
+          
+          onChange={ (e : ChangeEvent<HTMLInputElement>) => // taky nejakej pattern
+            props.changeActiveStandalones(e.target.checked)
+          }
+        >
+          Expand stand-alones
         </Switch>
       </span>
 
