@@ -77,13 +77,17 @@ export default function MacroDefinition (props : MacroDefinitionProperties) : JS
       return
     }
 
+    // TODO: hotfix
+    // I want Macros submited in SLI mode to have SLI parsed bodies
+    const macroBody : string = parseExpression(macroExpression, singleLetterNames).toString()
+
     setBoxState({
       ...state,
       macroName,
-      macroExpression,
+      macroExpression : macroBody,
     })
 
-    defineMacro(macroName, macroExpression)
+    defineMacro(macroName, macroBody)
   
     // const newMacroTable : MacroMap = {
     //   ...macroTable,
