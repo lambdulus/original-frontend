@@ -50,6 +50,7 @@
   /* padding: 1px; */
 }
 
+.application.redex.abstraction.argument,
 .churchnumeral.redex.abstraction.argument,
 .macro.redex.abstraction.argument {
   background-color: #97fff1;

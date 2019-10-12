@@ -118,6 +118,7 @@ export default class ReactPrinter extends ASTVisitor {
 
   // TODO: little bit refactored, maybe keep going
   onApplication (application: Application) : void {
+    let className : string = 'application'
     let leftClassName : string = 'left'
     let rightClassName : string = 'right'
     let set : boolean = false
@@ -125,6 +126,10 @@ export default class ReactPrinter extends ASTVisitor {
 
     if (this.reduction instanceof Beta) {
       redex = this.reduction.redex
+    }
+
+    if (this.reduction instanceof Gama && this.reduction.args.includes(application)) {
+      className += ' redex abstraction argument'
     }
     // else if (this.reduction instanceof Expansion) {
     //   redex = this.reduction.target
@@ -161,7 +166,7 @@ export default class ReactPrinter extends ASTVisitor {
       const right : JSX.Element | null = <span className={ rightClassName }>( { this.rendered } )</span>
 
       this.rendered =
-      <span className='application'>
+      <span className={ className }>
         { left } { right }
       </span>
     }
@@ -179,7 +184,7 @@ export default class ReactPrinter extends ASTVisitor {
       const right : JSX.Element | null = <span className={ rightClassName }>{ this.rendered }</span>
 
       this.rendered =
-      <span className='application'>
+      <span className={ className }>
         { left } { right }
       </span>
     }
@@ -360,13 +365,17 @@ export default class ReactPrinter extends ASTVisitor {
     } 
 
     if (this.reduction instanceof Gama) {
-      [ redex ] = this.reduction.redexes
-      className += redexClass + ' abstraction'
+      if (this.reduction.redexes.includes(macro)) {
+        [ redex ] = this.reduction.redexes
+        className += redexClass + ' abstraction'
+      }
+
 
       if (this.reduction.args.includes(macro)) {
-        className += ' argument'
+        className += redexClass + ' abstraction argument'
       }
     }
+
 
     if (redex !== null
           &&
