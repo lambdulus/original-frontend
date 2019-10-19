@@ -9,6 +9,7 @@ import { AST, tokenize, parse, Token, MacroMap, None } from '@lambdulus/core'
 import { AppState, Screen, BoxState, BoxType, EvaluationState } from '../AppTypes'
 
 import '../styles/MenuBar.css'
+import { reportEvent } from '../misc';
 
 interface MenuBarProperties {
   state : AppState
@@ -47,7 +48,10 @@ export default function MenuBar (props : MenuBarProperties) : JSX.Element {
           className='export'
           href={ link }
           download="notebook_lambdulus.json"
-          onClick={ () => setTimeout(() => window.URL.revokeObjectURL(link), 10) }
+          onClick={ () => setTimeout(() => {
+            window.URL.revokeObjectURL(link)
+            reportEvent('Export notebook', `Notebook: ${serialized}`, '')
+          }, 10) }
         >
           <i id='download' className="icon fas fa-cloud-download-alt fa-2x" />
         </a>
@@ -141,6 +145,7 @@ function onFiles (event : ChangeEvent<HTMLInputElement>, onImport : (state : App
     const state : AppState = JSON.parse(reader.result as string)
 
     onImport(hydrate(state))
+    reportEvent('Import notebook', `Notebook named ${ file.name }`, '')
   }
 
   reader.readAsText(file) 
