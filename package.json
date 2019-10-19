@@ -1,7 +1,7 @@
 {
   "name": "@lambdulus/frontend",
   "version": "0.1.0",
-  "homepage": "https://lambdulus.github.io/beta/",
+  "homepage": "https://lambdulus.github.io",
   "dependencies": {
     "@types/jest": "24.0.9",
     "@types/node": "11.9.5",

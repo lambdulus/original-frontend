@@ -30,6 +30,7 @@ export default class ReactPrinter extends ASTVisitor {
           ) {
               this.argument = context
               set = true
+              className += ' alpha'
       }
 
       // TO JE KVULI FIXU MULTILAMBDA FACCT 3 beta redukce nad shadowingem
@@ -223,6 +224,10 @@ export default class ReactPrinter extends ASTVisitor {
           className += ' substitutedArg'
       }
 
+      // if (this.reduction instanceof Alpha) {
+      //   className += ' alpha'
+      // }
+
       const acc : JSX.Element = (
         <span
           className={ className }
@@ -233,8 +238,7 @@ export default class ReactPrinter extends ASTVisitor {
             reportEvent('Breakpoint added to argument', 'Breakpoint was added', '')
           }
           }
-        >
-          { lambda.argument.name() }
+        >{ lambda.argument.name() }
         </span>
       )
 
@@ -303,6 +307,7 @@ export default class ReactPrinter extends ASTVisitor {
       )
     }
 
+    this.argument = argument
     if (argument !== null) {
       this.argument = argument
     }
@@ -415,6 +420,9 @@ export default class ReactPrinter extends ASTVisitor {
         &&
         this.argument.name() === variable.name()) {
           className += ' substitutedArg'
+          if (this.reduction instanceof Alpha) {
+            className += ' alpha'
+          }
       }
 
     this.rendered = <span className={ className } >{ variable.name() }</span>

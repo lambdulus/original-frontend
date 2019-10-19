@@ -293,6 +293,7 @@ export default class ExpressionBox extends PureComponent<EvaluationProperties> {
     
       let message : string = ''
       const comparator : TreeComparator = new TreeComparator([ userAst, ast ])
+
       if (comparator.equals) {
         ast = userAst
         message = 'Correct.'
