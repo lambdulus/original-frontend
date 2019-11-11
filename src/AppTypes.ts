@@ -14,6 +14,7 @@ export enum EvaluationStrategy {
 
 export enum Screen {
   main,
+  help,
   macrolist,
   // notebooks,
 }

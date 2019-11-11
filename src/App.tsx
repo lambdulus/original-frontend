@@ -10,6 +10,7 @@ import { MethodInjector } from './components/MethodInjector'
 import { DataInjector } from './components/DataInjector'
 import { DEFAULT_STATE, AppState, Screen, PromptPlaceholder, EvaluationStrategy, BoxState, BoxType, EvaluationState, MacroDefinitionState } from './AppTypes'
 import { updateMacros } from './misc'
+import HelpSpace from './components/HelpSpace'
 
 
 export default class App extends Component<{}, AppState> {
@@ -87,7 +88,10 @@ export default class App extends Component<{}, AppState> {
             </MethodInjector>
           </DataInjector>
           :
-          <MacroSpace macroTable={ macroTable } removeMacro={ this.removeMacro } />
+          screen === Screen.help ?
+            <HelpSpace />
+            :
+            <MacroSpace macroTable={ macroTable } removeMacro={ this.removeMacro } />
         }
       </div>
     )

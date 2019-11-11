@@ -42,6 +42,8 @@ export function mapLeftFromTo(
   }
 
 export const HANDY_MACROS : MacroMap = {
+  // 'Y' : '(λ f . (λ x . f (x x)) (λ x . f (x x)))',
+  // 'Z' : '(λ f . (λ y . f (λ z . y y z)) (λ y . f (λ z . y y z)))',
   // FACT : '(Y (λ f n . (<= n 1) 1 (* n (f (- n 1)))))',
   // FACCT : '(λ n . (Y (λ f n a . IF (= n 1) a (f (- n 1) (* n a)))) (- n 1) (n))',
   // FIB : '(Y (λ f n . (= n 0) 0 ((= n 1) 1 ( + (f (- n 1)) (f (- n 2))))))',

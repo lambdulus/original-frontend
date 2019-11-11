@@ -54,6 +54,8 @@ function Step (props : StepProperties) : JSX.Element | null {
   const printer : ReactPrinter = new ReactPrinter(tree, addBreakpoint, reduction, breakpoints)
 
   const incorrectStep : boolean = stepRecord.message.indexOf('Incorrect step.') === 0
+  const correctStep : boolean = stepRecord.message.indexOf('Correct.') === 0
+  const exerciseStep : boolean = incorrectStep || correctStep
 
   return (
     <span className='step'>
@@ -68,17 +70,19 @@ function Step (props : StepProperties) : JSX.Element | null {
           stepRecord.message === '' ?
             null
             :
+            exerciseStep === false ?
+            <p className='stepMessage' >
+              { stepRecord.message }
+            </p>
+            :
             incorrectStep === true ?
               <p className='stepMessage incorrect' >
                 Incorrect input: <i className='userInput'>`{ stepRecord.message.substr(15) }`</i>
               </p>
             :
-            <p className='stepMessage correct' >
-              { stepRecord.message }
-            </p>
-
-            
-            
+              <p className='stepMessage correct' >
+                { stepRecord.message }
+              </p>
         }
       </div>
     </span>

@@ -35,7 +35,7 @@ i {
   margin-bottom: 40px;
 }
 
-.evaluatorSpace, .macroSpace {
+.evaluatorSpace, .macroSpace, .helpSpace {
   padding-top: 10px;
   margin-left: 100px;
   padding-right: 1vw;

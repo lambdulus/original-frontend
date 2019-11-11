@@ -33,12 +33,28 @@ export default function MenuBar (props : MenuBarProperties) : JSX.Element {
         <p className='iconLabel'>Notebooks</p>
       </div> */}
 
+      <div title='Show help!' >
+        {
+          screen === Screen.main ?
+            <i className="icon far fa-question-circle fa-2x" onClick={ () => onScreenChange(Screen.help) } />
+            :
+            screen === Screen.help ?
+              <i className="icon far fa-window-close fa-2x" onClick={ () => onScreenChange(Screen.main) } />
+              :
+              <i className="icon far fa-question-circle fa-2x" onClick={ () => onScreenChange(Screen.help) } />
+        }
+        <p className='iconLabel'>Help</p>
+      </div>
+
       <div title='List all defined macros' >
         {
           screen === Screen.main ?
             <i className="icon fas fa-list-ul fa-2x" onClick={ () => onScreenChange(Screen.macrolist) } />
             :
-            <i className="icon far fa-window-close fa-2x" onClick={ () => onScreenChange(Screen.main) } />
+            screen === Screen.macrolist ?
+              <i className="icon far fa-window-close fa-2x" onClick={ () => onScreenChange(Screen.main) } />
+              :
+              <i className="icon fas fa-list-ul fa-2x" onClick={ () => onScreenChange(Screen.macrolist) } />
         }
         <p className='iconLabel'>Macros</p>
       </div>        
@@ -62,7 +78,14 @@ export default function MenuBar (props : MenuBarProperties) : JSX.Element {
         <input type="file" accept="application/json" id="input" onChange={ (e) => onFiles(e, onImport) } />
         <label htmlFor="input"><i className="icon fas fa-cloud-upload-alt fa-2x"></i></label>
         <p className='iconLabel'>Import</p>
-      </div>      
+      </div>
+
+      <div title='Report a bug or request new feature'>
+        <a href='https://github.com/lambdulus/frontend/issues' target="_blank">
+          <i className="icon fas fa-bug fa-2x"></i>
+        </a>
+        <p className='iconLabel'>Issues</p>
+      </div>     
     </div>
   )
 }
