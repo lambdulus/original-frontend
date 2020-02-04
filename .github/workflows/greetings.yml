@@ -1,0 +1,13 @@
+name: Greetings
+
+on: [pull_request, issues]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: 'Thank you for your submission. I see this is your first time submitting an issue to this project - make sure you described your problem or request clearly. You can also specify some scenarios which are problematic either by description or by screenshots. Have a nice day.'
+        pr-message: 'Thank you for your submission. I see this is your first pull request to this project - we will try to review it as soon as possible. For a better reviewing process, please add some description of what the changes do. You can also link the corresponding issue if it is a bug fix. Have a nice day.'
