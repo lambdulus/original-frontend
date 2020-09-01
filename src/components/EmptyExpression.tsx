@@ -21,7 +21,7 @@ interface EmptyExpressionProps {
 }
 
 
-export default function EmptyExpression(props : EmptyExpressionProps) : JSX.Element{
+export default function EmptyExpression(props : EmptyExpressionProps) : JSX.Element {
   const { className, isActive, editor } = props
   const {
     placeholder,
